@@ -1,0 +1,7 @@
+# Claude Code 本地設定（不上版控）
+.claude/
+
+# 系統檔
+Thumbs.db
+desktop.ini
+.DS_Store
