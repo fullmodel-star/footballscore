@@ -1,0 +1,20 @@
+{
+  "name": "2026 世界盃推估器",
+  "short_name": "世界盃推估",
+  "description": "2026 美加墨世界盃 48 強推估器：有效 Elo × Poisson × 蒙地卡羅，逐場勝負、比分與奪冠機率，可離線使用。",
+  "lang": "zh-Hant",
+  "dir": "ltr",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#070d19",
+  "theme_color": "#0b1220",
+  "categories": ["sports", "entertainment", "utilities"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
