@@ -230,12 +230,32 @@ table.sim td.mk{color:var(--blue)}
 .set input{width:80px;text-align:center}
 .addform{display:grid;gap:8px;margin-top:8px}
 .flagn{white-space:nowrap}
+.near{display:flex;flex-direction:column;gap:6px}
+.near .nr{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer;transition:all .15s ease}
+.near .nr:hover{border-color:var(--blue);background:rgba(255,255,255,0.05);transform:translateY(-1px)}
+.near .nr.today{border-color:var(--gold);box-shadow:var(--glow);background:rgba(251,191,36,.05)}
+.near .nd{font-size:10px;color:var(--sub);text-align:center;line-height:1.3;min-width:42px}
+.near .nd b{display:block;color:var(--gold);font-size:13px}
+.near .nt{font-size:13px;font-weight:600;line-height:1.4}
+.near .ns{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--gold);white-space:nowrap}
+.near .ns.pred{color:var(--sub);font-size:12px;font-weight:600}
+.match.today{border-color:var(--gold);box-shadow:var(--glow)}
+.koround{margin:14px 0 6px;color:var(--gold);font-weight:800;font-size:14px;letter-spacing:.5px}
+.koround small{color:var(--sub);font-weight:500;font-size:11px;margin-left:6px}
+.bt-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:12px}
+.bt-row:last-child{border-bottom:none}
+.bt-row .ok{color:var(--green);font-weight:700}
+.bt-row .no{color:var(--red);font-weight:700}
+.bt-row .pp{font-variant-numeric:tabular-nums;color:var(--sub);white-space:nowrap}
+.fix{display:flex;justify-content:space-between;align-items:center;gap:10px;background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.25);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:12px}
+.fix b{color:var(--txt)}
 @media(max-width:480px){ table.score td,table.score th{width:32px;height:28px} .breakdown{grid-template-columns:1fr} }
+@media(max-width:430px){ .tabs{padding:5px 2px calc(5px + env(safe-area-inset-bottom))} .tabs button{font-size:10px;padding:6px 1px} .tabs button .ico{font-size:18px} }
 </style>
 </head>
 <body>
 <header>
-  <h1>⚽ 2026 世界盃推估器<small>美加墨 48 強 · v4.4</small></h1>
+  <h1>⚽ 2026 世界盃推估器<small>美加墨 48 強 · v4.5</small></h1>
   <button class="gear" onclick="openSettings()">⚙️ 設定</button>
 </header>
 <main id="main"></main>
@@ -703,7 +723,7 @@ function predict(eA,eB,sA,sB){
 function samplePois(l){ const L=Math.exp(-l); let k=0,p=1; do{k++;p*=Math.random();}while(p>L); return k-1; }
 
 /* ================= 主畫面 ================= */
-const TABS=[["pred","⚔️","對戰預測"],["sched","📅","賽程戰績"],["teams","👥","球隊球員"],["news","📰","新聞情報"],["sim","🏆","奪冠模擬"],["model","📊","模型說明"]];
+const TABS=[["pred","⚔️","對戰"],["sched","📅","小組"],["ko","🏆","淘汰"],["teams","👥","球隊"],["news","📰","新聞"],["sim","🎲","模擬"],["acc","🎯","差異"],["model","📊","說明"]];
 let curTab='pred', gFilter='全部', openTeam=-1, simResult=null, pendingNews=[], lineupCache={}, bkFit=true;
 function renderTabs(){
   document.getElementById('tabs').innerHTML=TABS.map(t=>
@@ -715,11 +735,14 @@ function render(){
   const m=document.getElementById('main');
   if(curTab==='pred')m.innerHTML=viewPred();
   else if(curTab==='sched')m.innerHTML=viewSched();
+  else if(curTab==='ko')m.innerHTML=viewKO();
   else if(curTab==='teams')m.innerHTML=viewTeams();
   else if(curTab==='news')m.innerHTML=viewNews();
+  else if(curTab==='acc')m.innerHTML=viewAcc();
   else if(curTab==='model')m.innerHTML=viewModel();
   else m.innerHTML=viewSim();
-  if(curTab==='sim')setTimeout(applyBkFit,0);
+  if(curTab==='ko')setTimeout(applyBkFit,0);
+  if(curTab==='sched')setTimeout(scrollToNearMatch,0);
 }
 function flagName(i){ return `<span class="flagn">${TEAMS[i][5]} ${TEAMS[i][1]}</span>`; }
 function pct(x){ return (x*100).toFixed(1)+'%'; }
@@ -838,11 +861,70 @@ function tzRow(iso){
     <span>🇺🇸 美東 <b>${zoneStr(iso,'America/New_York',0)}</b></span>
     <span>🇪🇺 歐洲 <b>${zoneStr(iso,'Europe/Paris',0)}</b></span></div>`;
 }
+/* ---------- 近期賽事（小組賽＋淘汰賽統一清單，解決「滑很久才找到近期比賽」）---------- */
+function mdToDate(md){ const p=(md||'').split('/'); return new Date(2026,(+p[0]||1)-1,+p[1]||1); }
+function dayDelta(md){ const t=new Date(); const d0=new Date(t.getFullYear(),t.getMonth(),t.getDate()); return Math.round((mdToDate(md)-d0)/86400000); }
+function allMatchesUnified(){
+  const out=[];
+  MATCHES.forEach((m,idx)=>{
+    const res=S.results[idx];
+    out.push({kind:'group',md:m[0],kick:KICK[idx],g:m[1],a:m[2],b:m[3],vi:m[4],idx,
+      sc:(res&&!isNaN(res[0])&&!isNaN(res[1]))?[res[0],res[1]]:null});
+  });
+  try{
+    const rounds=buildBracketRounds(), RL=['32強','16強','8強','4強','決賽'];
+    rounds.forEach((rd,ri)=>rd.forEach(ms=>{
+      const inf=KO_INFO[ms.m]||['',0];
+      out.push({kind:'ko',md:inf[0],kick:null,a:ms.a,b:ms.b,vi:inf[1],m:ms.m,round:RL[ri],
+        pa:ms.pa,winner:ms.locked?ms.winner:null,fixed:ms.fixed,locked:ms.locked});
+    }));
+  }catch(e){}
+  return out;
+}
+function nearRow(x){
+  const wd=WDzh[mdToDate(x.md).getDay()];
+  const tw=x.kick?(zoneStr(x.kick,'Asia/Taipei',0).split(' ')[1]||''):'';
+  const isToday=x._d===0;
+  const tag=x.kind==='ko'
+    ? `<span style="color:var(--blue);font-weight:700">${x.round}${(x.fixed||x.locked)?'':' · 預測'}</span> `
+    : `<span style="color:var(--sub)">${x.g}組</span> `;
+  let right;
+  if(x.sc) right=`<span class="ns">${x.sc[0]} : ${x.sc[1]}</span>`;
+  else if(x.kind==='ko'&&x.winner!=null) right=`<span class="ns">✓ ${TEAMS[x.winner][1]}</span>`;
+  else right=`<span class="ns pred">${x.kind==='ko'&&x.pa!=null?Math.round(Math.max(x.pa,1-x.pa)*100)+'%':'預測'}</span>`;
+  return `<div class="nr ${isToday?'today':''}" onclick="S.pA=${x.a};S.pB=${x.b};S.pV='${x.vi}';save();goTab('pred')">
+    <div class="nd"><b>${x.md}</b>${wd?'週'+wd:''}${tw?'<br>'+tw:''}</div>
+    <div class="nt">${tag}${TEAMS[x.a][5]} ${TEAMS[x.a][1]} <span style="color:var(--sub)">vs</span> ${TEAMS[x.b][5]} ${TEAMS[x.b][1]}</div>
+    ${right}
+  </div>`;
+}
+function nearCard(){
+  const all=allMatchesUnified().filter(x=>x.md);
+  if(!all.length)return '';
+  all.forEach(x=>x._d=dayDelta(x.md));
+  let win=all.filter(x=>x._d>=-2&&x._d<=3);
+  if(win.length<3){ win=all.slice().sort((a,b)=>Math.abs(a._d)-Math.abs(b._d)).slice(0,6); }
+  win.sort((a,b)=>a._d-b._d||((a.kick||'9')<(b.kick||'9')?-1:1));
+  const todayN=win.filter(x=>x._d===0).length;
+  return `<div class="card"><h2>📍 近期賽事${todayN?`（今日 ${todayN} 場）`:''}</h2>
+    <div class="near">${win.map(nearRow).join('')}</div>
+    <div class="hint" style="margin-top:8px">顯示今天前後的比賽（小組賽標組別、淘汰賽標輪次；「預測」＝尚未鎖定的推估對陣）。點任一場即帶入對戰預測。</div></div>`;
+}
+function scrollToNearMatch(){
+  try{
+    let best=null,bd=99;
+    MATCHES.forEach((m,idx)=>{ if(gFilter!=='全部'&&m[1]!==gFilter)return; const d=Math.abs(dayDelta(m[0])); if(d<bd){bd=d;best=idx;} });
+    if(best==null||bd>2)return;
+    const el=document.getElementById('gm'+best);
+    if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+  }catch(e){}
+}
 function viewSched(){
   const gs=['全部',..."ABCDEFGHIJKL".split('')];
   let h=`<div class="card" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
     <button class="btn" onclick="updateScores(this)">🔄 一鍵更新比分</button>
     <span class="hint">需網路。從 openfootball／TheSportsDB 抓最新戰績自動填入（也可手動輸入）。</span></div>`;
+  if(gFilter==='全部') h+=nearCard();
   h+=`<div class="gfilter">${gs.map(g=>`<button class="${gFilter===g?'on':''}" onclick="gFilter='${g}';render()">${g==='全部'?'全部':g+'組'}</button>`).join('')}</div>`;
   if(gFilter!=='全部') h+=standingsCard(gFilter);
   MATCHES.forEach((m,idx)=>{
@@ -854,7 +936,7 @@ function viewSched(){
     const sm=styleMul(m[2],m[3]);
     const r=predict(eA,eB,sm[0],sm[1]);
     const vtags=(v[4]>=1400?`<span class="vtag">⛰${v[4]}m</span>`:'')+(v[5]?`<span class="vtag roof">🏟室內</span>`:'');
-    h+=`<div class="match">
+    h+=`<div class="match${dayDelta(m[0])===0?' today':''}" id="gm${idx}">
       <div class="top"><span>${m[0]}（${m[1]} 組）</span><span>📍 ${v[0]} ${vtags}</span></div>
       ${tzRow(KICK[idx])}
       <div class="mid">
@@ -1470,12 +1552,183 @@ function addNews(){
   save(); render();
 }
 
+/* ---------- 準確度回測（推估 vs 實際，並提出修正因子）---------- */
+// 回測用「賽前先驗」：排除「賽中動態」這個由賽果反推的因子，避免拿比賽結果去預測比賽自己（資料洩漏）
+function eloNoDyn(i){ const b=eloBreak(i); return b.eff-b.dyn; }
+function backtest(){
+  const eloP=TEAMS.map((t,i)=>eloNoDyn(i));
+  const G={n:0,hit:0,brier:0,predTot:0,actTot:0,predDraw:0,actDraw:0,favPred:0,favWin:0,favN:0,mae:0,rows:[],
+    teamExp:TEAMS.map(()=>({exp:0,act:0,pl:0}))};
+  MATCHES.forEach((m,idx)=>{
+    const res=S.results[idx]; if(!validRes(res))return;
+    const sm=styleMul(m[2],m[3]);
+    const r=predict(eloP[m[2]]+matchAdv(m[2],m[4]), eloP[m[3]]+matchAdv(m[3],m[4]),sm[0],sm[1]);
+    const gh=res[0],ga=res[1], oW=gh>ga?1:0,oD=gh===ga?1:0,oL=gh<ga?1:0;
+    const pred=(r.pW>=r.pD&&r.pW>=r.pL)?'W':(r.pL>=r.pD?'L':'D'), act=oW?'W':(oD?'D':'L');
+    const pAct=act==='W'?r.pW:(act==='D'?r.pD:r.pL); // 模型賦予「真實結果」的機率 → 越低代表越意外
+    G.n++; if(pred===act)G.hit++;
+    G.brier+=(r.pW-oW)**2+(r.pD-oD)**2+(r.pL-oL)**2;
+    G.predTot+=r.lA+r.lB; G.actTot+=gh+ga; G.mae+=Math.abs((r.lA+r.lB)-(gh+ga));
+    G.predDraw+=r.pD; G.actDraw+=oD;
+    const favA=r.we>=0.5; G.favPred+=favA?r.pW:r.pL; G.favWin+=favA?oW:oL; G.favN++;
+    // 各隊：賽前期望勝點 vs 實際勝點（差異分析核心）
+    const eA=G.teamExp[m[2]], eB=G.teamExp[m[3]];
+    eA.exp+=3*r.pW+r.pD; eB.exp+=3*r.pL+r.pD;
+    eA.act+=oW?3:(oD?1:0); eB.act+=oL?3:(oD?1:0); eA.pl++; eB.pl++;
+    G.rows.push({md:m[0],a:m[2],b:m[3],pW:r.pW,pD:r.pD,pL:r.pL,sc:[gh,ga],pred,act,ok:pred===act,pAct});
+  });
+  const K={n:0,hit:0,conf:0,rows:[]};
+  Object.keys(S.koRes||{}).forEach(mm=>{
+    const fx=S.koFix[mm]; if(!fx)return; const win=S.koRes[mm], a=fx[0],b=fx[1];
+    if(win!==a&&win!==b)return;
+    const vi=KO_INFO[mm]?KO_INFO[mm][1]:-1, ax=vi>=0?matchAdv(a,vi):0, ay=vi>=0?matchAdv(b,vi):0;
+    const sm=styleMul(a,b), r=predict(eloP[a]+ax,eloP[b]+ay,sm[0],sm[1]);
+    const pa=r.pW+r.pD*pkProb(a,b,r.we), okA=win===a;
+    const confWin=okA?pa:(1-pa);
+    K.n++; if((pa>=0.5)===okA)K.hit++; K.conf+=confWin;
+    K.rows.push({m:+mm,a,b,pa,win,ok:(pa>=0.5)===okA,confWin});
+  });
+  return {G,K};
+}
+function applyFix(k,v){ S.settings[k]=v; save(); render(); toast('✅ 已套用 '+k+' → '+v); }
+function viewAcc(){
+  const {G,K}=backtest();
+  const intro=`<div class="card"><h2>🎯 差異分析（推估 vs 實際）</h2>
+    <div class="hint">用<b>目前模型設定</b>重算每一場的<b>賽前</b>推估（刻意排除「賽中動態」因子，以免拿賽果預測賽果自己），再對照你已輸入的真實結果，量化模型有多準、哪裡系統性偏掉、該怎麼修。樣本越多越可信。</div></div>`;
+  if(G.n===0&&K.n===0){
+    return intro+`<div class="card"><div class="hint">目前還沒有任何已完成的比賽結果。請到「📅 小組」或「🏆 淘汰」分頁按「🔄 一鍵更新比分」（需網路）抓官方賽果，或手動輸入比分，這裡就會自動算出命中率、差異與修正建議。</div>
+      <div class="row" style="margin-top:10px;gap:8px"><button class="btn sec" onclick="goTab('sched')">📅 去更新小組賽</button><button class="btn sec" onclick="goTab('ko')">🏆 去更新淘汰賽</button></div></div>`;
+  }
+  const pct1=x=>(x*100).toFixed(0)+'%', sg=(x,d)=>(x>=0?'+':'')+x.toFixed(d==null?2:d);
+  const briA=G.n?G.brier/G.n:0, skill=G.n?((0.667-briA)/0.667*100):0, hit=G.n?G.hit/G.n:0;
+  const pT=G.n?G.predTot/G.n:0, aT=G.n?G.actTot/G.n:0, pD=G.n?G.predDraw/G.n:0, aD=G.n?G.actDraw/G.n:0;
+  const fP=G.favN?G.favPred/G.favN:0, fA=G.favN?G.favWin/G.favN:0;
+  let h=intro;
+
+  /* ── A. 總評 ── */
+  if(G.n>0){
+    const skillTxt=skill>=20?'<b style="color:var(--green)">明顯優於亂猜</b>':skill>=5?'<b style="color:var(--green)">優於亂猜</b>':skill>=-5?'<b>與亂猜相當</b>（樣本仍少或爆冷多）':'<b style="color:var(--red)">暫時不如亂猜</b>（多為爆冷或樣本太小）';
+    const favTxt=Math.abs(fA-fP)<0.05?'強隊勝率與推估<b>大致吻合</b>，實力差敏感度校準良好':fA>fP?`強隊實際勝率（${pct1(fA)}）<b style="color:var(--gold)">高於</b>推估（${pct1(fP)}）→ 模型對強隊<b>偏保守</b>`:`強隊實際勝率（${pct1(fA)}）<b style="color:var(--gold)">低於</b>推估（${pct1(fP)}）→ 冷門偏多、模型<b>略過度自信</b>`;
+    const golTxt=Math.abs(aT-pT)<0.15?'場均進球與推估吻合':aT>pT?`實際進球（${aT.toFixed(2)}）比推估（${pT.toFixed(2)}）<b>多</b>`:`實際進球（${aT.toFixed(2)}）比推估（${pT.toFixed(2)}）<b>少</b>`;
+    const drwTxt=Math.abs(aD-pD)<0.04?'平手率吻合':aD>pD?`平手實際偏<b>多</b>（${pct1(aD)} vs 推估 ${pct1(pD)}）`:`平手實際偏<b>少</b>（${pct1(aD)} vs 推估 ${pct1(pD)}）`;
+    h+=`<div class="card"><h2>📝 總評</h2>
+      <div class="hint" style="line-height:1.9;font-size:13px">
+      已驗證 <b>${G.n}</b> 場小組賽${K.n?`＋ <b>${K.n}</b> 場淘汰賽`:''}。勝平負<b>命中率 ${pct1(hit)}</b>（${G.hit}/${G.n}），技巧分 ${skillTxt}（Brier ${briA.toFixed(3)}，亂猜=0.667）。<br>
+      • 強隊校準：${favTxt}。<br>
+      • 進球規模：${golTxt}。<br>
+      • 平手傾向：${drwTxt}。<br>
+      ${G.n<16?'⚠ 目前樣本 <16 場，單場爆冷會主導統計，下方數值建議暫不顯示，結論先當參考。':'下方有依差異自動算出的<b>可一鍵套用</b>修正建議。'}
+      </div></div>`;
+  }
+
+  /* ── B. 預測 vs 實際 差異表 ── */
+  if(G.n>0){
+    const drow=(lab,mod,real,delta,note)=>`<tr><td style="text-align:left">${lab}</td><td>${mod}</td><td>${real}</td>
+      <td style="color:var(--gold);font-weight:700">${delta}</td><td style="text-align:left;color:var(--sub);font-size:11px">${note||''}</td></tr>`;
+    h+=`<div class="card"><h2>📊 預測 vs 實際（差異表）</h2>
+      <div style="overflow-x:auto"><table class="sim"><tr><th style="text-align:left">指標</th><th>模型推估</th><th>真實</th><th>差異 Δ</th><th style="text-align:left">解讀</th></tr>
+      ${drow('場均總進球',pT.toFixed(2),aT.toFixed(2),sg(aT-pT,2),Math.abs(aT-pT)<0.15?'吻合':(aT>pT?'實際更多進球':'實際更少進球'))}
+      ${drow('平手率',pct1(pD),pct1(aD),sg((aD-pD)*100,0)+'pp',Math.abs(aD-pD)<0.04?'吻合':(aD>pD?'平手比預期多':'平手比預期少'))}
+      ${drow('強隊勝率',pct1(fP),pct1(fA),sg((fA-fP)*100,0)+'pp',Math.abs(fA-fP)<0.05?'校準良好':(fA>fP?'強隊比預期強→偏保守':'冷門多→偏自信'))}
+      ${drow('勝平負命中','—',pct1(hit),'—','argmax 命中比例')}
+      ${drow('Brier 分數','0.667（亂猜）',briA.toFixed(3),sg(briA-0.667,3),briA<0.667?'優於亂猜':'差於亂猜')}
+      </table></div>
+      <div class="hint" style="margin-top:6px">pp＝百分點。「強隊」＝賽前有效 Elo 較高的一方；強隊勝率比較其「實際勝場率 vs 推估勝率」，是校準是否偏保守／過度自信的關鍵。</div></div>`;
+  }
+
+  /* ── C. 各隊表現 vs 推估 ── */
+  if(G.n>0){
+    const td=G.teamExp.map((t,i)=>({i,exp:t.exp,act:t.act,pl:t.pl,d:t.act-t.exp})).filter(t=>t.pl>0).sort((a,b)=>b.d-a.d);
+    const trow=t=>`<tr><td style="text-align:left">${TEAMS[t.i][5]} ${TEAMS[t.i][1]}</td><td>${t.pl}</td><td>${t.act}</td><td>${t.exp.toFixed(1)}</td>
+      <td class="${t.d>0.5?'ok':(t.d<-0.5?'no':'')}" style="font-weight:700">${sg(t.d,1)}</td></tr>`;
+    const over=td.filter(t=>t.d>0).slice(0,5), under=td.slice().reverse().filter(t=>t.d<0).slice(0,5);
+    h+=`<div class="card"><h2>👥 各隊：實際 vs 賽前推估</h2>
+      <div class="hint" style="margin-bottom:8px">把每隊已踢小組賽的「<b>賽前期望勝點</b>」（依推估的勝平負機率）對照「<b>實際拿到的勝點</b>」。Δ 正＝<b style="color:var(--green)">超出預期</b>（黑馬/低估）、負＝<b style="color:var(--red)">低於預期</b>（高估/失常）。</div>
+      <div class="calib">
+        <div class="cc"><div class="tm"><b>🚀 超出預期 Top5</b><span>Δ勝點</span></div>
+          ${over.length?over.map(t=>`<div class="tm"><span>${TEAMS[t.i][5]} ${TEAMS[t.i][1]}</span><b class="ok">${sg(t.d,1)}</b></div>`).join(''):'<div class="tm"><span>—</span><span></span></div>'}</div>
+        <div class="cc"><div class="tm"><b>📉 低於預期 Top5</b><span>Δ勝點</span></div>
+          ${under.length?under.map(t=>`<div class="tm"><span>${TEAMS[t.i][5]} ${TEAMS[t.i][1]}</span><b class="no">${sg(t.d,1)}</b></div>`).join(''):'<div class="tm"><span>—</span><span></span></div>'}</div>
+      </div>
+      <details style="margin-top:10px"><summary style="cursor:pointer;color:var(--blue);font-size:13px">📄 全部 ${td.length} 隊（依 Δ 排序）</summary>
+        <div style="overflow:auto;max-height:340px;margin-top:8px"><table class="sim"><tr><th style="text-align:left">球隊</th><th>場</th><th>實際分</th><th>期望分</th><th>Δ</th></tr>
+        ${td.map(trow).join('')}</table></div></details></div>`;
+  }
+
+  /* ── D. 最意外的場次 ── */
+  if(G.n>0){
+    const ms=G.rows.slice().sort((a,b)=>a.pAct-b.pAct).slice(0,8);
+    const lab=(r,o)=>o==='W'?TEAMS[r.a][1]:(o==='L'?TEAMS[r.b][1]:'平手');
+    h+=`<div class="card"><h2>🌋 最意外的場次（模型最沒料到）</h2>
+      <div class="hint" style="margin-bottom:8px">依「模型賽前賦予真實結果的機率」由低到高排序——機率越低代表越爆冷、越值得檢討。</div>
+      <div style="overflow-x:auto"><table class="sim"><tr><th>日期</th><th style="text-align:left">對戰</th><th>賽前推估</th><th>實際</th><th>命中真實機率</th></tr>
+      ${ms.map(r=>{const mp=Math.max(r.pW,r.pD,r.pL);
+        return `<tr><td>${r.md}</td><td style="text-align:left">${TEAMS[r.a][5]}${TEAMS[r.a][1].slice(0,3)} v ${TEAMS[r.b][5]}${TEAMS[r.b][1].slice(0,3)}</td>
+        <td>${lab(r,r.pred)}勝 ${pct1(mp)}</td><td>${r.sc[0]}:${r.sc[1]}（${lab(r,r.act)}）</td>
+        <td class="${r.ok?'ok':'no'}">${pct1(r.pAct)} ${r.ok?'✓':'✗'}</td></tr>`;}).join('')}
+      </table></div></div>`;
+  }
+
+  /* ── E. 修正因子建議 ── */
+  if(G.n>0){
+    const sug=[], enough=G.n>=16;
+    if(enough){
+      if(Math.abs(aT-pT)>=0.15){
+        const nv=Math.max(2.0,Math.min(3.4,+(S.settings.totalGoals*aT/pT).toFixed(2)));
+        sug.push([`實際場均總進球 ${aT.toFixed(2)} ${aT>pT?'高':'低'}於推估 ${pT.toFixed(2)}`,
+          `把「單場平均總進球」由 ${S.settings.totalGoals} 調為 <b>${nv}</b>`,'totalGoals',nv]);
+      }
+      if(aD>0&&Math.abs(aD-pD)/Math.max(pD,0.05)>=0.2){
+        const nv=Math.max(1.0,Math.min(1.6,+(S.settings.drawBoost*(aD/Math.max(pD,0.05))).toFixed(2)));
+        if(Math.abs(nv-S.settings.drawBoost)>=0.05)
+          sug.push([`實際平手率 ${pct1(aD)} ${aD>pD?'高':'低'}於推估 ${pct1(pD)}`,
+            `把「平手修正係數」由 ${S.settings.drawBoost} 調為 <b>${nv}</b>`,'drawBoost',nv]);
+      }
+      if(Math.abs(fA-fP)>=0.06){
+        const cur=S.settings.eloScale, nv=fA>fP?Math.max(300,cur-50):Math.min(900,cur+50);
+        sug.push([`強隊實際勝率 ${pct1(fA)} ${fA>fP?'高':'低'}於推估 ${pct1(fP)}（模型${fA>fP?'偏保守':'過度自信'}）`,
+          `把「實力差敏感度（分母）」由 ${cur} 調為 <b>${nv}</b>（${fA>fP?'更陡、強隊機率提高':'更平、降低過度自信'}）`,'eloScale',nv]);
+      }
+    }
+    h+=`<div class="card"><h2>🔧 修正因子建議</h2>`;
+    if(!enough) h+=`<div class="hint">已驗 ${G.n} 場（<16）。樣本太小時單場爆冷會主導統計，暫不給數值建議——等更多比賽完成後，這裡會自動出現可一鍵套用的調整。</div>`;
+    else if(!sug.length) h+=`<div class="hint">✅ 目前推估與實際大致吻合（總進球、平手率、強隊勝率皆在合理誤差內），暫無需要修正的系統性偏差。</div>`;
+    else{
+      sug.forEach(s=>{ h+=`<div class="fix"><div><b>${s[0]}</b><br><span class="hint">${s[1]}</span></div>
+        <button class="btn sec" onclick="applyFix('${s[2]}',${s[3]})">套用</button></div>`; });
+      h+=`<div class="hint" style="margin-top:8px">建議由資料驅動、屬經驗法則（非嚴謹最佳化）；套用後可回來看命中率有無改善，或到「⚙️ 設定」微調／還原。</div>`;
+    }
+    h+=`</div>`;
+  }
+
+  /* ── F. 淘汰賽晉級準確度 ── */
+  if(K.n>0){
+    const ups=K.rows.slice().sort((a,b)=>a.confWin-b.confWin).slice(0,6);
+    h+=`<div class="card"><h2>🏆 淘汰賽晉級準確度（${K.n} 場）</h2>
+      <div class="calib" style="margin-bottom:8px"><div class="cc">
+        <div class="tm"><span>晉級命中率</span><b>${pct1(K.hit/K.n)}（${K.hit}/${K.n}）</b></div>
+        <div class="tm"><span>對勝方平均信心</span><b>${pct1(K.conf/K.n)}</b></div>
+        <div class="tm"><span style="font-size:11px;color:var(--sub)">淘汰賽只有勝負（無比分），僅評晉級方向</span><b></b></div>
+      </div></div>
+      <div style="overflow-x:auto"><table class="sim"><tr><th style="text-align:left">M</th><th style="text-align:left">對戰</th><th>實際晉級</th><th>模型給勝方</th></tr>
+      ${ups.map(r=>`<tr><td style="text-align:left">M${r.m}</td><td style="text-align:left">${TEAMS[r.a][5]}${TEAMS[r.a][1].slice(0,3)} v ${TEAMS[r.b][5]}${TEAMS[r.b][1].slice(0,3)}</td>
+        <td>${TEAMS[r.win][5]} ${TEAMS[r.win][1]}</td><td class="${r.ok?'ok':'no'}">${pct1(r.confWin)} ${r.ok?'✓':'✗'}</td></tr>`).join('')}
+      </table></div>
+      <div class="hint" style="margin-top:6px">列出模型最沒料到的晉級（對勝方信心由低到高）。</div></div>`;
+  }
+  return h;
+}
+
 /* ---------- 模型說明 ---------- */
 function viewModel(){
   const s=S.settings, pw=s.perWeight, az=Math.round((s.altSlope||43)*1.04);
   const mvPct=Math.round((s.mvWeight||0)*100);
   const mf=(name,form,src)=>`<div class="mf"><b>${name}</b><div class="form">${form}</div><div class="src">${src}</div></div>`;
   return `
+  <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+    <div class="hint" style="flex:1;min-width:180px">想看「推估 vs 實際」的命中率與差異分析？已移到專屬的 <b style="color:var(--gold)">🎯 差異</b> 分頁。</div>
+    <button class="btn sec" onclick="goTab('acc')">🎯 前往差異分析</button>
+  </div>
   <div class="card"><h2>📊 這個推估器怎麼運作</h2>
     <div class="hint" style="margin-bottom:10px">核心是「<b>Elo 實力評分</b>」：先把每隊的長期實力（Elo），用十多項因子修正成「<b>有效 Elo</b>」，再把兩隊的 Elo 差距換算成勝/平/負機率與比分；整屆冠軍則用蒙地卡羅模擬幾千次。全程透明、每個數字都可在設定調整。</div>
     <div class="flow">
@@ -1678,6 +1931,53 @@ function fitBracket() {
   render();
 }
 
+/* ---------- 淘汰賽（獨立分頁：近期＋對陣圖＋逐場推估）---------- */
+function koMatchCard(ms){
+  const a=ms.a,b=ms.b,inf=KO_INFO[ms.m]||['',0],v=VENUES[inf[1]];
+  const vtags=(v[4]>=1400?`<span class="vtag">⛰${v[4]}m</span>`:'')+(v[5]?`<span class="vtag roof">🏟室內</span>`:'');
+  const pa=ms.pa, today=dayDelta(inf[0])===0;
+  let center;
+  if(ms.locked) center=`<span style="color:var(--green);font-weight:800;white-space:nowrap">✓ ${TEAMS[ms.winner][5]}</span>`;
+  else center=`<span style="color:var(--sub);font-size:11px">預測</span>`;
+  return `<div class="match${today?' today':''}">
+    <div class="top"><span>${ms.fixed?'🔒 ':''}M${ms.m}｜${inf[0]}</span><span>📍 ${v[0]} ${vtags}</span></div>
+    <div class="mid">
+      <div class="tA">${flagName(a)}</div>
+      <div class="sc">${center}</div>
+      <div class="tB">${flagName(b)}</div>
+    </div>
+    <div class="minibar"><div style="flex:${pa}"></div><div style="flex:0"></div><div style="flex:${1-pa}"></div></div>
+    <div class="pr"><span>${ms.locked&&ms.winner===a?'晉級 ✓':'晉級 '+pct(pa)}</span><span>${ms.locked?'官方賽果':'PK 混合'}</span><span>${ms.locked&&ms.winner===b?'晉級 ✓':'晉級 '+pct(1-pa)}</span></div>
+    <button class="use" onclick="S.pA=${a};S.pB=${b};S.pV='${inf[1]}';save();goTab('pred')">→ 帶入對戰預測（看完整拆解／比分／PK）</button>
+  </div>`;
+}
+function viewKO(){
+  let h=`<div class="card" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <button class="btn" onclick="updateScores(this)">🔄 一鍵更新對陣／比分</button>
+    <span class="hint">需網路。小組賽全部完賽後，自動抓官方 32 強對陣與淘汰賽賽果逐場鎖定（🔒＝官方對陣、✓＝官方賽果）。</span></div>`;
+  h+=nearCard();
+  h+=`<div class="card"><h2>🗂 對陣圖（點隊伍指定晉級）</h2>
+    <div class="hint" style="margin-bottom:8px">採 <b>FIFA 官方對陣樹（M73–M104）</b>：各組名次依「已踢真實比分＋未踢期望積分」即時推估，按官方槽位排入（場次/日期/場館皆官方，⛰＝高原）。每隊旁 % 為該場晉級機率（含 PK 混合）；機率高者預設前進，<b>點任一隊可改派它晉級</b>，後面立即重排。🔒＝官方對陣、✓＝官方賽果（鎖定不可點）。</div>
+    <div class="row" style="margin-bottom:8px; gap:8px">
+      <button class="btn sec ${bkFit?'on':''}" onclick="fitBracket()">🗜 一頁全覽 (Fit)</button>
+      <button class="btn sec" onclick="zoomBracket(0.1)">➕ 放大</button>
+      <button class="btn sec" onclick="zoomBracket(-0.1)">➖ 縮小</button>
+      <span style="font-size:12px; color:var(--sub); align-self:center;">縮放: ${(bkZoom * 100).toFixed(0)}%</span>
+      ${Object.keys(brOverride).length?`<button class="btn sec" onclick="resetBracket()">↺ 清除手動指定（${Object.keys(brOverride).length}）</button>`:''}
+    </div>
+    ${bracketHtml()}</div>`;
+  const rounds=buildBracketRounds();
+  const RL=[['32 強','R32 · 6/28–7/3'],['16 強','R16 · 7/4–7/7'],['8 強','QF · 7/9–7/11'],['4 強','SF · 7/14–7/15'],['🏆 決賽','Final · 7/19']];
+  h+=`<div class="card"><h2>📋 淘汰賽逐場推估</h2>
+    <div class="hint" style="margin-bottom:6px">每輪逐場列出對陣、官方日期/場館、晉級機率（含主場・高原・僑民・PK）。今日場次以金框標示；尚未鎖定者為依目前實力的推估對陣。</div>`;
+  rounds.forEach((rd,ri)=>{
+    h+=`<div class="koround">${RL[ri][0]}<small>${RL[ri][1]}</small></div>`;
+    rd.forEach(ms=>{ h+=koMatchCard(ms); });
+  });
+  h+=`</div>`;
+  return h;
+}
+
 /* ---------- 蒙地卡羅模擬 ---------- */
 function viewSim(){
   const hasOdds=Object.keys(S.odds).length>0;
@@ -1696,17 +1996,6 @@ function viewSim(){
         <div id="simBar" style="width:0%; height:100%; background:var(--gold); transition:width 0.1s ease;"></div>
       </div>
     </div>
-  </div>
-  <div class="card"><h2>🗂 動態對陣圖（點隊伍指定晉級）</h2>
-    <div class="hint" style="margin-bottom:8px">採 <b>FIFA 官方對陣樹</b>：各組名名次依「已踢真實比分＋未踢期望積分」即時推估，按官方槽位（如 M79＝A組第一 vs 指定組別之第三）排入，場次編號/日期/場館皆為官方賽程（⛰＝高原場館，主場與高原效應已計入晉級機率）。每隊旁的 % 是該場晉級機率（含 PK 混合）；預設機率高者前進一格，<b>點任一隊伍可改派它晉級</b>，後面對陣立即重排。第三名分配在官方表多解時可能與正式結果略有差異——小組賽全部結束後按「🔄 一鍵更新比分」，會自動抓官方對陣與賽果逐場鎖定（🔒＝官方對陣、✓＝官方賽果，鎖定場次不可點選）。</div>
-    <div class="row" style="margin-bottom:8px; gap:8px">
-      <button class="btn sec ${bkFit?'on':''}" onclick="fitBracket()">🗜 一頁全覽 (Fit)</button>
-      <button class="btn sec" onclick="zoomBracket(0.1)">➕ 放大 (+)</button>
-      <button class="btn sec" onclick="zoomBracket(-0.1)">➖ 縮小 (-)</button>
-      <span style="font-size:12px; color:var(--sub); align-self:center;">縮放: ${(bkZoom * 100).toFixed(0)}%</span>
-      ${Object.keys(brOverride).length?`<button class="btn sec" onclick="resetBracket()">↺ 清除手動指定（${Object.keys(brOverride).length}）</button>`:''}
-    </div>
-    ${bracketHtml()}
   </div>`;
   if(simResult){
     h+=`<div class="card"><h2>模擬結果（${simResult.n} 次）</h2><div style="overflow-x:auto">
@@ -1908,7 +2197,7 @@ document.getElementById('modal').addEventListener('click',e=>{ if(e.target.id===
 /* ---------- 備份匯出／匯入（使用者個人編輯的可攜資料檔）---------- */
 function exportBackup(){
   try{
-    const payload=Object.assign({_app:'wc2026_predictor',_ver:'v4.4',_exported:new Date().toISOString()},S);
+    const payload=Object.assign({_app:'wc2026_predictor',_ver:'v4.5',_exported:new Date().toISOString()},S);
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
