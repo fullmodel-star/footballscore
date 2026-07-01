@@ -255,7 +255,7 @@ table.sim td.mk{color:var(--blue)}
 </head>
 <body>
 <header>
-  <h1>⚽ 2026 世界盃推估器<small>美加墨 48 強 · v4.5.1</small></h1>
+  <h1>⚽ 2026 世界盃推估器<small>美加墨 48 強 · v4.5.2</small></h1>
   <button class="gear" onclick="openSettings()">⚙️ 設定</button>
 </header>
 <main id="main"></main>
@@ -699,21 +699,24 @@ function venueExtra(ti,vi){ // [主場加成, 高原懲罰, 僑民主場]
 function matchAdv(ti,vi){ const e=venueExtra(ti,vi); return e[0]+e[1]+e[2]; }
 function fact(n){let f=1;for(let i=2;i<=n;i++)f*=i;return f;}
 function pois(l,k){ return Math.exp(-l)*Math.pow(l,k)/fact(k); }
-function predict(eA,eB,sA,sB){
+function predict(eA,eB,sA,sB,opts){
   // sA/sB：風格乘數（攻擊×對手防守）^γ，預設 1＝關閉；由呼叫端依球隊攻防指數帶入（第 1 點）
+  // opts：可覆寫 eloScale/totalGoals/drawBoost/drawCloseness（供準確度回測做校準 grid search，不動全域設定）
+  opts=opts||{};
   sA=sA||1; sB=sB||1;
   const dr=eA-eB;
   // 分母用 eloScale（預設 600，比標準 400 平緩）：書商單場勝率比純 Elo 換算保守，600 與市場最接近
-  const we=1/(1+Math.pow(10,-dr/(S.settings.eloScale||600)));
-  const tg=S.settings.totalGoals;
+  const scale=opts.eloScale||S.settings.eloScale||600;
+  const we=1/(1+Math.pow(10,-dr/scale));
+  const tg=opts.totalGoals!=null?opts.totalGoals:S.settings.totalGoals;
   // 夾住 we（而非各自對 λ 套絕對下限）以維持「兩隊期望進球相加≈總進球」守恆，避免實力懸殊場系統性高估總進球
   const weC=Math.min(0.94,Math.max(0.06,we));
   const lA=tg*weC*sA, lB=tg*(1-weC)*sB;
   const N=11,pa=[],pb=[];
   for(let k=0;k<N;k++){pa.push(pois(lA,k));pb.push(pois(lB,k));}
   // 動態平手修正：Poisson 對平局的低估在「勢均力敵」時最嚴重，故加成隨實力差淡出（第 2 點）
-  const dBoost=S.settings.drawBoost||1.2;
-  const close=Math.exp(-Math.abs(dr)/(S.settings.drawCloseness||350)); // 1=勢均力敵 → 0=一面倒
+  const dBoost=opts.drawBoost!=null?opts.drawBoost:(S.settings.drawBoost||1.2);
+  const close=Math.exp(-Math.abs(dr)/(opts.drawCloseness||S.settings.drawCloseness||350)); // 1=勢均力敵 → 0=一面倒
   const rho=1+(dBoost-1)*close;
   let pW=0,pD=0,pL=0; const M=[];
   for(let i=0;i<N;i++){M.push([]);for(let j=0;j<N;j++){let p=pa[i]*pb[j];if(i===j)p*=rho;M[i].push(p);
@@ -1568,7 +1571,7 @@ function addNews(){
 function eloNoDyn(i){ const b=eloBreak(i); return b.eff-b.dyn; }
 function backtest(){
   const eloP=TEAMS.map((t,i)=>eloNoDyn(i));
-  const G={n:0,hit:0,brier:0,predTot:0,actTot:0,predDraw:0,actDraw:0,favPred:0,favWin:0,favN:0,mae:0,rows:[],
+  const G={n:0,hit:0,brier:0,predTot:0,actTot:0,predDraw:0,actDraw:0,favPred:0,favWin:0,favN:0,mae:0,rows:[],feats:[],
     teamExp:TEAMS.map(()=>({exp:0,act:0,pl:0}))};
   MATCHES.forEach((m,idx)=>{
     const res=S.results[idx]; if(!validRes(res))return;
@@ -1587,6 +1590,7 @@ function backtest(){
     eA.exp+=3*r.pW+r.pD; eB.exp+=3*r.pL+r.pD;
     eA.act+=oW?3:(oD?1:0); eB.act+=oL?3:(oD?1:0); eA.pl++; eB.pl++;
     G.rows.push({md:m[0],a:m[2],b:m[3],pW:r.pW,pD:r.pD,pL:r.pL,sc:[gh,ga],pred,act,ok:pred===act,pAct});
+    G.feats.push({eA:eloP[m[2]]+matchAdv(m[2],m[4]),eB:eloP[m[3]]+matchAdv(m[3],m[4]),sA:sm[0],sB:sm[1],act,tot:gh+ga}); // 供校準 grid search
   });
   const K={n:0,hit:0,conf:0,rows:[]};
   Object.keys(S.koRes||{}).forEach(mm=>{
@@ -1602,6 +1606,29 @@ function backtest(){
   return {G,K};
 }
 function applyFix(k,v){ S.settings[k]=v; save(); render(); toast('✅ 已套用 '+k+' → '+v); }
+// 以已完成比賽做「參數校準」，每項都有統計理論依據（見 viewAcc 說明）：
+//  • eloScale：對數損失最小化＝logistic 尺度的最大概似估計（Platt 尺度重校）
+//  • drawBoost：Dixon–Coles 對角修正，同以對數損失最小化擬合到實際平手頻率
+//  • totalGoals：Poisson 率參數的最大概似估計＝樣本平均（閉式解）
+function calibrateFactors(feats){
+  if(!feats||feats.length<8)return null;
+  const s=S.settings;
+  const probAct=(f,o)=>{ const r=predict(f.eA,f.eB,f.sA,f.sB,o); return f.act==='W'?r.pW:(f.act==='D'?r.pD:r.pL); };
+  const ll=o=>{ let L=0; for(const f of feats)L+=-Math.log(Math.max(probAct(f,o),1e-9)); return L/feats.length; };
+  const base=ll({});
+  // ① eloScale：grid MLE（對數損失最小）
+  let bScale=s.eloScale, bScaleLL=base;
+  for(let sc=300;sc<=900;sc+=25){ const L=ll({eloScale:sc}); if(L<bScaleLL-1e-9){bScaleLL=L;bScale=sc;} }
+  // ② drawBoost：grid MLE
+  let bBoost=s.drawBoost, bBoostLL=base;
+  for(let bo=100;bo<=160;bo+=5){ const v=bo/100, L=ll({drawBoost:v}); if(L<bBoostLL-1e-9){bBoostLL=L;bBoost=v;} }
+  // ③ totalGoals：Poisson 率的 MLE＝樣本平均（閉式）
+  const meanTot=feats.reduce((a,f)=>a+f.tot,0)/feats.length;
+  let modelTot=0; for(const f of feats){ const r=predict(f.eA,f.eB,f.sA,f.sB,{}); modelTot+=r.lA+r.lB; }
+  modelTot/=feats.length;
+  const bTG=Math.max(2.0,Math.min(3.4,+(s.totalGoals*meanTot/Math.max(modelTot,0.1)).toFixed(2)));
+  return {base,bScale,bScaleLL,bBoost,bBoostLL,bTG,meanTot,modelTot};
+}
 function viewAcc(){
   const {G,K}=backtest();
   const intro=`<div class="card"><h2>🎯 差異分析（推估 vs 實際）</h2>
@@ -1680,34 +1707,42 @@ function viewAcc(){
       </table></div></div>`;
   }
 
-  /* ── E. 修正因子建議 ── */
+  /* ── E. 修正因子建議（有統計理論依據）── */
   if(G.n>0){
-    const sug=[], enough=G.n>=16;
-    if(enough){
-      if(Math.abs(aT-pT)>=0.15){
-        const nv=Math.max(2.0,Math.min(3.4,+(S.settings.totalGoals*aT/pT).toFixed(2)));
-        sug.push([`實際場均總進球 ${aT.toFixed(2)} ${aT>pT?'高':'低'}於推估 ${pT.toFixed(2)}`,
-          `把「單場平均總進球」由 ${S.settings.totalGoals} 調為 <b>${nv}</b>`,'totalGoals',nv]);
+    const enough=G.n>=16, cal=calibrateFactors(G.feats);
+    // 抽樣標準誤與 z 值（是否顯著超過雜訊，避免過度擬合）
+    const z=(diff,se)=>se>0?diff/se:0;
+    const seDraw=Math.sqrt(Math.max(pD*(1-pD),1e-6)/G.n), zDraw=z(aD-pD,seDraw);
+    const seFav=Math.sqrt(Math.max(fP*(1-fP),1e-6)/G.favN), zFav=z(fA-fP,seFav);
+    const seTot=Math.sqrt(Math.max(aT,0.1)/G.n), zTot=z(aT-pT,seTot); // Poisson：Var(均值)=λ/n
+    const sug=[];
+    if(enough&&cal){
+      const dLL=cal.base-cal.bScaleLL; // 對數損失改善（nats/場）
+      // ① 實力差敏感度：logistic 尺度 MLE（對數損失最小）＋ 強隊校準顯著性
+      if(cal.bScale!==S.settings.eloScale&&Math.abs(zFav)>=1.96){
+        sug.push([`強隊實際勝率 ${pct1(fA)} ${fA>fP?'高':'低'}於推估 ${pct1(fP)}（模型${fA>fP?'偏保守':'過度自信'}；z=${zFav.toFixed(1)}）`,
+          `<b>理論</b>：logistic 尺度重校（Platt scaling）＝以<b>對數損失最小化</b>反解 Elo 分母的最大概似值。<br><b>建議</b>：實力差敏感度 ${S.settings.eloScale} → <b>${cal.bScale}</b>（${cal.bScale<S.settings.eloScale?'更陡、強隊機率提高':'更平、降低過度自信'}；對數損失 ${cal.base.toFixed(3)}→${cal.bScaleLL.toFixed(3)}，改善 ${(dLL>0?dLL:0).toFixed(3)}/場）`,'eloScale',cal.bScale]);
       }
-      if(aD>0&&Math.abs(aD-pD)/Math.max(pD,0.05)>=0.2){
-        const nv=Math.max(1.0,Math.min(1.6,+(S.settings.drawBoost*(aD/Math.max(pD,0.05))).toFixed(2)));
-        if(Math.abs(nv-S.settings.drawBoost)>=0.05)
-          sug.push([`實際平手率 ${pct1(aD)} ${aD>pD?'高':'低'}於推估 ${pct1(pD)}`,
-            `把「平手修正係數」由 ${S.settings.drawBoost} 調為 <b>${nv}</b>`,'drawBoost',nv]);
+      // ② 平手修正：Dixon–Coles 對角係數，對數損失最小化擬合到實際平手頻率
+      const dLLb=cal.base-cal.bBoostLL;
+      if(cal.bBoost!==S.settings.drawBoost&&Math.abs(zDraw)>=1.96){
+        sug.push([`實際平手率 ${pct1(aD)} ${aD>pD?'高':'低'}於推估 ${pct1(pD)}（z=${zDraw.toFixed(1)}）`,
+          `<b>理論</b>：Dixon–Coles（1997）對角平手修正 ρ，以<b>對數損失最小化</b>校準到實際平手頻率（矩估計）。<br><b>建議</b>：平手修正係數 ${S.settings.drawBoost} → <b>${cal.bBoost}</b>（對數損失改善 ${(dLLb>0?dLLb:0).toFixed(3)}/場）`,'drawBoost',cal.bBoost]);
       }
-      if(Math.abs(fA-fP)>=0.06){
-        const cur=S.settings.eloScale, nv=fA>fP?Math.max(300,cur-50):Math.min(900,cur+50);
-        sug.push([`強隊實際勝率 ${pct1(fA)} ${fA>fP?'高':'低'}於推估 ${pct1(fP)}（模型${fA>fP?'偏保守':'過度自信'}）`,
-          `把「實力差敏感度（分母）」由 ${cur} 調為 <b>${nv}</b>（${fA>fP?'更陡、強隊機率提高':'更平、降低過度自信'}）`,'eloScale',nv]);
+      // ③ 期望總進球：Poisson 率參數的最大概似估計＝樣本平均（閉式解）
+      if(Math.abs(cal.bTG-S.settings.totalGoals)>=0.05&&Math.abs(zTot)>=1.96){
+        sug.push([`實際場均總進球 ${aT.toFixed(2)} ${aT>pT?'高':'低'}於推估 ${pT.toFixed(2)}（z=${zTot.toFixed(1)}）`,
+          `<b>理論</b>：Poisson 進球模型（Maher 1982）率參數 λ 的<b>最大概似估計＝樣本平均</b>；按實際/推估比例縮放使模型期望總進球等於觀測值。<br><b>建議</b>：單場平均總進球 ${S.settings.totalGoals} → <b>${cal.bTG}</b>`,'totalGoals',cal.bTG]);
       }
     }
-    h+=`<div class="card"><h2>🔧 修正因子建議</h2>`;
-    if(!enough) h+=`<div class="hint">已驗 ${G.n} 場（<16）。樣本太小時單場爆冷會主導統計，暫不給數值建議——等更多比賽完成後，這裡會自動出現可一鍵套用的調整。</div>`;
-    else if(!sug.length) h+=`<div class="hint">✅ 目前推估與實際大致吻合（總進球、平手率、強隊勝率皆在合理誤差內），暫無需要修正的系統性偏差。</div>`;
+    h+=`<div class="card"><h2>🔧 修正因子建議（統計校準）</h2>
+      <div class="hint" style="margin-bottom:8px">每項建議都以標準統計方法從已完成比賽推導，<b>非拍腦袋</b>：①實力差敏感度＝logistic 尺度的<b>最大概似估計</b>（對數損失最小化 / Platt 重校）②平手係數＝<b>Dixon–Coles</b> 對角修正校準到實際平手率 ③總進球＝<b>Poisson 率的 MLE</b>（樣本平均）。並僅在偏差<b>超過抽樣誤差（|z|≥1.96，95%）</b>時才建議，以免擬合雜訊。</div>`;
+    if(!enough) h+=`<div class="hint">已驗 ${G.n} 場（<16）。樣本太小時估計量方差過大、抽樣誤差主導，暫不給數值建議——依大數法則，比賽越多校準越穩定。</div>`;
+    else if(!sug.length) h+=`<div class="hint">✅ 目前各項推估與實際的偏差<b>都在 95% 抽樣誤差內（|z|<1.96）</b>，屬隨機波動而非系統性偏差，暫無需修正。（總進球 z=${zTot.toFixed(1)}、平手率 z=${zDraw.toFixed(1)}、強隊勝率 z=${zFav.toFixed(1)}）</div>`;
     else{
       sug.forEach(s=>{ h+=`<div class="fix"><div><b>${s[0]}</b><br><span class="hint">${s[1]}</span></div>
         <button class="btn sec" onclick="applyFix('${s[2]}',${s[3]})">套用</button></div>`; });
-      h+=`<div class="hint" style="margin-top:8px">建議由資料驅動、屬經驗法則（非嚴謹最佳化）；套用後可回來看命中率有無改善，或到「⚙️ 設定」微調／還原。</div>`;
+      h+=`<div class="hint" style="margin-top:8px">校準值為<b>樣本內</b>最大概似估計（描述性），非未來保證；套用後可回來看命中率／對數損失有無改善，或到「⚙️ 設定」微調／還原。</div>`;
     }
     h+=`</div>`;
   }
@@ -2213,7 +2248,7 @@ document.getElementById('modal').addEventListener('click',e=>{ if(e.target.id===
 /* ---------- 備份匯出／匯入（使用者個人編輯的可攜資料檔）---------- */
 function exportBackup(){
   try{
-    const payload=Object.assign({_app:'wc2026_predictor',_ver:'v4.5.1',_exported:new Date().toISOString()},S);
+    const payload=Object.assign({_app:'wc2026_predictor',_ver:'v4.5.2',_exported:new Date().toISOString()},S);
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
