@@ -2,7 +2,7 @@
    策略：同源 App 殼層用 stale-while-revalidate（離線可用、回連時自動更新）；
    跨源請求（ESPN 比分／新聞、openfootball、Open-Meteo、翻譯、Google 字型）一律放行給瀏覽器，
    不攔截、不快取，確保即時資料永遠是最新。 */
-const CACHE = 'wc2026-v4.5.2';
+const CACHE='wc2026-v4.5.3';
 const SHELL = [
   './',
   './index.html',
@@ -19,7 +19,7 @@ self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE)
       .then(c => Promise.allSettled(SHELL.map(u => c.add(u)))) // 個別加入：單檔失敗不拖垮整體
-      .then(() => self.skipWaiting())
+      
   );
 });
 
@@ -52,3 +52,4 @@ self.addEventListener('fetch', e => {
 
 // 允許頁面要求立即套用新版 SW
 self.addEventListener('message', e => { if (e.data === 'skipWaiting') self.skipWaiting(); });
+self.addEventListener('message',e=>{if(e.data==='SKIP_WAITING'||e.data==='skipWaiting'||(e.data&&e.data.type==='SKIP_WAITING'))self.skipWaiting()});

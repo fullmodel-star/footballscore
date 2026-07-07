@@ -2293,5 +2293,36 @@ if('serviceWorker' in navigator){
   });
 }
 </script>
+<!-- 版本更新提示（家族共用模組 fam-update v1）-->
+<script>
+(function(){
+  if(!('serviceWorker' in navigator)||window.__famUpd)return; window.__famUpd=1;
+  var reg=null, shown=false, refreshing=false, watched=false;
+  function mkBanner(){
+    if(document.getElementById('famUpdateBanner'))return;
+    var b=document.createElement('div'); b.id='famUpdateBanner';
+    b.setAttribute('style','position:fixed;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:2147483000;max-width:520px;margin:0 auto;background:linear-gradient(135deg,#16a34a,#0d9488);color:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 8px 26px rgba(16,163,74,.45);display:flex;align-items:center;gap:10px;font:600 14px/1.4 system-ui,-apple-system,"Noto Sans TC","Microsoft JhengHei",sans-serif');
+    b.innerHTML='<div style="flex:1"><b>🎉 有新版本可用</b><br><span style="font-size:12.5px;font-weight:400;opacity:.95">點「立即更新」套用最新版</span></div><button id="famUpdGo" style="background:#fff;color:#0d9488;border:0;border-radius:10px;padding:8px 15px;font:800 13.5px system-ui,sans-serif;cursor:pointer">立即更新</button><button id="famUpdX" aria-label="close" style="background:rgba(255,255,255,.22);border:0;color:#fff;width:30px;height:30px;border-radius:8px;font-size:15px;cursor:pointer">✕</button>';
+    (document.body||document.documentElement).appendChild(b);
+    document.getElementById('famUpdX').onclick=function(){b.remove()};
+    document.getElementById('famUpdGo').onclick=function(){
+      var w=reg&&reg.waiting;
+      if(w){['SKIP_WAITING','skipWaiting',{type:'SKIP_WAITING'}].forEach(function(m){try{w.postMessage(m)}catch(e){}});b.remove();setTimeout(function(){if(!refreshing){refreshing=true;location.reload();}},1800);}
+      else location.reload();
+    };
+  }
+  function show(){if(shown)return;shown=true;mkBanner();}
+  function watch(r){
+    if(!r||watched)return; watched=true; reg=r;
+    if(r.waiting&&navigator.serviceWorker.controller)show();
+    r.addEventListener('updatefound',function(){var nw=r.installing;if(!nw)return;
+      nw.addEventListener('statechange',function(){if(nw.state==='installed'&&navigator.serviceWorker.controller)show();});});
+    try{setInterval(function(){r.update().catch(function(){});},30*60*1000);}catch(e){}
+  }
+  navigator.serviceWorker.getRegistration().then(watch).catch(function(){});
+  navigator.serviceWorker.ready.then(watch).catch(function(){});
+  navigator.serviceWorker.addEventListener('controllerchange',function(){if(refreshing)return;refreshing=true;location.reload();});
+})();
+</script>
 </body>
 </html>
