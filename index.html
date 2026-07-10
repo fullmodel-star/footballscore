@@ -276,7 +276,7 @@ table.sim td.mk{color:var(--blue)}
 </head>
 <body>
 <header>
-  <h1>⚽ 2026 世界盃推估器<small>美加墨 48 強 · 八強聚焦版 v4.6.1</small></h1>
+  <h1>⚽ 2026 世界盃推估器<small>美加墨 48 強 · 八強聚焦版 v4.6.2</small></h1>
   <button class="gear" onclick="openSettings()">⚙️ 設定</button>
 </header>
 <main id="main"></main>
@@ -911,7 +911,8 @@ function allMatchesUnified(){
   return out;
 }
 function nearRow(x){
-  const wd=WDzh[mdToDate(x.md).getDay()];
+  const md=x._tw||x.md; // 台灣日期優先
+  const wd=WDzh[mdToDate(md).getDay()];
   const tw=x.kick?(zoneStr(x.kick,'Asia/Taipei',0).split(' ')[1]||''):'';
   const isToday=x._d===0;
   const tag=x.kind==='ko'
@@ -922,7 +923,7 @@ function nearRow(x){
   else if(x.kind==='ko'&&x.winner!=null) right=`<span class="ns">✓ ${TEAMS[x.winner][1]}</span>`;
   else right=`<span class="ns pred">${x.kind==='ko'&&x.pa!=null?Math.round(Math.max(x.pa,1-x.pa)*100)+'%':'預測'}</span>`;
   return `<div class="nr ${isToday?'today':''}" onclick="S.pA=${x.a};S.pB=${x.b};S.pV='${x.vi}';save();goTab('pred')">
-    <div class="nd"><b>${x.md}</b>${wd?'週'+wd:''}${tw?'<br>'+tw:''}</div>
+    <div class="nd"><b>${md}</b>${wd?'週'+wd:''}${tw?'<br>'+tw:''}</div>
     <div class="nt">${tag}${TEAMS[x.a][5]} ${TEAMS[x.a][1]} <span style="color:var(--sub)">vs</span> ${TEAMS[x.b][5]} ${TEAMS[x.b][1]}</div>
     ${right}
   </div>`;
@@ -930,7 +931,7 @@ function nearRow(x){
 function nearCard(){
   const all=allMatchesUnified().filter(x=>x.md);
   if(!all.length)return '';
-  all.forEach(x=>x._d=dayDelta(x.md));
+  all.forEach(x=>{ x._tw=x.kick?zoneStr(x.kick,'Asia/Taipei',0).split(' ')[0]:x.md; x._d=dayDelta(x._tw); }); // 台灣日期優先，今日判定也一致
   let win=all.filter(x=>x._d>=-2&&x._d<=3);
   if(win.length<3){ win=all.slice().sort((a,b)=>Math.abs(a._d)-Math.abs(b._d)).slice(0,6); }
   win.sort((a,b)=>a._d-b._d||((a.kick||'9')<(b.kick||'9')?-1:1));
@@ -1926,7 +1927,10 @@ function resetBracket(){ brOverride={}; render(); }
 function koMatchCard(ms,r,i){
   const a=ms.a,b=ms.b,inf=KO_INFO[ms.m]||['',0],v=VENUES[inf[1]];
   const alt=v[4]>=1400?' ⛰':'', roof=v[5]?' 🏟':'';
-  const today=dayDelta(inf[0])===0, sc=S.koScore[ms.m], played=!!(sc&&!isNaN(sc[0])&&!isNaN(sc[1]));
+  const kick=S.koKick[ms.m];
+  const twWhen=kick?('🇹🇼 '+zoneStr(kick,'Asia/Taipei',1)):inf[0]; // 有開球時間→台灣日期(週X 時:分)，否則官方日期
+  const twMD=kick?(zoneStr(kick,'Asia/Taipei',0).split(' ')[0]):inf[0];
+  const today=dayDelta(twMD)===0, sc=S.koScore[ms.m], played=!!(sc&&!isNaN(sc[0])&&!isNaN(sc[1]));
   const clickable=!ms.locked; // 官方賽果鎖定不可改；未鎖定可點隊指定晉級
   const status=played?(sc[0]===sc[1]?('PK '+TEAMS[ms.winner][1]+' 晉'):'官方賽果'):(ms.locked?'官方對陣':(today?'🔴 今日開踢':'推估對陣'));
   const teamRow=(t,prob,scv)=>{
@@ -1936,7 +1940,7 @@ function koMatchCard(ms,r,i){
       ${played?`<b class="knum">${scv}</b>`:`<span class="kprob">${Math.round(prob*100)}%</span>`}${isWin?'<span class="kchk">✓</span>':''}</div>`;
   };
   return `<div class="kmatch${today?' today':''}">
-    <div class="kmeta"><span>${ms.fixed?'🔒 ':''}M${ms.m} · ${inf[0]} · 📍${v[0]}${alt}${roof}</span><span class="kstat">${status}</span></div>
+    <div class="kmeta"><span>${ms.fixed?'🔒 ':''}M${ms.m} · ${twWhen} · 📍${v[0]}${alt}${roof}</span><span class="kstat">${status}</span></div>
     ${teamRow(a,ms.pa,sc?sc[0]:0)}
     ${teamRow(b,1-ms.pa,sc?sc[1]:0)}
     ${played?'':`<div class="kbar"><i style="flex:${ms.pa}"></i><i style="flex:${1-ms.pa}"></i></div>`}
@@ -2189,7 +2193,7 @@ document.getElementById('modal').addEventListener('click',e=>{ if(e.target.id===
 /* ---------- 備份匯出／匯入（使用者個人編輯的可攜資料檔）---------- */
 function exportBackup(){
   try{
-    const payload=Object.assign({_app:'wc2026_predictor',_ver:'v4.6.1',_exported:new Date().toISOString()},S);
+    const payload=Object.assign({_app:'wc2026_predictor',_ver:'v4.6.2',_exported:new Date().toISOString()},S);
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
