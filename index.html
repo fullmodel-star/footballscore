@@ -242,6 +242,27 @@ table.sim td.mk{color:var(--blue)}
 .match.today{border-color:var(--gold);box-shadow:var(--glow)}
 .koround{margin:14px 0 6px;color:var(--gold);font-weight:800;font-size:14px;letter-spacing:.5px}
 .koround small{color:var(--sub);font-weight:500;font-size:11px;margin-left:6px}
+/* 直式對陣卡 */
+.kmatch{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px;box-shadow:var(--shadow)}
+.kmatch.today{border-color:var(--gold);box-shadow:var(--glow)}
+.kmeta{display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;font-size:11px;color:var(--sub);margin-bottom:7px}
+.kmeta .kstat{font-weight:700;white-space:nowrap}
+.krow{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:10px;font-size:15px;font-weight:700;border:1.5px solid transparent}
+.krow+.krow{margin-top:5px}
+.krow .kteam{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.krow .kprob{color:var(--sub);font-variant-numeric:tabular-nums}
+.krow .knum{color:var(--txt);font-size:18px;font-variant-numeric:tabular-nums}
+.krow .kchk{color:var(--green);font-weight:800}
+.krow.win{background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.45)}
+.krow.win .kprob{color:var(--green)}
+.krow.lose{opacity:.6}
+.krow.pick{cursor:pointer}.krow.pick:active{background:rgba(59,130,246,.12)}
+.kbar{display:flex;height:5px;border-radius:3px;overflow:hidden;margin:8px 2px 6px}
+.kbar i:nth-child(1){background:var(--green)}.kbar i:nth-child(2){background:var(--blue)}
+.kuse{background:none;border:none;color:var(--blue);font-size:12px;cursor:pointer;padding:2px 0;font-family:inherit}
+.kchamp{background:linear-gradient(135deg,rgba(251,191,36,.18),rgba(251,191,36,.04));border:1.5px solid var(--gold);border-radius:16px;padding:14px 16px;margin-bottom:10px;text-align:center}
+.kchamp .kct{font-size:12px;color:var(--sub);font-weight:700}
+.kchamp .kcn{font-size:23px;font-weight:900;margin-top:3px}
 .bt-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:12px}
 .bt-row:last-child{border-bottom:none}
 .bt-row .ok{color:var(--green);font-weight:700}
@@ -255,7 +276,7 @@ table.sim td.mk{color:var(--blue)}
 </head>
 <body>
 <header>
-  <h1>⚽ 2026 世界盃推估器<small>美加墨 48 強 · 八強聚焦版 v4.6</small></h1>
+  <h1>⚽ 2026 世界盃推估器<small>美加墨 48 強 · 八強聚焦版 v4.6.1</small></h1>
   <button class="gear" onclick="openSettings()">⚙️ 設定</button>
 </header>
 <main id="main"></main>
@@ -752,7 +773,6 @@ function render(){
   else if(curTab==='news')m.innerHTML=viewNews();
   else if(curTab==='analysis')m.innerHTML=viewSim()+viewAcc()+viewModel();
   else m.innerHTML=viewKO();
-  if(curTab==='ko')setTimeout(applyBkFit,0);
   if(curTab==='sched')setTimeout(scrollToNearMatch,0);
 }
 function flagName(i){ return `<span class="flagn">${TEAMS[i][5]} ${TEAMS[i][1]}</span>`; }
@@ -1902,112 +1922,25 @@ function buildBracketRounds(){
 }
 function pickWin(r,i,t){ brOverride[r+'_'+i]=t; render(); }
 function resetBracket(){ brOverride={}; render(); }
-const BR_START=2; // 對陣圖起始輪：0=32強 1=16強 2=八強（賽事進到八強，只畫八強起）
-function bracketHtml(){
-  // 世界盃掛圖式：左半往右打、右半往左打、決賽置中；SVG 接線、冠軍路徑金色。僅畫 BR_START 起的輪次。
-  const rounds=buildBracketRounds();
-  const champ=rounds[4][0].winner;
-  const START=BR_START;
-  const BW=172,BH=54,GX=34,PITCH=72,PAD=4,TOP=48;
-  const RNAME=['32 強','16 強','8 強','4 強'];
-  const nSide=4-START;            // 每側輪數(不含決賽)：八強起 → 2（8強、4強）
-  const finalCol=nSide, ncol=2*nSide+1;
-  const base=8>>START;           // 每側基底槽數：八強起 → 2
-  const colX=c=>PAD+c*(BW+GX);
-  const yc={};
-  yc[START]=[]; for(let i=0;i<base;i++)yc[START][i]=TOP+i*PITCH+BH/2;
-  for(let r=START+1;r<4;r++){ yc[r]=[]; const cnt=8>>r; for(let i=0;i<cnt;i++)yc[r][i]=(yc[r-1][2*i]+yc[r-1][2*i+1])/2; }
-  yc[4]=[yc[3][0]];
-  const W=colX(ncol-1)+BW+PAD, H=TOP+base*PITCH+PAD;
-  // 佈局：每場 {m,r,i,li,left,x,y}（r/i 沿用真實輪次與索引，pickWin 才對得上）
-  const colOf=(r,left)=>left?(r-START):(ncol-1-(r-START));
-  const place=[];
-  for(let r=START;r<4;r++){ const per=8>>r; rounds[r].forEach((m,i)=>{
-    const left=i<per, li=i%per;
-    place.push({m,r,i,li,left,x:colX(colOf(r,left)),y:yc[r][li]});
-  }); }
-  place.push({m:rounds[4][0],r:4,i:0,li:0,left:true,x:colX(finalCol),y:yc[4][0]});
-  // SVG 接線（冠軍路徑金色高亮）
-  let paths='';
-  place.filter(p=>p.r<4).forEach(p=>{
-    let sx,tx,ty;
-    if(p.r===3){ ty=yc[4][0]; if(p.left){sx=p.x+BW;tx=colX(finalCol);}else{sx=p.x;tx=colX(finalCol)+BW;} }
-    else{ const ni=Math.floor(p.li/2); ty=yc[p.r+1][ni]; const nc=colOf(p.r+1,p.left);
-      if(p.left){sx=p.x+BW;tx=colX(nc);}else{sx=p.x;tx=colX(nc)+BW;} }
-    const mid=(sx+tx)/2, gold=p.m.winner===champ;
-    paths+=`<path d="M${sx} ${p.y} H${mid} V${ty} H${tx}" fill="none" stroke="${gold?'rgba(251,191,36,.8)':'#27395c'}" stroke-width="${gold?2:1.3}"/>`;
-  });
-  // 比賽框
-  let boxes='';
-  const mbox=p=>{
-    const m=p.m, inf=KO_INFO[m.m], scv=S.koScore[m.m];
-    const pcvOf=x=>m.locked?(scv?`${x===m.a?scv[0]:scv[1]}${m.winner===x?' ✓':''}`:(m.winner===x?'✓':'—')):Math.round((x===m.a?m.pa:1-m.pa)*100)+'%';
-    const row=x=>`<div class="bkt ${m.winner===x?'win':'lose'}" ${m.locked?'style="cursor:default"':`onclick="pickWin(${p.r},${p.i},${x})"`}>
-      <span>${TEAMS[x][5]} ${TEAMS[x][1]}</span><span class="pcv">${pcvOf(x)}</span></div>`;
-    const goldBox=p.r===4?'border-color:var(--gold);':'';
-    return `<div class="bkm" style="left:${p.x}px;top:${p.y-BH/2}px;width:${BW}px;${goldBox}">
-      <div class="bkh">${m.fixed?'🔒':''}M${m.m}｜${inf[0]} ${VENUES[inf[1]][0]}${VENUES[inf[1]][4]>=1400?'⛰':''}</div>${row(m.a)}${row(m.b)}</div>`;
-  };
-  place.forEach(p=>{ boxes+=mbox(p); });
-  // 冠軍橫幅（決賽框正上方）
-  boxes+=`<div class="bkchamp" style="left:${colX(finalCol)}px;top:${yc[4][0]-BH/2-72}px;width:${BW}px">
-    <div class="t">🏆</div><div class="n">${TEAMS[champ][5]} ${TEAMS[champ][1]}</div></div>`;
-  // 欄位標題（依起始輪動態產生）
-  let labels='';
-  for(let c=0;c<ncol;c++){
-    const t=(c===finalCol)?'🏆 決賽':RNAME[START+(c<finalCol?c:ncol-1-c)];
-    labels+=`<div class="bklab" style="left:${colX(c)}px;top:2px;width:${BW}px">${t}</div>`;
-  }
-  return `<div class="bk-wrap"><div class="bk" data-w="${W}" data-h="${H}" style="width:${W}px;height:${H}px">
-    <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${paths}</svg>${labels}${boxes}</div></div>`;
-}
-let bkZoom = 1.0;
-function applyBkFit(){ // 縮放至全寬（一頁看完整棵樹）或指定縮放比例
-  const wrap=document.querySelector('.bk-wrap'), bk=document.querySelector('.bk');
-  if(!wrap||!bk)return;
-  const W=parseFloat(bk.dataset.w), H=parseFloat(bk.dataset.h);
-  if(bkFit){
-    const sc=Math.min(1,(wrap.clientWidth-4)/W);
-    bk.style.transform=`scale(${sc})`; bk.style.transformOrigin='0 0';
-    wrap.style.height=(H*sc+6)+'px'; wrap.style.overflow='hidden';
-    bkZoom = sc;
-  }else{
-    bk.style.transform=`scale(${bkZoom})`; bk.style.transformOrigin='0 0';
-    wrap.style.height=(H*bkZoom+6)+'px'; wrap.style.overflow='auto';
-  }
-}
-function zoomBracket(delta) {
-  bkFit = false;
-  bkZoom = Math.max(0.3, Math.min(2.0, bkZoom + delta));
-  render();
-}
-function fitBracket() {
-  bkFit = true;
-  render();
-}
-
 /* ---------- 淘汰賽（獨立分頁：近期＋對陣圖＋逐場推估）---------- */
-function koMatchCard(ms){
+function koMatchCard(ms,r,i){
   const a=ms.a,b=ms.b,inf=KO_INFO[ms.m]||['',0],v=VENUES[inf[1]];
-  const vtags=(v[4]>=1400?`<span class="vtag">⛰${v[4]}m</span>`:'')+(v[5]?`<span class="vtag roof">🏟室內</span>`:'');
-  const pa=ms.pa, today=dayDelta(inf[0])===0, sc=S.koScore[ms.m], kick=S.koKick[ms.m];
-  let center;
-  if(sc){
-    const pk=(sc[0]===sc[1]&&ms.winner!=null)?`<div style="font-size:10px;color:var(--sub)">PK ${TEAMS[ms.winner][1]}</div>`:'';
-    center=`<div style="display:flex;flex-direction:column;align-items:center;gap:1px"><span style="font-size:17px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums">${sc[0]} : ${sc[1]}</span>${pk}</div>`;
-  }else if(ms.locked) center=`<span style="color:var(--green);font-weight:800;white-space:nowrap">✓ ${TEAMS[ms.winner][5]}</span>`;
-  else center=`<span style="color:var(--sub);font-size:11px">預測</span>`;
-  return `<div class="match${today?' today':''}">
-    <div class="top"><span>${ms.fixed?'🔒 ':''}M${ms.m}｜${inf[0]}</span><span>📍 ${v[0]} ${vtags}</span></div>
-    ${kick?tzRow(kick):''}
-    <div class="mid">
-      <div class="tA">${flagName(a)}</div>
-      <div class="sc" style="justify-content:center">${center}</div>
-      <div class="tB">${flagName(b)}</div>
-    </div>
-    <div class="minibar"><div style="flex:${pa}"></div><div style="flex:0"></div><div style="flex:${1-pa}"></div></div>
-    <div class="pr"><span>${ms.locked&&ms.winner===a?'晉級 ✓':'晉級 '+pct(pa)}</span><span>${ms.locked?'官方賽果':'PK 混合'}</span><span>${ms.locked&&ms.winner===b?'晉級 ✓':'晉級 '+pct(1-pa)}</span></div>
-    <button class="use" onclick="S.pA=${a};S.pB=${b};S.pV='${inf[1]}';save();goTab('pred')">→ 帶入對戰預測（看完整拆解／比分／PK）</button>
+  const alt=v[4]>=1400?' ⛰':'', roof=v[5]?' 🏟':'';
+  const today=dayDelta(inf[0])===0, sc=S.koScore[ms.m], played=!!(sc&&!isNaN(sc[0])&&!isNaN(sc[1]));
+  const clickable=!ms.locked; // 官方賽果鎖定不可改；未鎖定可點隊指定晉級
+  const status=played?(sc[0]===sc[1]?('PK '+TEAMS[ms.winner][1]+' 晉'):'官方賽果'):(ms.locked?'官方對陣':(today?'🔴 今日開踢':'推估對陣'));
+  const teamRow=(t,prob,scv)=>{
+    const isWin=ms.winner===t;
+    return `<div class="krow ${isWin?'win':'lose'}${clickable?' pick':''}" ${clickable?`onclick="pickWin(${r},${i},${t})"`:''}>
+      <span class="kteam">${TEAMS[t][5]} ${TEAMS[t][1]}</span>
+      ${played?`<b class="knum">${scv}</b>`:`<span class="kprob">${Math.round(prob*100)}%</span>`}${isWin?'<span class="kchk">✓</span>':''}</div>`;
+  };
+  return `<div class="kmatch${today?' today':''}">
+    <div class="kmeta"><span>${ms.fixed?'🔒 ':''}M${ms.m} · ${inf[0]} · 📍${v[0]}${alt}${roof}</span><span class="kstat">${status}</span></div>
+    ${teamRow(a,ms.pa,sc?sc[0]:0)}
+    ${teamRow(b,1-ms.pa,sc?sc[1]:0)}
+    ${played?'':`<div class="kbar"><i style="flex:${ms.pa}"></i><i style="flex:${1-ms.pa}"></i></div>`}
+    <button class="kuse" onclick="S.pA=${a};S.pB=${b};S.pV='${inf[1]}';save();goTab('pred')">看完整拆解／比分／PK →</button>
   </div>`;
 }
 function viewKO(){
@@ -2015,23 +1948,18 @@ function viewKO(){
     <button class="btn" onclick="updateScores(this)">🔄 一鍵更新對陣／比分</button>
     <span class="hint">需網路。小組賽全部完賽後，自動抓官方 32 強對陣與淘汰賽賽果逐場鎖定（🔒＝官方對陣、✓＝官方賽果）。</span></div>`;
   h+=nearCard();
-  h+=`<div class="card"><h2>🗂 對陣圖（八強起・點隊伍指定晉級）</h2>
-    <div class="hint" style="margin-bottom:8px">賽事已進八強，本圖<b>從八強起顯示</b>（先前 32／16 強見上方逐場推估的「歷史」收合）。採 <b>FIFA 官方對陣樹</b>，每隊旁 % 為該場晉級機率（含 PK 混合）；機率高者預設前進，<b>點任一隊可改派它晉級</b>，後面立即重排。🔒＝官方對陣、✓＝官方賽果（鎖定不可點）。</div>
-    <div class="row" style="margin-bottom:8px; gap:8px">
-      <button class="btn sec ${bkFit?'on':''}" onclick="fitBracket()">🗜 一頁全覽 (Fit)</button>
-      <button class="btn sec" onclick="zoomBracket(0.1)">➕ 放大</button>
-      <button class="btn sec" onclick="zoomBracket(-0.1)">➖ 縮小</button>
-      <span style="font-size:12px; color:var(--sub); align-self:center;">縮放: ${(bkZoom * 100).toFixed(0)}%</span>
-      ${Object.keys(brOverride).length?`<button class="btn sec" onclick="resetBracket()">↺ 清除手動指定（${Object.keys(brOverride).length}）</button>`:''}
-    </div>
-    ${bracketHtml()}</div>`;
   const rounds=buildBracketRounds();
+  const champ=rounds[4][0].winner;
   const RL=[['32 強','R32 · 6/28–7/3'],['16 強','R16 · 7/4–7/7'],['8 強','QF · 7/9–7/11'],['4 強','SF · 7/14–7/15'],['🏆 決賽','Final · 7/19']];
-  h+=`<div class="card"><h2>📋 淘汰賽逐場推估</h2>
-    <div class="hint" style="margin-bottom:6px">每輪逐場列出對陣、官方日期/場館、晉級機率（含主場・高原・僑民・PK）。今日場次以金框標示；尚未鎖定者為依目前實力的推估對陣。</div>`;
+  // 冠軍橫幅（最可能路徑；奪冠率請看模擬）
+  h+=`<div class="kchamp"><div class="kct">🏆 推估冠軍（最可能路徑）</div>
+    <div class="kcn">${TEAMS[champ][5]} ${TEAMS[champ][1]}</div>
+    <div class="hint" style="margin-top:4px">＝每場選機率高者一路推到底的單一劇本。想看「綜合奪冠率」請到 <b>📊 分析</b> 的模擬。</div></div>`;
+  h+=`<div class="card"><h2>🗂 對陣圖（八強起）</h2>
+    <div class="hint" style="margin-bottom:6px">八強 → 四強 → 決賽逐輪列出，每隊右側為晉級機率（含主場・高原・PK）。<b>點任一隊可改派它晉級</b>，後面立即重排；綠底＝晉級者、🔒官方對陣、✓官方賽果。已完賽輪次自動收合。${Object.keys(brOverride).length?` <a onclick="resetBracket()" style="color:var(--blue);cursor:pointer;font-weight:700">↺ 清除手動指定（${Object.keys(brOverride).length}）</a>`:''}</div>`;
   rounds.forEach((rd,ri)=>{
     const done=rd.length&&rd.every(ms=>ms.locked);
-    const body=rd.map(ms=>koMatchCard(ms)).join('');
+    const body=rd.map((ms,i)=>koMatchCard(ms,ri,i)).join('');
     if(done){
       h+=`<details style="margin-top:8px"><summary style="cursor:pointer;color:var(--sub);font-weight:700;padding:8px 0">▸ ${RL[ri][0]}　<small style="font-weight:400">${RL[ri][1]}・已完賽，點開看歷史</small></summary>${body}</details>`;
     }else{
@@ -2261,7 +2189,7 @@ document.getElementById('modal').addEventListener('click',e=>{ if(e.target.id===
 /* ---------- 備份匯出／匯入（使用者個人編輯的可攜資料檔）---------- */
 function exportBackup(){
   try{
-    const payload=Object.assign({_app:'wc2026_predictor',_ver:'v4.6',_exported:new Date().toISOString()},S);
+    const payload=Object.assign({_app:'wc2026_predictor',_ver:'v4.6.1',_exported:new Date().toISOString()},S);
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
