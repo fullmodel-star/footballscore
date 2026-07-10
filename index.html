@@ -255,7 +255,7 @@ table.sim td.mk{color:var(--blue)}
 </head>
 <body>
 <header>
-  <h1>⚽ 2026 世界盃推估器<small>美加墨 48 強 · v4.5.2</small></h1>
+  <h1>⚽ 2026 世界盃推估器<small>美加墨 48 強 · 八強聚焦版 v4.6</small></h1>
   <button class="gear" onclick="openSettings()">⚙️ 設定</button>
 </header>
 <main id="main"></main>
@@ -564,9 +564,11 @@ function defaultState(){
     koFix:{},               // 場次編號 -> [隊A,隊B] 官方對陣（更新比分時自動抓）
     koRes:{},               // 場次編號 -> 勝者隊idx（官方賽果）
     koScore:{},             // 場次編號 -> [進球A,進球B]（對齊 koFix 順序，ESPN 抓取）
-    koKick:{}               // 場次編號 -> 開賽 UTC ISO（顯示台/美東/歐時區）
+    koKick:{},              // 場次編號 -> 開賽 UTC ISO（顯示台/美東/歐時區）
+    newsFixV:NEWS_FIX_V     // 內建新聞內容修正版本（見 load() 一次性遷移）
   };
 }
+const NEWS_FIX_V=46; // 每次修正內建新聞內容就+1，讓既有使用者的舊存檔自動刷新（保留開關與自訂）
 // 一筆賽果只有「兩格都是有效數字」才算數；半填(NaN)經 JSON.stringify 會變 null，必須擋掉避免被誤判為 0:0 幻影賽果
 function validRes(r){ return Array.isArray(r) && typeof r[0]==='number' && !isNaN(r[0]) && typeof r[1]==='number' && !isNaN(r[1]); }
 function load(){
@@ -578,6 +580,11 @@ function load(){
       for(const k in S.results){ if(!validRes(S.results[k])) delete S.results[k]; } // 清掉半填/損壞(含舊版寫入的 [x,null])的賽果，避免幻影賽果污染積分榜與模擬
       if(!Array.isArray(S.news))S.news=defaultState().news;
       else S.news=S.news.filter(n=>n&&typeof n.t==='number'&&n.t>=0&&n.t<TEAMS.length); // 丟掉隊伍索引越界的新聞，避免新聞頁渲染崩潰
+      if((S.newsFixV||0)<NEWS_FIX_V){ // 一次性遷移：把內建新聞(非自訂)刷新為最新查證修正版，保留使用者的 on 開關與自訂新聞
+        const def={}; DEF_NEWS.forEach((n,i)=>def['d'+i]={t:n[0],title:n[1],detail:n[2],delta:n[3]});
+        S.news=S.news.map(n=>(n&&n.custom===false&&def[n.id])?{...n,...def[n.id]}:n);
+        S.newsFixV=NEWS_FIX_V; save(); // 持久化遷移結果，避免每次載入重跑
+      }
       if(S.pV===undefined)S.pV='auto';
       if(!Array.isArray(S.seenNews))S.seenNews=[];
       if(!Array.isArray(S.pending))S.pending=[];
@@ -728,8 +735,8 @@ function predict(eA,eB,sA,sB,opts){
 function samplePois(l){ const L=Math.exp(-l); let k=0,p=1; do{k++;p*=Math.random();}while(p>L); return k-1; }
 
 /* ================= 主畫面 ================= */
-const TABS=[["pred","⚔️","對戰"],["sched","📅","小組"],["ko","🏆","淘汰"],["teams","👥","球隊"],["news","📰","新聞"],["sim","🎲","模擬"],["acc","🎯","差異"],["model","📊","說明"]];
-let curTab='pred', gFilter='全部', openTeam=-1, simResult=null, pendingNews=[], lineupCache={}, bkFit=true;
+const TABS=[["ko","🏆","八強"],["pred","⚔️","對戰"],["teams","👥","球隊"],["news","📰","新聞"],["analysis","📊","分析"],["sched","📅","歷史"]];
+let curTab='ko', gFilter='全部', openTeam=-1, simResult=null, pendingNews=[], lineupCache={}, bkFit=true;
 function renderTabs(){
   document.getElementById('tabs').innerHTML=TABS.map(t=>
     `<button class="${curTab===t[0]?'on':''}" onclick="goTab('${t[0]}')">${t[0]==='news'&&pendingNews.length?`<span class="bdg">${pendingNews.length}</span>`:''}<span class="ico">${t[1]}</span>${t[2]}</button>`).join('');
@@ -743,9 +750,8 @@ function render(){
   else if(curTab==='ko')m.innerHTML=viewKO();
   else if(curTab==='teams')m.innerHTML=viewTeams();
   else if(curTab==='news')m.innerHTML=viewNews();
-  else if(curTab==='acc')m.innerHTML=viewAcc();
-  else if(curTab==='model')m.innerHTML=viewModel();
-  else m.innerHTML=viewSim();
+  else if(curTab==='analysis')m.innerHTML=viewSim()+viewAcc()+viewModel();
+  else m.innerHTML=viewKO();
   if(curTab==='ko')setTimeout(applyBkFit,0);
   if(curTab==='sched')setTimeout(scrollToNearMatch,0);
 }
@@ -844,11 +850,9 @@ function viewPred(){
     <div style="overflow-x:auto;margin-top:10px">${mtx}</div>
     <div class="hint" style="margin-top:6px">綠＝左隊勝、灰＝平手、藍＝右隊勝（各比分機率 %，僅列 0~5 球）</div>
   </div>
-  <div class="card"><h2>📖 模型說明</h2><div class="hint">
-    有效 Elo ＝ 基準 Elo（eloratings.net）± 手動 ± 球員狀態（缺陣 −權重×${S.settings.perWeight}、低迷帶傷 −50%、巔峰 +25%）± 新聞 ± 特質（韌性/團結 ±2.5/級、中場 ±3/級，總上限 ±15）± 年齡結構 ± <b>市場身價</b>（全隊身價對數對齊 Elo 後混入 ${Math.round((S.settings.mvWeight||0)*100)}%，學界最強單一變數）± <b>賽中動態</b>（每場真實比分以 K=${S.settings.kFactor} 依「實際−預期」調整，爆冷即時反映）± 主場（主辦國 +${S.settings.homeAdv}）± 高原（海拔1200m+ 每千米約 ${S.settings.altSlope}，Azteca≈−${Math.round((S.settings.altSlope||43)*1.04)}；墨/厄/哥免疫）± <b>僑民主場</b>（拉美隊在美國場館，墨西哥≈+${S.settings.diasporaAdv}、按各隊權重）± 休息差。奪冠模擬另以 σ=${S.settings.simNoise} 隨機擾動各隊狀態（538 式，防過度自信）。<br>
-    再經 Elo 期望值 → 期望進球（總進球 ${S.settings.totalGoals}）→ Poisson 比分分布，平手機率乘 ${S.settings.drawBoost} 倍修正（Dixon-Coles 式；獨立 Poisson 會低估平局，如加拿大 1-1 波士尼亞一役）。淘汰賽平手時用「Elo 勝率 × PK 大戰史」混合判定。<br>
-    特質與年齡是「Elo 看不到的結構性因子」，預設值可在「球隊球員」自行調整。同一傷情別同時記在球員狀態和新聞，避免重複扣分。
-  </div></div>`;
+  <div class="card hint">📖 模型細節（有效 Elo 的十多項因子怎麼算）已整併到 <b style="color:var(--gold)">📊 分析</b> 分頁，避免重複。
+    <div class="row" style="margin-top:8px"><button class="btn sec" onclick="goTab('analysis')">📊 看完整模型說明＋模擬＋差異</button></div>
+  </div>`;
 }
 
 /* ---------- 賽程 ---------- */
@@ -929,7 +933,7 @@ function viewSched(){
   let h=`<div class="card" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
     <button class="btn" onclick="updateScores(this)">🔄 一鍵更新比分</button>
     <span class="hint">需網路。從 openfootball／TheSportsDB 抓最新戰績自動填入（也可手動輸入）。</span></div>`;
-  if(gFilter==='全部') h+=nearCard();
+  if(gFilter==='全部') h+='<div class="card hint">📅 本頁為<b>小組賽歷史紀錄</b>與最終積分。淘汰賽對陣、近期賽事與逐場推估請看「🏆 八強」分頁。</div>';
   h+=`<div class="gfilter">${gs.map(g=>`<button class="${gFilter===g?'on':''}" onclick="gFilter='${g}';render()">${g==='全部'?'全部':g+'組'}</button>`).join('')}</div>`;
   if(gFilter!=='全部') h+=standingsCard(gFilter);
   MATCHES.forEach((m,idx)=>{
@@ -1771,10 +1775,6 @@ function viewModel(){
   const mvPct=Math.round((s.mvWeight||0)*100);
   const mf=(name,form,src)=>`<div class="mf"><b>${name}</b><div class="form">${form}</div><div class="src">${src}</div></div>`;
   return `
-  <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-    <div class="hint" style="flex:1;min-width:180px">想看「推估 vs 實際」的命中率與差異分析？已移到專屬的 <b style="color:var(--gold)">🎯 差異</b> 分頁。</div>
-    <button class="btn sec" onclick="goTab('acc')">🎯 前往差異分析</button>
-  </div>
   <div class="card"><h2>📊 這個推估器怎麼運作</h2>
     <div class="hint" style="margin-bottom:10px">核心是「<b>Elo 實力評分</b>」：先把每隊的長期實力（Elo），用十多項因子修正成「<b>有效 Elo</b>」，再把兩隊的 Elo 差距換算成勝/平/負機率與比分；整屆冠軍則用蒙地卡羅模擬幾千次。全程透明、每個數字都可在設定調整。</div>
     <div class="flow">
@@ -1902,32 +1902,38 @@ function buildBracketRounds(){
 }
 function pickWin(r,i,t){ brOverride[r+'_'+i]=t; render(); }
 function resetBracket(){ brOverride={}; render(); }
+const BR_START=2; // 對陣圖起始輪：0=32強 1=16強 2=八強（賽事進到八強，只畫八強起）
 function bracketHtml(){
-  // 世界盃掛圖式：左半往右打、右半往左打、決賽置中；SVG 接線、冠軍路徑金色
+  // 世界盃掛圖式：左半往右打、右半往左打、決賽置中；SVG 接線、冠軍路徑金色。僅畫 BR_START 起的輪次。
   const rounds=buildBracketRounds();
   const champ=rounds[4][0].winner;
-  const BW=172,BH=54,GX=30,PITCH=66,PAD=4,TOP=26;
+  const START=BR_START;
+  const BW=172,BH=54,GX=34,PITCH=72,PAD=4,TOP=48;
+  const RNAME=['32 強','16 強','8 強','4 強'];
+  const nSide=4-START;            // 每側輪數(不含決賽)：八強起 → 2（8強、4強）
+  const finalCol=nSide, ncol=2*nSide+1;
+  const base=8>>START;           // 每側基底槽數：八強起 → 2
   const colX=c=>PAD+c*(BW+GX);
-  const HALF=[8,4,2,1];
-  const yc=[[],[],[],[],[]];
-  for(let i=0;i<8;i++)yc[0][i]=TOP+i*PITCH+BH/2;
-  for(let r=1;r<4;r++)for(let i=0;i<HALF[r];i++)yc[r][i]=(yc[r-1][2*i]+yc[r-1][2*i+1])/2;
-  yc[4][0]=yc[3][0];
-  const W=colX(8)+BW+PAD, H=TOP+8*PITCH+PAD;
-  // 佈局：每場 {m,r,i,x,y,left}
+  const yc={};
+  yc[START]=[]; for(let i=0;i<base;i++)yc[START][i]=TOP+i*PITCH+BH/2;
+  for(let r=START+1;r<4;r++){ yc[r]=[]; const cnt=8>>r; for(let i=0;i<cnt;i++)yc[r][i]=(yc[r-1][2*i]+yc[r-1][2*i+1])/2; }
+  yc[4]=[yc[3][0]];
+  const W=colX(ncol-1)+BW+PAD, H=TOP+base*PITCH+PAD;
+  // 佈局：每場 {m,r,i,li,left,x,y}（r/i 沿用真實輪次與索引，pickWin 才對得上）
+  const colOf=(r,left)=>left?(r-START):(ncol-1-(r-START));
   const place=[];
-  for(let r=0;r<4;r++)rounds[r].forEach((m,i)=>{
-    const left=i<HALF[r], li=i%HALF[r];
-    place.push({m,r,i,li,left,x:left?colX(r):colX(8-r),y:yc[r][li]});
-  });
-  place.push({m:rounds[4][0],r:4,i:0,li:0,left:true,x:colX(4),y:yc[4][0]});
+  for(let r=START;r<4;r++){ const per=8>>r; rounds[r].forEach((m,i)=>{
+    const left=i<per, li=i%per;
+    place.push({m,r,i,li,left,x:colX(colOf(r,left)),y:yc[r][li]});
+  }); }
+  place.push({m:rounds[4][0],r:4,i:0,li:0,left:true,x:colX(finalCol),y:yc[4][0]});
   // SVG 接線（冠軍路徑金色高亮）
   let paths='';
   place.filter(p=>p.r<4).forEach(p=>{
     let sx,tx,ty;
-    if(p.r===3){ ty=yc[4][0]; if(p.left){sx=p.x+BW;tx=colX(4);}else{sx=p.x;tx=colX(4)+BW;} }
-    else{ const ni=Math.floor(p.li/2); ty=yc[p.r+1][ni];
-      if(p.left){sx=p.x+BW;tx=colX(p.r+1);}else{sx=p.x;tx=colX(7-p.r)+BW;} }
+    if(p.r===3){ ty=yc[4][0]; if(p.left){sx=p.x+BW;tx=colX(finalCol);}else{sx=p.x;tx=colX(finalCol)+BW;} }
+    else{ const ni=Math.floor(p.li/2); ty=yc[p.r+1][ni]; const nc=colOf(p.r+1,p.left);
+      if(p.left){sx=p.x+BW;tx=colX(nc);}else{sx=p.x;tx=colX(nc)+BW;} }
     const mid=(sx+tx)/2, gold=p.m.winner===champ;
     paths+=`<path d="M${sx} ${p.y} H${mid} V${ty} H${tx}" fill="none" stroke="${gold?'rgba(251,191,36,.8)':'#27395c'}" stroke-width="${gold?2:1.3}"/>`;
   });
@@ -1944,12 +1950,14 @@ function bracketHtml(){
   };
   place.forEach(p=>{ boxes+=mbox(p); });
   // 冠軍橫幅（決賽框正上方）
-  boxes+=`<div class="bkchamp" style="left:${colX(4)}px;top:${yc[4][0]-BH/2-72}px;width:${BW}px">
+  boxes+=`<div class="bkchamp" style="left:${colX(finalCol)}px;top:${yc[4][0]-BH/2-72}px;width:${BW}px">
     <div class="t">🏆</div><div class="n">${TEAMS[champ][5]} ${TEAMS[champ][1]}</div></div>`;
-  // 欄位標題
-  const LBL=['32 強','16 強','8 強','4 強','🏆 決賽','4 強','8 強','16 強','32 強'];
+  // 欄位標題（依起始輪動態產生）
   let labels='';
-  LBL.forEach((t,c)=>{ labels+=`<div class="bklab" style="left:${colX(c)}px;top:2px;width:${BW}px">${t}</div>`; });
+  for(let c=0;c<ncol;c++){
+    const t=(c===finalCol)?'🏆 決賽':RNAME[START+(c<finalCol?c:ncol-1-c)];
+    labels+=`<div class="bklab" style="left:${colX(c)}px;top:2px;width:${BW}px">${t}</div>`;
+  }
   return `<div class="bk-wrap"><div class="bk" data-w="${W}" data-h="${H}" style="width:${W}px;height:${H}px">
     <svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${paths}</svg>${labels}${boxes}</div></div>`;
 }
@@ -2007,8 +2015,8 @@ function viewKO(){
     <button class="btn" onclick="updateScores(this)">🔄 一鍵更新對陣／比分</button>
     <span class="hint">需網路。小組賽全部完賽後，自動抓官方 32 強對陣與淘汰賽賽果逐場鎖定（🔒＝官方對陣、✓＝官方賽果）。</span></div>`;
   h+=nearCard();
-  h+=`<div class="card"><h2>🗂 對陣圖（點隊伍指定晉級）</h2>
-    <div class="hint" style="margin-bottom:8px">採 <b>FIFA 官方對陣樹（M73–M104）</b>：各組名次依「已踢真實比分＋未踢期望積分」即時推估，按官方槽位排入（場次/日期/場館皆官方，⛰＝高原）。每隊旁 % 為該場晉級機率（含 PK 混合）；機率高者預設前進，<b>點任一隊可改派它晉級</b>，後面立即重排。🔒＝官方對陣、✓＝官方賽果（鎖定不可點）。</div>
+  h+=`<div class="card"><h2>🗂 對陣圖（八強起・點隊伍指定晉級）</h2>
+    <div class="hint" style="margin-bottom:8px">賽事已進八強，本圖<b>從八強起顯示</b>（先前 32／16 強見上方逐場推估的「歷史」收合）。採 <b>FIFA 官方對陣樹</b>，每隊旁 % 為該場晉級機率（含 PK 混合）；機率高者預設前進，<b>點任一隊可改派它晉級</b>，後面立即重排。🔒＝官方對陣、✓＝官方賽果（鎖定不可點）。</div>
     <div class="row" style="margin-bottom:8px; gap:8px">
       <button class="btn sec ${bkFit?'on':''}" onclick="fitBracket()">🗜 一頁全覽 (Fit)</button>
       <button class="btn sec" onclick="zoomBracket(0.1)">➕ 放大</button>
@@ -2022,8 +2030,13 @@ function viewKO(){
   h+=`<div class="card"><h2>📋 淘汰賽逐場推估</h2>
     <div class="hint" style="margin-bottom:6px">每輪逐場列出對陣、官方日期/場館、晉級機率（含主場・高原・僑民・PK）。今日場次以金框標示；尚未鎖定者為依目前實力的推估對陣。</div>`;
   rounds.forEach((rd,ri)=>{
-    h+=`<div class="koround">${RL[ri][0]}<small>${RL[ri][1]}</small></div>`;
-    rd.forEach(ms=>{ h+=koMatchCard(ms); });
+    const done=rd.length&&rd.every(ms=>ms.locked);
+    const body=rd.map(ms=>koMatchCard(ms)).join('');
+    if(done){
+      h+=`<details style="margin-top:8px"><summary style="cursor:pointer;color:var(--sub);font-weight:700;padding:8px 0">▸ ${RL[ri][0]}　<small style="font-weight:400">${RL[ri][1]}・已完賽，點開看歷史</small></summary>${body}</details>`;
+    }else{
+      h+=`<div class="koround">${RL[ri][0]}<small>${RL[ri][1]}</small></div>${body}`;
+    }
   });
   h+=`</div>`;
   return h;
@@ -2248,7 +2261,7 @@ document.getElementById('modal').addEventListener('click',e=>{ if(e.target.id===
 /* ---------- 備份匯出／匯入（使用者個人編輯的可攜資料檔）---------- */
 function exportBackup(){
   try{
-    const payload=Object.assign({_app:'wc2026_predictor',_ver:'v4.5.2',_exported:new Date().toISOString()},S);
+    const payload=Object.assign({_app:'wc2026_predictor',_ver:'v4.6',_exported:new Date().toISOString()},S);
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
