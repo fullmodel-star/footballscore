@@ -1,0 +1,100 @@
+/* ============================================================
+   稜線 UI · 共用地基  ridgeline-ui.css   v3
+   34 支 App 的共同底層。每支 <link> 這一份，最外層加一個 .theme-* 類別。
+   四個錨點（統一）：稜線標記 · 破曉金峰頂 · Noto 字體 · 頁尾簽名區塊。
+   一個變化：主題色（頭部底色＋主行動色），明暗兼具、12 選 1。
+   ============================================================ */
+
+:root{
+  /* 六色盤 */
+  --岩藍:#141E2B; --稜藍:#2C4459; --鋼藍:#6E8BA3;
+  --雪白:#EEF3F6; --破曉金:#DE9A45; --紙背:#F7F3EC;
+
+  /* 語意 token（淺色模式） */
+  --bg:var(--紙背); --surface:#FFFFFF; --ink:var(--岩藍);
+  --sub:var(--稜藍); --muted:var(--鋼藍); --line:#E4DDCE; --gold:var(--破曉金);
+
+  /* 主題色（預設 steel；由 .theme-* 覆蓋）
+     --hdr 頭部底色 · --on 頭部文字與標記色 · --accent 主行動 · --tint chip 淡底 */
+  --hdr:#4E6E88; --on:#EEF3F6; --accent:#6688A2; --tint:#E6ECF0;
+
+  --radius:10px; --radius-lg:14px;
+  --font-title:'Noto Serif TC','Songti TC',serif;
+  --font-body:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;
+  --font-data:'IBM Plex Mono',ui-monospace,monospace;
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:var(--岩藍);--surface:#1B2838;--ink:var(--雪白);--sub:#B9C6D2;--line:#2A3A4E;}
+}
+[data-theme-mode="dark"]{--bg:var(--岩藍);--surface:#1B2838;--ink:var(--雪白);--sub:#B9C6D2;--line:#2A3A4E;}
+
+/* ---------- 12 主題（加寬色域，明暗兼具） ---------- */
+/* 深色頭部（反白文字與標記） */
+.theme-steel  {--hdr:#4E6E88;--on:#EEF3F6;--accent:#6688A2;--tint:#E6ECF0;} /* 鋼藍 英語入口 */
+.theme-lake   {--hdr:#1E6E8C;--on:#EEF3F6;--accent:#2E86A8;--tint:#E0EAF0;} /* 湖藍 題庫 */
+.theme-pine   {--hdr:#2E8C6A;--on:#EEF3F6;--accent:#3EA47E;--tint:#E2F0EA;} /* 松綠 學測自然 */
+.theme-slate  {--hdr:#3E7A88;--on:#EEF3F6;--accent:#4E92A2;--tint:#E4EEF0;} /* 遠山 旅遊 */
+.theme-indigo {--hdr:#35508C;--on:#EEF3F6;--accent:#4A68A8;--tint:#E4E8F2;} /* 靛藍 商務 */
+.theme-teal   {--hdr:#2C8C8C;--on:#EEF3F6;--accent:#3CA6A6;--tint:#E2F0F0;} /* 湖青 健康 */
+.theme-clay   {--hdr:#B36A3E;--on:#EEF3F6;--accent:#C77E4E;--tint:#F3E7DD;} /* 陶赭 文化 */
+.theme-heather{--hdr:#6B5A8C;--on:#EEF3F6;--accent:#8672A8;--tint:#ECE7F2;} /* 霧紫 學習・錯題 */
+/* 淺色頭部（深文字與標記） */
+.theme-sky    {--hdr:#E6F1FB;--on:#173A5A;--accent:#2E7BC4;--tint:#D6E7F6;} /* 晴空 單字 */
+.theme-grass  {--hdr:#E9F3E0;--on:#2C4A20;--accent:#4C9A3F;--tint:#DCEBCF;} /* 草綠 會話・生活 */
+.theme-plum   {--hdr:#F0E9F4;--on:#3C2A48;--accent:#7A4E8C;--tint:#E6DCEC;} /* 梅紫 句型 */
+.theme-stone  {--hdr:#ECEBE4;--on:#33342C;--accent:#6B6E66;--tint:#E0DFD6;} /* 岩灰 生活工具 */
+
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);line-height:1.6;}
+
+/* ---------- 稜線標記 ---------- */
+/* 頭部標記：.ridge 用 var(--on)（深底反白、淺底深色）；峰頂恆為破曉金 */
+.rl-mark{display:grid;place-items:center;width:42px;height:42px;border-radius:11px;flex:none;
+  background:color-mix(in srgb,var(--on) 10%,transparent);}
+.rl-glyph{width:26px;height:26px;}
+.rl-appbar .rl-glyph .ridge{stroke:var(--on);}
+
+/* ---------- App Bar：頭部＝主題色 ---------- */
+.rl-appbar{display:flex;align-items:center;gap:14px;padding:14px 22px;background:var(--hdr);color:var(--on);}
+.rl-appbar .rl-title{font-family:var(--font-title);font-weight:600;font-size:20px;line-height:1.1;}
+.rl-appbar .rl-sub{font-size:12px;color:color-mix(in srgb,var(--on) 62%,transparent);margin-top:2px;letter-spacing:1px;}
+.rl-appbar .rl-spacer{flex:1;}
+
+/* ---------- 按鈕：主行動＝主題色（金不做按鈕） ---------- */
+.rl-btn{font-family:var(--font-body);font-size:13px;font-weight:500;padding:8px 16px;border-radius:var(--radius);
+  border:1.5px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;}
+.rl-btn--primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+.rl-appbar .rl-btn{border-color:color-mix(in srgb,var(--on) 50%,transparent);color:var(--on);}
+.rl-appbar .rl-btn--primary{background:color-mix(in srgb,var(--on) 16%,transparent);border-color:transparent;color:var(--on);}
+
+/* ---------- 卡片 / chip / 連結 / 資料字 ---------- */
+.rl-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:16px 18px;}
+.rl-chip{display:inline-block;font-size:12px;font-weight:500;letter-spacing:.5px;padding:2px 10px;border-radius:999px;
+  color:var(--accent);background:color-mix(in srgb,var(--accent) 15%,transparent);}
+.rl-link{color:var(--accent);text-decoration:none;}
+.rl-link:hover{text-decoration:underline;}
+.rl-data{font-family:var(--font-data);font-size:12px;letter-spacing:1px;color:var(--muted);}
+
+/* ============================================================
+   頁尾簽名區塊 · 每一頁都要放（品牌鐵則）
+   稜線標記 ｜ 金色直線 ｜「人生走稜，高低都是風景。」＋ LUCAS 出品
+   深淺自適應：稜線隨頁面 --ink 反白，金線與峰頂恆為破曉金
+   ============================================================ */
+.rl-signature{padding:40px 22px 32px;border-top:1px solid var(--line);text-align:center;}
+.rl-sig-row{display:inline-flex;align-items:center;gap:22px;text-align:left;}
+.rl-sig-row .rl-sig-glyph{width:60px;height:60px;flex:none;}
+.rl-sig-glyph .ridge{stroke:var(--ink);}
+.rl-sig-rule{width:2px;height:64px;background:var(--破曉金);flex:none;border-radius:2px;}
+.rl-sig-quote{margin:0;font-family:var(--font-title);font-weight:600;font-size:22px;line-height:1.35;
+  letter-spacing:1px;color:var(--ink);}
+.rl-sig-by{margin:16px 0 0;font-family:var(--font-body);font-size:13px;letter-spacing:6px;color:var(--muted);}
+@media(max-width:480px){
+  .rl-sig-row{gap:16px;}
+  .rl-sig-row .rl-sig-glyph{width:48px;height:48px;}
+  .rl-sig-quote{font-size:18px;}
+  .rl-sig-rule{height:52px;}
+}
+
+/* ---------- 鐵則 ---------- */
+/* 禁用：linear-gradient / box-shadow / filter:blur / 光暈 / 破曉金做非峰頂非簽名金線用途 / 主題與六色盤外顏色 */
+/* 每頁必含：.rl-signature 頁尾簽名區塊 */

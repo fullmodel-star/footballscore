@@ -2,11 +2,13 @@
    策略：同源 App 殼層用 stale-while-revalidate（離線可用、回連時自動更新）；
    跨源請求（ESPN 比分／新聞、openfootball、Open-Meteo、翻譯、Google 字型）一律放行給瀏覽器，
    不攔截、不快取，確保即時資料永遠是最新。 */
-const CACHE='wc2026-v4.6.2';
+const CACHE='wc2026-v4.6.3';
 const SHELL = [
   './',
   './index.html',
   './世界盃資料.js',
+  './ridgeline-ui.css',
+  './favicon.svg',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png',
