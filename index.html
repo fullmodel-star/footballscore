@@ -280,7 +280,7 @@ table.sim td.mk{color:var(--blue)}
   <span class="rl-mark"><svg class="rl-glyph" width="26" height="26" viewBox="0 0 64 64" fill="none" stroke-linejoin="round" stroke-linecap="round" stroke-width="3.6"><path class="ridge" stroke="currentColor" d="M0 52 L6 46 L10 50 L15 34 L19 44 L24 22 L28 38 L33 16 L38 36 L43 26 L48 40 L54 32 L58 44 L64 48"/><path d="M30 26 L33 16 L35 23" stroke="#DE9A45"/></svg></span>
   <div>
     <div class="rl-title">⚽ 2026 世界盃推估器</div>
-    <div class="rl-sub">美加墨 48 強 · 八強聚焦版 v4.6.2</div>
+    <div class="rl-sub">美加墨 48 強 · 四強聚焦版 v4.7</div>
   </div>
   <span class="rl-spacer"></span>
   <button class="rl-btn rl-btn--primary" onclick="openSettings()">⚙️ 設定</button>
@@ -770,7 +770,7 @@ function predict(eA,eB,sA,sB,opts){
 function samplePois(l){ const L=Math.exp(-l); let k=0,p=1; do{k++;p*=Math.random();}while(p>L); return k-1; }
 
 /* ================= 主畫面 ================= */
-const TABS=[["ko","🏆","八強"],["pred","⚔️","對戰"],["teams","👥","球隊"],["news","📰","新聞"],["analysis","📊","分析"],["sched","📅","歷史"]];
+const TABS=[["ko","🏆","四強"],["pred","⚔️","對戰"],["teams","👥","球隊"],["news","📰","新聞"],["analysis","📊","分析"],["sched","📅","歷史"]];
 let curTab='ko', gFilter='全部', openTeam=-1, simResult=null, pendingNews=[], lineupCache={}, bkFit=true;
 function renderTabs(){
   document.getElementById('tabs').innerHTML=TABS.map(t=>
@@ -1961,10 +1961,68 @@ function koMatchCard(ms,r,i){
     <button class="kuse" onclick="S.pA=${a};S.pB=${b};S.pV='${inf[1]}';save();goTab('pred')">看完整拆解／比分／PK →</button>
   </div>`;
 }
+function amImplied(v){ const a=parseFloat(v); if(!a)return null; return a<0? (-a)/(-a+100) : 100/(a+100); }
+/* ---------- 四強焦點：四隊狀態 / 歷史教戰 / 近況戰績 / 賭盤建議 ---------- */
+function semiFocus(){
+  if(typeof SEMI_FOCUS==='undefined')return '';
+  const D=SEMI_FOCUS;
+  let h=`<style>
+  .semitie{border:1px solid var(--line)}
+  .sttop{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--sub)}
+  .stt{font-weight:700;color:var(--gold)} .stw{color:var(--sub)}
+  .stvs{font-size:18px;font-weight:800;text-align:center;margin:6px 0 8px}
+  .sth2h{font-size:12.5px;color:var(--sub);line-height:1.55;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:10px}
+  .stgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .stcol{border:1px solid var(--line);border-radius:12px;padding:10px}
+  .sthead{display:flex;align-items:center;gap:6px;font-size:15px;margin-bottom:6px;flex-wrap:wrap}
+  .stelo{margin-left:auto;font-size:11px;color:var(--sub);font-weight:400}
+  .stbar{height:7px;background:var(--bg);border-radius:5px;overflow:hidden;border:1px solid var(--line)}
+  .stbar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--gold))}
+  .stadv{font-size:11.5px;color:var(--sub);margin:3px 0 8px}
+  .stit{font-size:12px;line-height:1.5;margin-bottom:5px}
+  .stit span{color:var(--sub);font-weight:700;margin-right:4px}
+  .stverdict{margin-top:10px;font-size:13px;line-height:1.55;background:var(--bg);border-left:3px solid var(--gold);border-radius:8px;padding:8px 10px}
+  @media(max-width:560px){.stgrid{grid-template-columns:1fr}}
+  </style>`;
+  h+=`<div class="card sfhead"><h2>🔥 四強焦點</h2>
+    <div class="hint">四隊的狀態、歷史教戰、近況戰績與盤口一覽；「模型晉級％」用本器有效 Elo（含傷病/特質/場館）計算，盤口為 ${D.asof} 快照。</div></div>`;
+  D.ties.forEach(t=>{
+    const a=t.a,b=t.b,vi=t.vi;
+    const sm=styleMul(a,b);
+    const r=predict(effElo(a)+matchAdv(a,vi), effElo(b)+matchAdv(b,vi), sm[0], sm[1]);
+    const advA=pkProb(a,b,r.we), advB=1-advA;
+    const ia=amImplied(t.row[a].sf), ib=amImplied(t.row[b].sf);
+    const mA=(ia&&ib)? ia/(ia+ib):0.5, mB=1-mA;
+    const modFav=advA>=advB?a:b, mktFav=mA>=mB?a:b, agree=modFav===mktFav;
+    const verdict = agree
+      ? `盤口與模型<b>一致看好 ${TEAMS[modFav][1]}</b>（模型晉級 ${pct(Math.max(advA,advB))}、盤口隱含 ${pct(Math.max(mA,mB))}）。`
+      : `盤口看好 <b>${TEAMS[mktFav][1]}</b>，但本模型看好 Elo 較高的 <b style="color:var(--gold)">${TEAMS[modFav][1]}</b>（模型晉級 ${pct(Math.max(advA,advB))}）→ 若想押冷門，價值可能在 ${TEAMS[modFav][1]}。`;
+    const col=(ti,adv)=>{ const d=t.row[ti],pk=PK[ti];
+      return `<div class="stcol">
+        <div class="sthead">${TEAMS[ti][5]} <b>${TEAMS[ti][1]}</b> <span class="stelo">Elo ${Math.round(effElo(ti))}</span></div>
+        <div class="stbar"><i style="width:${(adv*100).toFixed(0)}%"></i></div>
+        <div class="stadv">模型晉級 <b>${pct(adv)}</b></div>
+        <div class="stit"><span>📌 狀態</span>${d.form}</div>
+        <div class="stit"><span>📅 近況</span>${d.y1}</div>
+        <div class="stit"><span>🥅 PK 史</span>${pk?`${pk[0]}勝${pk[1]}敗 · 加權 ${(pkRate(ti)*100).toFixed(0)}%`:'無大賽 PK 紀錄'}</div>
+        <div class="stit"><span>💰 盤口</span>奪冠 ${d.champ.toFixed(2)}（${d.champAm}）· 晉級 ${d.sf}</div>
+      </div>`; };
+    h+=`<div class="card semitie">
+      <div class="sttop"><span class="stt">${t.r}</span><span class="stw">${t.tw}</span></div>
+      <div class="stvs">${TEAMS[a][5]} ${TEAMS[a][1]}　<b style="color:var(--sub)">vs</b>　${TEAMS[b][5]} ${TEAMS[b][1]}</div>
+      <div class="sth2h">🤝 歷史教戰：${t.h2h}</div>
+      <div class="stgrid">${col(a,advA)}${col(b,advB)}</div>
+      <div class="stverdict">💰 賭盤建議：${verdict}</div>
+    </div>`;
+  });
+  h+=`<div class="card hint" style="font-size:11px;line-height:1.6">⚠️「盤口／賭盤建議」僅為<b>模型 vs 市場</b>的分析參考，<b>非投注建議</b>；博弈有風險，請理性娛樂、量力而為。盤口為 ${D.asof} 快照，實際賠率隨時變動。</div>`;
+  return h;
+}
 function viewKO(){
   let h=`<div class="card" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
     <button class="btn" onclick="updateScores(this)">🔄 一鍵更新對陣／比分</button>
     <span class="hint">需網路。小組賽全部完賽後，自動抓官方 32 強對陣與淘汰賽賽果逐場鎖定（🔒＝官方對陣、✓＝官方賽果）。</span></div>`;
+  h+=semiFocus();
   h+=nearCard();
   const rounds=buildBracketRounds();
   const champ=rounds[4][0].winner;
@@ -1973,8 +2031,8 @@ function viewKO(){
   h+=`<div class="kchamp"><div class="kct">🏆 推估冠軍（最可能路徑）</div>
     <div class="kcn">${TEAMS[champ][5]} ${TEAMS[champ][1]}</div>
     <div class="hint" style="margin-top:4px">＝每場選機率高者一路推到底的單一劇本。想看「綜合奪冠率」請到 <b>📊 分析</b> 的模擬。</div></div>`;
-  h+=`<div class="card"><h2>🗂 對陣圖（八強起）</h2>
-    <div class="hint" style="margin-bottom:6px">八強 → 四強 → 決賽逐輪列出，每隊右側為晉級機率（含主場・高原・PK）。<b>點任一隊可改派它晉級</b>，後面立即重排；綠底＝晉級者、🔒官方對陣、✓官方賽果。已完賽輪次自動收合。${Object.keys(brOverride).length?` <a onclick="resetBracket()" style="color:var(--blue);cursor:pointer;font-weight:700">↺ 清除手動指定（${Object.keys(brOverride).length}）</a>`:''}</div>`;
+  h+=`<div class="card"><h2>🗂 對陣圖（四強起）</h2>
+    <div class="hint" style="margin-bottom:6px">四強 → 決賽逐輪列出，每隊右側為晉級機率（含主場・高原・PK）。<b>點任一隊可改派它晉級</b>，後面立即重排；綠底＝晉級者、🔒官方對陣、✓官方賽果。已完賽輪次自動收合。${Object.keys(brOverride).length?` <a onclick="resetBracket()" style="color:var(--blue);cursor:pointer;font-weight:700">↺ 清除手動指定（${Object.keys(brOverride).length}）</a>`:''}</div>`;
   rounds.forEach((rd,ri)=>{
     const done=rd.length&&rd.every(ms=>ms.locked);
     const body=rd.map((ms,i)=>koMatchCard(ms,ri,i)).join('');

@@ -239,3 +239,24 @@ const PLAYER_ALT={"久保建英":"Takefusa Kubo","遠藤航":"Wataru Endo","堂�
 "孫興慜":"Son Heung-Min","金玟哉":"Kim Min-Jae","李剛仁":"Lee Kang-In","黃喜燦":"Hwang Hee-Chan"};
 function norm(s){ return (s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9一-鿿 ]/g,' ').replace(/\s+/g,' ').trim(); }
 function latinName(n){ return PLAYER_ALT[n]||n; }
+
+// ——— 四強焦點資料（2026-07-12 查核：ESPN 奪冠/晉級盤口、11v11・Wikipedia 交手史、賽事新聞）———
+// 每隊：form=近況狀態；y1=近一年/本屆戰績；champ=奪冠小數賠率、champAm=美式；sf=晉級決賽美式盤口
+// vi=場館索引（VENUES）；a/b=TEAMS 索引
+const SEMI_FOCUS={
+  asof:'2026-07-12',
+  ties:[
+    { r:'準決賽 · 達拉斯', tw:'台灣 7/15（三）', vi:10, a:32, b:28,
+      h2h:'兩隊史上交手 38 次：西班牙 18 勝、法國 13 勝、7 平。近年西班牙 3 連勝——2024 歐國盃準決 2-1、2025 國聯準決 5-4。',
+      row:{
+        32:{ form:'本屆 5 戰全勝、唯一未打加時的球隊；Mbappé＋Dembélé 火力全開，連 3 屆闖進四強。', y1:'本屆世界盃 5-0-0；2024 歐國盃四強。', champ:2.50, champAm:'+150', sf:'-158' },
+        28:{ form:'衛冕歐洲冠軍(Euro 2024)，八強擊敗比利時；Yamal／Pedri 高位壓迫，控球宰制力最強。', y1:'本屆 5-0-0；2024 歐洲冠軍、2025 國聯冠軍。', champ:4.10, champAm:'+310', sf:'-105' }
+      }},
+    { r:'準決賽 · 亞特蘭大', tw:'台灣 7/16（四）', vi:12, a:44, b:36,
+      h2h:'世界盃 5 次交手：英格蘭 3 勝、1 平、1 負。1986「上帝之手」、1998 十六強點球出局、2002 貝克漢十二碼復仇。',
+      row:{
+        44:{ form:'延長賽驚險過關(Bellingham 加時進球)，力拚 1966 年後首座世界盃。', y1:'本屆 5 戰全勝(含加時)。', champ:5.90, champAm:'+490', sf:'+120' },
+        36:{ form:'衛冕冠軍、Messi 最後一舞；對維德角、埃及都上演驚險逆轉，韌性十足。', y1:'本屆 5 戰全勝。', champ:5.30, champAm:'+430', sf:'-115' }
+      }}
+  ]
+};
