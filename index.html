@@ -273,6 +273,16 @@ table.sim td.mk{color:var(--blue)}
 .fix b{color:var(--txt)}
 @media(max-width:480px){ table.score td,table.score th{width:32px;height:28px} .breakdown{grid-template-columns:1fr} }
 @media(max-width:430px){ .tabs{padding:5px 2px calc(5px + env(safe-area-inset-bottom))} .tabs button{font-size:10px;padding:6px 1px} .tabs button .ico{font-size:18px} }
+/* 手機頂欄防跑版：標題那格可縮(min-width:0)、字級收斂、副標不換行(過長顯示…) */
+@media(max-width:480px){
+  .rl-appbar{gap:10px;padding:11px 14px}
+  .rl-appbar>div{min-width:0;flex:1 1 auto}
+  .rl-appbar .rl-title{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rl-appbar .rl-sub{font-size:10.5px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rl-appbar .rl-spacer{display:none}
+  .rl-appbar .rl-btn{flex:none;padding:7px 11px;font-size:12px}
+  .rl-appbar .rl-mark{width:34px;height:34px}
+}
 </style>
 </head>
 <body class="theme-stone">
