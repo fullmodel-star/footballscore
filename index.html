@@ -308,7 +308,7 @@ table.sim td.mk{color:var(--blue)}
 
 <div class="modal" id="modal"><div class="box" id="modalBox"></div></div>
 
-<script src="世界盃資料.js" charset="utf-8"></script>
+<script src="世界盃資料.js?v=4.7.2" charset="utf-8"></script>
 <script>
 'use strict';
 /* 內建資料已移至 世界盃資料.js（於上方先行載入）；以下為程式邏輯。 */
@@ -1974,7 +1974,7 @@ function koMatchCard(ms,r,i){
 function amImplied(v){ const a=parseFloat(v); if(!a)return null; return a<0? (-a)/(-a+100) : 100/(a+100); }
 /* ---------- 四強焦點：四隊狀態 / 歷史教戰 / 近況戰績 / 賭盤建議 ---------- */
 function semiFocus(){
-  if(typeof SEMI_FOCUS==='undefined')return '';
+  if(typeof SEMI_FOCUS==='undefined')return '<div class="card hint">🔄 四強焦點資料載入中——請<b>重新整理</b>頁面；若仍未出現，清除此網站快取後重開（可能是舊版 <code>世界盃資料.js</code> 被快取黏住）。</div>';
   const D=SEMI_FOCUS;
   let h=`<style>
   .semitie{border:1px solid var(--line)}
