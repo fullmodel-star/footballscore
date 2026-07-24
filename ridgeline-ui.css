@@ -77,7 +77,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body)
 
 /* ============================================================
    頁尾簽名區塊 · 每一頁都要放（品牌鐵則）
-   稜線標記 ｜ 金色直線 ｜「人生走稜，高低都是風景。」＋ LUCAS 出品
+   稜線標記 ｜ 金色直線 ｜「人生走稜，高低都是風景。」＋ Ridgeline · by Lucas
    深淺自適應：稜線隨頁面 --ink 反白，金線與峰頂恆為破曉金
    ============================================================ */
 .rl-signature{padding:40px 22px 32px;border-top:1px solid var(--line);text-align:center;}
