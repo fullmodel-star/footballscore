@@ -283,11 +283,15 @@ table.sim td.mk{color:var(--blue)}
   .rl-appbar .rl-btn{flex:none;padding:7px 11px;font-size:12px}
   .rl-appbar .rl-mark{width:34px;height:34px}
 }
+
+.rl-glyph-d{display:none}
+html[data-theme="dark"] .rl-glyph-l{display:none}
+html[data-theme="dark"] .rl-glyph-d{display:inline}
 </style>
 </head>
 <body class="theme-stone">
 <header class="rl-appbar">
-  <span class="rl-mark"><svg class="rl-glyph" viewBox="0 0 64 64" width="30" height="30" fill="none"><path d="M0 54 L8 48 L14 51 L22 38 L26 42 L36 14 L46 34 L61 44" fill="none" stroke="currentColor" stroke-width="4.4" stroke-linejoin="round" stroke-linecap="round"/><path d="M31.3 27.2 L36 14 L38.7 19.4" fill="none" stroke="#DE9A45" stroke-width="4.4" stroke-linejoin="round" stroke-linecap="round"/></svg></span>
+  <span class="rl-mark"><img class="rl-glyph rl-glyph-l" src="rl-mark-aconcagua-navy.png" width="30" height="30" alt="" style="object-fit:contain"><img class="rl-glyph rl-glyph-d" src="rl-mark-aconcagua-white.png" width="30" height="30" alt="" style="object-fit:contain"></span>
   <div>
     <div class="rl-title">⚽ 2026 世界盃推估器</div>
     <div class="rl-sub">美加墨 48 強 · 四強聚焦版 v4.7</div>
@@ -298,7 +302,7 @@ table.sim td.mk{color:var(--blue)}
 <main id="main"></main>
 <footer class="rl-signature">
   <div class="rl-sig-row">
-    <span class="rl-mkcol" style="display:inline-flex;flex-direction:column;align-items:center;gap:3px"><svg class="rl-sig-glyph" viewBox="0 0 64 64" width="66" height="34" fill="none"><path d="M0 54 L8 48 L14 51 L22 38 L26 42 L36 14 L46 34 L61 44" fill="none" stroke="currentColor" stroke-width="4.4" stroke-linejoin="round" stroke-linecap="round"/><path d="M31.3 27.2 L36 14 L38.7 19.4" fill="none" stroke="#DE9A45" stroke-width="4.4" stroke-linejoin="round" stroke-linecap="round"/></svg><span style="font-family:'Noto Serif TC',serif;font-size:14px;font-weight:600;letter-spacing:.5px;color:currentColor">Aconcagua</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;color:#8794a3">6,961 M</span></span>
+    <span class="rl-mkcol" style="display:inline-flex;flex-direction:column;align-items:center;gap:3px"><img class="rl-sig-glyph rl-glyph-l" src="rl-mark-aconcagua-navy.png" width="66" height="34" alt="" style="object-fit:contain"><img class="rl-sig-glyph rl-glyph-d" src="rl-mark-aconcagua-white.png" width="66" height="34" alt="" style="object-fit:contain"><span style="font-family:'Noto Serif TC',serif;font-size:14px;font-weight:600;letter-spacing:.5px;color:currentColor">Aconcagua</span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;color:#8794a3">6,961 M</span></span>
     <span class="rl-sig-rule" style="height:88px"></span>
     <p class="rl-sig-quote">Messi 就是我的神。</p>
   </div>
