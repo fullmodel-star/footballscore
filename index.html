@@ -179,6 +179,7 @@ table.sim td.mk{color:var(--blue)}
 .pitem{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px;font-size:12px}
 .pitem .ph{font-weight:700;font-size:13px;margin-bottom:4px;color:var(--txt)}
 .pitem .pd{color:var(--sub);line-height:1.6;margin-bottom:8px}
+.pitem .pd a,.newsitem .nd a{color:var(--blue);font-weight:700;text-decoration:none;white-space:nowrap}
 .pitem .pc{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--sub)}
 .pitem select{max-width:150px;font-size:12px;padding:4px 6px}
 .pitem input{width:60px;font-size:12px;padding:4px 6px}
@@ -657,6 +658,10 @@ function load(){
       if(S.pV===undefined)S.pV='auto';
       if(!Array.isArray(S.seenNews))S.seenNews=[];
       if(!Array.isArray(S.pending))S.pending=[];
+      // 2026-10-01 新聞只留原文標題＋原文連結：舊版待審（含 ESPN 摘要／機翻標題、無原文連結）一律清掉，
+      // 仍在 4 天內的會在下次抓取時以新格式重新出現；已納入的 ESPN 新聞清掉摘要，標題與影響值保留
+      S.pending=S.pending.filter(p=>p&&p.url&&!p.zh).map(p=>{ delete p.d; return p; });
+      S.news.forEach(n=>{ if(n&&n.srcId&&!n.url&&n.detail)n.detail=''; });
       if(!S.lastNewsTs)S.lastNewsTs=0;
       if(!S.lastScoreTs)S.lastScoreTs=0;
       for(const k in DEF_RESULTS){ if(!S.results[k])S.results[k]=DEF_RESULTS[k].slice(); } // 補入內建的真實賽果（不覆寫已輸入值）
@@ -1478,15 +1483,18 @@ async function fetchDailyNews(silent){
       return Date.now()-ts<4*86400e3; // 只看 4 天內
     }).map(a=>{
       const id=String(a.dataSourceIdentifier||a.id||a.headline);
+      // 摘要只在這裡當關鍵字判斷球隊／影響值，不保存、不顯示；畫面只列原文標題＋原文連結
       const txt=(a.headline||'')+' '+(a.description||'');
       const players=mentionedPlayers(txt), delta=suggestDelta(txt);
-      return {id,h:a.headline||'',d:a.description||'',pub:(a.published||'').slice(5,10).replace('-','/'),
+      const web=a.links&&a.links.web&&a.links.web.href;
+      const url=(typeof web==='string'&&/^https:\/\/[^/]*espn\.com\//.test(web))?web:(/^\d+$/.test(String(a.id||''))?'https://www.espn.com/soccer/story/_/id/'+a.id:'');
+      return {id,h:a.headline||'',url,pub:a.published||'',
         team:detectTeam(txt),delta,players,_txt:txt};
-    }).filter(p=>!seen.has(p.id)&&!exist.has(p.id)&&!have.has(p.id));
+    }).filter(p=>p.h&&p.url&&!seen.has(p.id)&&!exist.has(p.id)&&!have.has(p.id));
     const relevant=fresh.filter(p=>newsRelevant(p._txt,p.delta,p.players));
     relevant.forEach(p=>delete p._txt);
     const skipped=fresh.length-relevant.length;
-    S.pending=relevant.concat(S.pending).slice(0,60); // 新的排前面、含翻譯的舊待審保留、上限 60
+    S.pending=relevant.concat(S.pending).slice(0,60); // 新的排前面、舊待審保留、上限 60
     pendingNews=S.pending;
     S.lastNewsTs=Date.now(); save();
     if(!silent){ render(); if(relevant.length||skipped)toast(`📡 ${relevant.length} 則相關新聞${skipped?`，略過 ${skipped} 則無關`:''}`); }
@@ -1497,7 +1505,7 @@ function acceptPending(k){
   const p=pendingNews[k];
   if(p.team<0){alert('這則新聞無法自動判斷球隊，請先在下拉選單選擇。');return;}
   S.news.unshift({id:'e'+Math.random().toString(36).slice(2),srcId:p.id,t:p.team,
-    title:p.h.slice(0,90),detail:p.d,delta:p.delta||0,on:true,custom:true});
+    title:p.h,detail:'',url:p.url,src:'ESPN',pub:p.pub,delta:p.delta||0,on:true,custom:true});
   S.seenNews=(S.seenNews||[]).concat(p.id).slice(-300);
   pendingNews.splice(k,1); save(); render();
 }
@@ -1509,53 +1517,14 @@ function ignoreAllPending(){
   S.seenNews=(S.seenNews||[]).concat(pendingNews.map(p=>p.id)).slice(-300);
   S.pending=[]; pendingNews=S.pending; save(); render();
 }
-async function trZh(text){ // 免金鑰翻譯：Google gtx 為主、MyMemory 備援
-  try{
-    const u='https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q='+encodeURIComponent(text);
-    const j=await(await fetch(u)).json();
-    return j[0].map(s=>s[0]).join('');
-  }catch(e){
-    const j=await(await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text.slice(0,490))+'&langpair=en|zh-TW')).json();
-    const t=j.responseData&&j.responseData.translatedText;
-    if(t)return t;
-    throw e;
-  }
+function escN(x){ return String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function newsTime(iso){ // ESPN published（ISO）→ 台灣時間 M/D HH:mm
+  if(!iso)return '';
+  const d=new Date(iso); if(isNaN(d))return escN(iso);
+  return d.toLocaleString('zh-TW',{timeZone:'Asia/Taipei',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
 }
-async function translateItem(p){
-  if(p.zh)return;
-  const h=await trZh(p.h);
-  const d=p.d?await trZh(p.d):'';
-  p.h=h||p.h; p.d=d||p.d; p.zh=1;
-  save(); // 翻譯結果隨待審清單一起保存，重開 App 不會消失
-}
-async function translateOne(k,btn){
-  btn.textContent='…';
-  try{ await translateItem(pendingNews[k]); }catch(e){ alert('翻譯失敗：請確認網路。'); }
-  render();
-}
-async function translateAllPending(btn){
-  const todo=pendingNews.filter(p=>!p.zh);
-  const total=todo.length; let done=0;
-  const upd=()=>{ if(btn)btn.textContent=`🌐 翻譯中 ${done}/${total}…`; };
-  upd();
-  await Promise.all(Array.from({length:3},async()=>{ // 3 路並行
-    while(todo.length){
-      const p=todo.shift();
-      try{ await translateItem(p); }catch(e){}
-      done++; upd();
-    }
-  }));
-  render();
-}
-async function translateNews(k,btn){ // 已納入清單的事後翻譯
-  btn.textContent='…';
-  try{
-    const n=S.news[k];
-    n.title=await trZh(n.title);
-    if(n.detail)n.detail=await trZh(n.detail);
-    save();
-  }catch(e){ alert('翻譯失敗：請確認網路。'); }
-  render();
+function newsSrcLine(src,pub,url){ // 來源｜時間｜閱讀原文 ↗（只連到原文，不轉載內文）
+  return `${escN(src||'ESPN')}${pub?'｜'+newsTime(pub):''}｜<a href="${escN(url)}" target="_blank" rel="noopener noreferrer">閱讀原文 ↗</a>`;
 }
 function acceptAllPending(){ // 只納入「球隊已判斷＋影響≠0」的項目，其餘留待人工確認
   let added=0;
@@ -1563,7 +1532,7 @@ function acceptAllPending(){ // 只納入「球隊已判斷＋影響≠0」的�
     const p=pendingNews[k];
     if(p.team>=0&&p.delta!==0){
       S.news.unshift({id:'e'+Math.random().toString(36).slice(2),srcId:p.id,t:p.team,
-        title:p.h.slice(0,90),detail:p.d,delta:p.delta,on:true,custom:true});
+        title:p.h,detail:'',url:p.url,src:'ESPN',pub:p.pub,delta:p.delta,on:true,custom:true});
       S.seenNews=(S.seenNews||[]).concat(p.id);
       pendingNews.splice(k,1); added++;
     }
@@ -1579,15 +1548,14 @@ function viewNews(){
     <div class="row" style="margin-bottom:4px">
       <button class="btn" onclick="fetchDailyNews(false)">抓取最新情報</button>
       ${pendingNews.filter(p=>p.team>=0&&p.delta!==0).length?`<button class="btn" style="background:var(--gold);color:#3a2c00" onclick="acceptAllPending()">⚡ 一鍵納入（${pendingNews.filter(p=>p.team>=0&&p.delta!==0).length} 則有影響）</button>`:''}
-      ${pendingNews.some(p=>!p.zh)?`<button class="btn sec" onclick="translateAllPending(this)">🌐 全部翻譯</button>`:''}
       ${pendingNews.length?`<button class="btn sec" onclick="ignoreAllPending()">全部忽略</button>`:''}
       <span class="hint">${S.lastNewsTs?'上次抓取：'+new Date(S.lastNewsTs).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'尚未抓取'}</span>
     </div>
-    <div class="hint"><b style="color:var(--gold)">只擷取會動到模型參數的新聞</b>——傷病、停賽、回歸、換帥、陣容異動；純預測、賽前口水、人物特寫等無關報導自動略過。比分每次開啟自動更新；情報超過 20 小時自動抓（離線靜默跳過）。待審清單與翻譯會保存，重開不消失。已自動判斷球隊、建議影響值、比對主力球員；按「納入」變成新聞因素。</div>`;
+    <div class="hint"><b style="color:var(--gold)">只擷取會動到模型參數的新聞</b>——傷病、停賽、回歸、換帥、陣容異動；純預測、賽前口水、人物特寫等無關報導自動略過。比分每次開啟自動更新；情報超過 20 小時自動抓（離線靜默跳過）。待審清單會保存，重開不消失。已自動判斷球隊、建議影響值、比對主力球員；按「納入」變成新聞因素。<br>標題維持 ESPN 英文原文、不翻譯、不轉載內文，要看全文請點「閱讀原文 ↗」到 ESPN 網站。</div>`;
   pendingNews.forEach((p,k)=>{
     h+=`<div class="pitem">
-      <div class="ph">${p.h}</div>
-      <div class="pd">${p.pub}｜${p.d}</div>
+      <div class="ph" lang="en">${escN(p.h)}</div>
+      <div class="pd">${newsSrcLine('ESPN',p.pub,p.url)}</div>
       ${p.players.length?`<div style="margin-bottom:6px">${p.players.map(mp=>
         `<span class="chip org" onclick="setPState(${mp[0]},${mp[1]},1)">提及 ${mp[2]} → 標低迷</span><span class="chip red" onclick="setPState(${mp[0]},${mp[1]},3)">→ 標缺陣</span>`).join('')}</div>`:''}
       <div class="pc">
@@ -1597,7 +1565,6 @@ function viewNews(){
         </select>
         影響 <input type="number" aria-label="影響值" value="${p.delta}" onchange="pendingNews[${k}].delta=parseInt(this.value)||0;save()">
         <button class="btn" style="padding:5px 12px;font-size:12px" onclick="acceptPending(${k})">納入</button>
-        ${p.zh?'':`<button class="btn sec" style="padding:5px 12px;font-size:12px" onclick="translateOne(${k},this)">🌐 翻譯</button>`}
         <button class="btn sec" style="padding:5px 12px;font-size:12px" onclick="ignorePending(${k})">忽略</button>
       </div>
     </div>`;
@@ -1618,12 +1585,11 @@ function viewNews(){
     h+=`<div class="newsitem ${n.on?'':'off'}">
       <div class="nt">
         <label class="switch"><input type="checkbox" aria-label="切換此新聞是否套用" ${n.on?'checked':''} onchange="S.news[${k}].on=this.checked;save();render()"><i></i></label>
-        <b>${TEAMS[n.t][5]} ${TEAMS[n.t][1]}｜${n.title}</b>
+        <b>${TEAMS[n.t][5]} ${TEAMS[n.t][1]}｜${n.srcId?`<span lang="en">${escN(n.title)}</span>`:n.title}</b>
         <span class="tagD ${n.delta>=0?'pos':'neg'}">${sgn(n.delta)}</span>
       </div>
-      ${n.detail?`<div class="nd">${n.detail}</div>`:''}
+      ${n.url?`<div class="nd">${newsSrcLine(n.src,n.pub,n.url)}</div>`:(n.detail?`<div class="nd">${n.detail}</div>`:'')}
       <div class="nc">影響 Elo：<input type="number" value="${n.delta}" onchange="S.news[${k}].delta=parseInt(this.value)||0;save();render()">
-      ${/[a-zA-Z]{4}/.test(n.title)?`<button class="del" style="color:var(--blue)" onclick="translateNews(${k},this)">🌐 翻譯</button>`:''}
       <button class="del" onclick="if(confirm('刪除這則新聞？')){S.news.splice(${k},1);save();render()}">🗑 刪除</button></div>
     </div>`;
   });
@@ -1897,7 +1863,7 @@ function viewModel(){
       <b>市場身價</b><span>Transfermarkt（GiveMeSport/SI 交叉查核）</span>
       <b>賽程/比分</b><span>openfootball＋TheSportsDB＋ESPN（即時，每次開啟自動抓）</span>
       <b>球員/名單</b><span>各隊 26 人名單＋ESPN 出賽名單 API</span>
-      <b>新聞情報</b><span>ESPN 世界盃新聞 API（可一鍵翻譯成中文）</span>
+      <b>新聞情報</b><span>ESPN 世界盃新聞（只列原文標題＋原文連結）</span>
       <b>平均年齡</b><span>RotoWire 最終名單（2026/6）</span>
       <b>PK 大戰史</b><span>Opta／Wikipedia</span>
       <b>天氣</b><span>Open-Meteo（開球日氣溫/降雨）</span>
@@ -1925,7 +1891,7 @@ function viewModel(){
     <div class="hint" style="line-height:1.9">
     • Elo 是「長期實力」，單場爆冷只能靠你輸入比分與新聞修正——這正是賽中動態與新聞分頁的用途。<br>
     • 特質、僑民主場、PK 體質是<b>估計值</b>，非硬數據；可在設定調整或關閉。<br>
-    • 新聞為機器翻譯，偶有誤譯（曾把「戰平 tie」譯成「領帶」）；影響值判讀以英文原文為準。<br>
+    • ESPN 新聞只列英文原文標題與原文連結（不翻譯、不轉載內文）；球隊與影響值為關鍵字自動判讀，請點原文確認後再納入。<br>
     • 比分來源 ESPN 為非官方介面，改版時可能失效（App 本體不受影響）。<br>
     • 平手機率經修正仍可能略低於真實；第三名分配在官方表多解時可能與正式結果略異。<br>
     • <b>這是娛樂與學習用的推估工具，不是投注建議。</b></div>
@@ -2330,7 +2296,7 @@ function importBackup(input){
 
 /* ================= 啟動 ================= */
 load();
-pendingNews=S.pending; // 待審新聞（含翻譯）從上次保存接續
+pendingNews=S.pending; // 待審新聞從上次保存接續
 render();
 autoScores(); // 每次開啟自動更新比分（10 分鐘節流）
 // 超過 20 小時自動抓每日情報（離線時靜默跳過）
