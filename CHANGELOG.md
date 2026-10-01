@@ -3,6 +3,14 @@
 > 2026 世界盃推估器（離線可安裝 PWA）。完整模型說明見 `世界盃推估器_說明文件.md`。
 > 發版提醒：每次改 `index.html`／`世界盃資料.js` 後，記得更新 `sw.js` 的 `CACHE`（如 `wc2026-v4.5`），使用者重開才會換到新版。
 
+## 2026-10-01 移除公開網站上未使用的海報／肖像圖（上線前稽核 E 報告）
+
+- 從 repo（= GitHub Pages 公開內容）移除 4 張 App 沒有引用的圖：`世界盃海報_藍白軍團.png`、`世界盃海報_方形.png`、`image-1781332952118.png`、`ChatGPT Image 2026年5月11日 下午07_27_41_auto15_320x320.png`（含真人肖像插畫與「2026 FIFA 世界盃」「對標 Opta」字樣）。
+- 刪前確認：index.html、世界盃資料.js、sw.js、manifest.webmanifest、ridgeline-ui.css、說明文件全部沒有引用（含 URL 編碼形式）。
+- 已 `git rm --cached`（暫存刪除，未 commit／未 push）；原檔搬到 `_docs/_移出公開_20261001/`（_docs 在 .gitignore，不會公開）留底。
+- ⚠ push 後 Pages 才會 404；但 git 歷史裡仍有這 4 張（公開 repo 可從舊 commit 取得），要徹底清除需改寫歷史，待老闆決定。
+- 未動 index.html／sw.js，不需升 CACHE。新聞分頁未處理（待老闆決定）。
+
 ## 2026-09-30 icon v5 換版
 
 - 依稜線 icon v5 定案重出安裝 icon：fifa26＝FIFA／2026（6 檔）。
