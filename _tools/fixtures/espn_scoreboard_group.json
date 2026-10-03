@@ -1,0 +1,19 @@
+{
+  "_note": "ui_tests.mjs 假資料：ESPN scoreboard?dates=20260611-20260627。A、B 兩組 6 場全踢完（B 組加拿大／瑞士同分同淨勝同進球，靠對戰加拿大 1-0 勝出）；另有 1 場未完賽、1 場隊名對不上，兩者都必須被忽略。",
+  "events": [
+    {"id":"t01","date":"2026-06-11T19:00Z","status":{"type":{"completed":true}},"competitions":[{"competitors":[{"homeAway":"home","score":"2","team":{"displayName":"Mexico"}},{"homeAway":"away","score":"0","team":{"displayName":"South Africa"}}]}]},
+    {"id":"t02","date":"2026-06-12T02:00Z","status":{"type":{"completed":true}},"competitions":[{"competitors":[{"homeAway":"home","score":"2","team":{"displayName":"South Korea"}},{"homeAway":"away","score":"1","team":{"displayName":"Czechia"}}]}]},
+    {"id":"t03","date":"2026-06-18T16:00Z","status":{"type":{"completed":true}},"competitions":[{"competitors":[{"homeAway":"home","score":"1","team":{"displayName":"Czechia"}},{"homeAway":"away","score":"1","team":{"displayName":"South Africa"}}]}]},
+    {"id":"t04","date":"2026-06-19T01:00Z","status":{"type":{"completed":true}},"competitions":[{"competitors":[{"homeAway":"home","score":"1","team":{"displayName":"Mexico"}},{"homeAway":"away","score":"1","team":{"displayName":"South Korea"}}]}]},
+    {"id":"t05","date":"2026-06-25T01:00Z","status":{"type":{"completed":true}},"competitions":[{"competitors":[{"homeAway":"home","score":"0","team":{"displayName":"Czechia"}},{"homeAway":"away","score":"3","team":{"displayName":"Mexico"}}]}]},
+    {"id":"t06","date":"2026-06-25T01:00Z","status":{"type":{"completed":true}},"competitions":[{"competitors":[{"homeAway":"home","score":"2","team":{"displayName":"South Africa"}},{"homeAway":"away","score":"2","team":{"displayName":"South Korea"}}]}]},
+    {"id":"t07","date":"2026-06-12T19:00Z","status":{"type":{"completed":true}},"competitions":[{"competitors":[{"homeAway":"home","score":"0","team":{"displayName":"Canada"}},{"homeAway":"away","score":"2","team":{"displayName":"Bosnia and Herzegovina"}}]}]},
+    {"id":"t08","date":"2026-06-13T19:00Z","status":{"type":{"completed":true}},"competitions":[{"competitors":[{"homeAway":"home","score":"0","team":{"displayName":"Qatar"}},{"homeAway":"away","score":"2","team":{"displayName":"Switzerland"}}]}]},
+    {"id":"t09","date":"2026-06-18T19:00Z","status":{"type":{"completed":true}},"competitions":[{"competitors":[{"homeAway":"home","score":"2","team":{"displayName":"Switzerland"}},{"homeAway":"away","score":"1","team":{"displayName":"Bosnia and Herzegovina"}}]}]},
+    {"id":"t10","date":"2026-06-18T22:00Z","status":{"type":{"completed":true}},"competitions":[{"competitors":[{"homeAway":"home","score":"3","team":{"displayName":"Canada"}},{"homeAway":"away","score":"0","team":{"displayName":"Qatar"}}]}]},
+    {"id":"t11","date":"2026-06-24T19:00Z","status":{"type":{"completed":true}},"competitions":[{"competitors":[{"homeAway":"home","score":"0","team":{"displayName":"Switzerland"}},{"homeAway":"away","score":"1","team":{"displayName":"Canada"}}]}]},
+    {"id":"t12","date":"2026-06-24T19:00Z","status":{"type":{"completed":true}},"competitions":[{"competitors":[{"homeAway":"home","score":"1","team":{"displayName":"Bosnia and Herzegovina"}},{"homeAway":"away","score":"1","team":{"displayName":"Qatar"}}]}]},
+    {"id":"x01","date":"2026-06-19T19:00Z","status":{"type":{"completed":false}},"competitions":[{"competitors":[{"homeAway":"home","score":"5","team":{"displayName":"United States"}},{"homeAway":"away","score":"0","team":{"displayName":"Australia"}}]}]},
+    {"id":"x02","date":"2026-06-20T19:00Z","status":{"type":{"completed":true}},"competitions":[{"competitors":[{"homeAway":"home","score":"1","team":{"displayName":"Atlantis"}},{"homeAway":"away","score":"0","team":{"displayName":"Mexico"}}]}]}
+  ]
+}

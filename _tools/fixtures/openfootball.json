@@ -1,0 +1,10 @@
+{
+  "_note": "ui_tests.mjs 假資料：openfootball worldcup.json。只有巴西 3-1 摩洛哥（MATCHES 第 5 場）是新比分；墨西哥 2-0 南非與既有相同，不算新更新。",
+  "rounds": [
+    {"name":"Matchday 1","matches":[
+      {"team1":"Brazil","team2":"Morocco","score":{"ft":[3,1]}},
+      {"team1":"Mexico","team2":"South Africa","score":{"ft":[2,0]}},
+      {"team1":"Haiti","team2":"Scotland"}
+    ]}
+  ]
+}

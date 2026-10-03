@@ -1,0 +1,11 @@
+{
+  "_note": "ui_tests.mjs 假資料：ESPN news?limit=50。_ageHours 會在送出前換成 published（現在 − N 小時）。預期：9001 法國 −15、9002 西班牙 +6、9003 阿根廷 0（標題含 HTML，必須被轉義）進待審；9004 無關、9005 太舊、abc 非 ESPN 連結，三則都不能出現。",
+  "articles": [
+    {"id":9001,"_ageHours":1,"headline":"France forward ruled out of semi-final with ACL injury","description":"Blow for Les Bleus.","links":{"web":{"href":"https://www.espn.com/soccer/story/_/id/9001/france"}}},
+    {"id":9002,"_ageHours":2,"headline":"Spain midfielder returns from injury, fit for semi-final","description":"Good news for La Roja.","links":{"web":{"href":"https://www.espn.com/soccer/story/_/id/9002/spain"}}},
+    {"id":9003,"_ageHours":3,"headline":"Argentina squad news <img src=x onerror=window.__xss=1>","description":"","links":{"web":{"href":"https://www.espn.com/soccer/story/_/id/9003/argentina"}}},
+    {"id":9004,"_ageHours":4,"headline":"World Cup predictions: who lifts the trophy?","description":"Our panel picks the winner.","links":{"web":{"href":"https://www.espn.com/soccer/story/_/id/9004/picks"}}},
+    {"id":9005,"_ageHours":240,"headline":"England injury crisis deepens","description":"Old story.","links":{"web":{"href":"https://www.espn.com/soccer/story/_/id/9005/england"}}},
+    {"id":"abc-not-numeric","_ageHours":1,"headline":"Brazil injury doubt for opener","description":"","links":{"web":{"href":"https://evil.example.com/brazil"}}}
+  ]
+}
