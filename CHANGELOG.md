@@ -3,6 +3,11 @@
 > 2026 世界盃推估器（離線可安裝 PWA）。完整模型說明見 `世界盃推估器_說明文件.md`。
 > 發版提醒：每次改 `index.html`／`世界盃資料.js` 後，記得更新 `sw.js` 的 `CACHE`（如 `wc2026-v4.5`），使用者重開才會換到新版。
 
+## 2026-10-03 修第一次造訪頁面自己重整（sw wc2026-v4.7.12）
+
+- sw activate 會 clients.claim()，首訪「沒有控制者→有控制者」也觸發 controllerchange，原本直接 reload＝新使用者打開 1～2 秒後頁面自己重整。加 hadController，只有真的換版才重新載入（比照 605／607～609）。全新瀏覽器實測導覽次數 2→1。
+- 沒改內建新聞，NEWS_FIX_V 不動（46）。sw CACHE v4.7.11→v4.7.12。部署前確認 GitHub Pages 線上 index.html／sw.js＝git HEAD。
+
 ## 2026-10-01 新聞分頁只留原文標題＋原文連結，移除機翻（sw wc2026-v4.7.11）
 
 - **原因**：上線前稽核 E 報告（medium）指出新聞分頁把 ESPN 未公開 API 的標題與摘要整段抓進 App 顯示，並以 translate.googleapis.com（client=gtx，非官方免金鑰端點）／MyMemory 機翻，屬重製改作第三方新聞文字、也可能違反服務條款。老闆 2026-10-01 同意改為只列標題＋原文連結。

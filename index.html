@@ -2338,7 +2338,10 @@ if('serviceWorker' in navigator){
   }
   navigator.serviceWorker.getRegistration().then(watch).catch(function(){});
   navigator.serviceWorker.ready.then(watch).catch(function(){});
-  navigator.serviceWorker.addEventListener('controllerchange',function(){if(refreshing)return;refreshing=true;location.reload();});
+  /* 2026-10-03 修：sw activate 會 clients.claim()，第一次造訪「沒有控制者→有控制者」也會觸發 controllerchange，
+     原本直接 reload＝新使用者打開 1～2 秒後頁面自己重整。只有本來就有控制者（真的換版）才重新載入。比照 605／607～609。 */
+  var __rlHadCtl = !!(navigator.serviceWorker && navigator.serviceWorker.controller);
+  navigator.serviceWorker.addEventListener('controllerchange',function(){ if(!__rlHadCtl)return;if(refreshing)return;refreshing=true;location.reload();});
 })();
 </script>
 <!--REPORT_BTN_START-->
