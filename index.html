@@ -1005,8 +1005,8 @@ function scrollToNearMatch(){
 function viewSched(){
   const gs=['全部',..."ABCDEFGHIJKL".split('')];
   let h=`<div class="card" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-    <button class="btn" onclick="updateScores(this)">🔄 一鍵更新比分</button>
-    <span class="hint">需網路。從 openfootball／TheSportsDB 抓最新戰績自動填入（也可手動輸入）。</span></div>`;
+    ${TOURNEY_ENDED?ENDED_NOTE:`<button class="btn" onclick="updateScores(this)">🔄 一鍵更新比分</button>
+    <span class="hint">需網路。從 openfootball／TheSportsDB 抓最新戰績自動填入（也可手動輸入）。</span>`}</div>`;
   if(gFilter==='全部') h+='<div class="card hint">📅 本頁為<b>小組賽歷史紀錄</b>與最終積分。淘汰賽對陣、近期賽事與逐場推估請看「🏆 八強」分頁。</div>';
   h+=`<div class="gfilter">${gs.map(g=>`<button class="${gFilter===g?'on':''}" onclick="gFilter='${g}';render()">${g==='全部'?'全部':g+'組'}</button>`).join('')}</div>`;
   if(gFilter!=='全部') h+=standingsCard(gFilter);
@@ -1110,7 +1110,12 @@ function toast(msg){
   t.textContent=msg; t.classList.add('show');
   clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove('show'),3500);
 }
+/* 2026-10-09：決賽 2026-07-19（美東）結束後不再連網抓比分——ESPN 的日期區間查詢會回 400、一鍵更新實際失效，畫面卻沒說。
+   結束後兩個「一鍵更新」按鈕改成「賽事已結束、以下為最終結果」說明。 */
+const TOURNEY_ENDED = Date.now() > Date.parse('2026-07-21T00:00:00+08:00');
+const ENDED_NOTE = '<span class="hint">✅ <b>2026 世界盃已於 7/19 結束</b>，以下比分與對陣為最終結果，不需要再更新。</span>';
 async function autoScores(){ // 開啟 App 自動更新比分（ESPN 單一請求、10 分鐘節流、靜默）
+  if(TOURNEY_ENDED)return;
   if(!navigator.onLine)return;
   if(Date.now()-(S.lastScoreTs||0)<10*60*1000)return;
   try{
@@ -1199,6 +1204,7 @@ async function updateKO(){ // 小組賽完賽後：抓官方 32 強對陣與淘�
   return n;
 }
 async function updateScores(btn){
+  if(TOURNEY_ENDED){ toast('2026 世界盃已結束，資料為最終結果'); return; }
   btn.textContent='🔄 更新中…'; btn.disabled=true;
   let n=0, src='';
   const apply=(i1,i2,s1,s2)=>{ // 依隊伍對找到場次（小組賽每對只踢一次）
@@ -2020,8 +2026,8 @@ function semiFocus(){
 }
 function viewKO(){
   let h=`<div class="card" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-    <button class="btn" onclick="updateScores(this)">🔄 一鍵更新對陣／比分</button>
-    <span class="hint">需網路。小組賽全部完賽後，自動抓官方 32 強對陣與淘汰賽賽果逐場鎖定（🔒＝官方對陣、✓＝官方賽果）。</span></div>`;
+    ${TOURNEY_ENDED?ENDED_NOTE:`<button class="btn" onclick="updateScores(this)">🔄 一鍵更新對陣／比分</button>
+    <span class="hint">需網路。小組賽全部完賽後，自動抓官方 32 強對陣與淘汰賽賽果逐場鎖定（🔒＝官方對陣、✓＝官方賽果）。</span>`}</div>`;
   h+=semiFocus();
   h+=nearCard();
   const rounds=buildBracketRounds();
