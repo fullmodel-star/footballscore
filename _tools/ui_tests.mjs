@@ -56,7 +56,7 @@ function route(url) {
   if (u.hostname === 'site.api.espn.com') {
     if (u.pathname.endsWith('/scoreboard')) return json(u.searchParams.get('dates') === '20260611-20260627' ? SCOREBOARD : { events: [] });
     if (u.pathname.endsWith('/news')) {
-      const now = Date.now();
+      const now = Date.parse('2026-07-01T12:00:00+08:00'); // 與 open() 的假時鐘一致
       return json({ articles: NEWS.articles.map(({ _ageHours, ...a }) => ({ ...a, published: new Date(now - _ageHours * 3600e3).toISOString() })) });
     }
     if (u.pathname.endsWith('/summary')) return json({ rosters: [] });
@@ -163,11 +163,12 @@ class CDP {
     await sleep(200);
   }
   /** 開頁面：預設清本地資料；攔 alert/confirm（在頁面任何程式碼之前）。回傳是否載入完成。 */
-  async open(url, { clear = true, net = 'fixture' } = {}) {
+  async open(url, { clear = true, net = 'fixture', clock = '2026-07-01T12:00:00+08:00' } = {}) {
     // ⚠ addScriptToEvaluateOnNewDocument 會累積：每次 open 先移除上一支，再整段包成 IIFE。
     if (this.initScript) await this.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: this.initScript });
     const r = await this.send('Page.addScriptToEvaluateOnNewDocument', { source: `(() => {
       ${clear ? 'try { localStorage.clear(); } catch(e) {}' : ''}
+      ${clock ? `{ const R = Date, off = R.parse('${clock}') - R.now(); class D extends R { constructor(...a) { if (a.length === 0) super(R.now() + off); else super(...a); } static now() { return R.now() + off; } } window.Date = D; }` : ''}
       window.__alerts = [];
       window.alert = (m) => { window.__alerts.push(String(m)); };
       window.confirm = (m) => { window.__alerts.push('confirm:' + String(m)); return true; };
@@ -559,6 +560,23 @@ try {
   }
   ok('13.nav 已安裝 SW 後再開（' + navCounts.length + ' 次）每次導覽次數都＝1（實測 ' + JSON.stringify(navCounts) + '）',
     navCounts.length === 2 && navCounts.every((x) => x === 1), navCounts);
+
+  /* ───────────────────────── 15 賽事結束後：不連 ESPN、有引導與跳轉 ───────────────────────── */
+  console.log('\n[15 賽事結束後（2026-10-12）：不再連 ESPN、首頁有引導／完成數／頁內跳轉]');
+  await c.width(390);
+  const pausedEnd = c.paused.length;
+  const loadedEnd = await c.open(BASE, { clock: '2026-10-12T10:00:00+08:00' });
+  await sleep(1500);
+  const endReq = c.paused.slice(pausedEnd).map((p) => new URL(p.url).hostname);
+  ok('15.1 賽後開啟不連 ESPN（外部請求 ' + JSON.stringify(endReq) + '）', loadedEnd && !endReq.some((h) => /espn\.com/.test(h)), endReq);
+  const mt15 = await mainText();
+  ok('15.2 首頁有「第一步」引導與主要按鈕「查看冠軍推估與對陣圖」', mt15.includes('第一步') && mt15.includes('查看冠軍推估與對陣圖'));
+  ok('15.3 首頁有賽果完成數「已有實際賽果 N / M 場」', /已有實際賽果 \d+ \/ \d+ 場/.test(mt15), mt15.slice(0, 200));
+  ok('15.4 頁內跳轉：4 顆目錄按鈕都對得到區塊 id', await c.eval(`[...document.querySelectorAll('.jump button')].every(b=>{const id=/'([^']+)'/.exec(b.getAttribute('onclick'))[1];return !!document.getElementById(id)})`));
+  ok('15.5 百分比都有標籤（近期賽事列與對陣卡不出現單獨的「NN%」）', await c.eval(`![...document.querySelectorAll('.near .ns, .krow .kprob')].some(e=>/^\s*\d+%\s*$/.test(e.textContent))`));
+  await tab('news');
+  const mtN = await mainText();
+  ok('15.6 新聞分頁賽後不放「抓取最新情報」按鈕、有說明', !mtN.includes('抓取最新情報') && mtN.includes('情報來源已停止更新'));
 
   console.log('\n[14 沒有錯誤]');
   ok('14.1 全程沒有未捕捉的 JS 例外（' + c.errors.length + ' 個）', c.errors.length === 0, c.errors.slice(0, 3));

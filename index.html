@@ -28,9 +28,9 @@
   --tint:#E0DFD6;
   --line:#E4DDCE;
   --line-focus:#6B6E66;
-  --txt:#141E2B; --sub:#6E8BA3; --green:#10b981; --gold:#DE9A45; --red:#ef4444;
-  --blue:#3b82f6; --grey:#64748b; --orange:#f97316;
-  --accent:#6B6E66;
+  --txt:#141E2B; --sub:#4A6279; --green:#0B7A57; --gold:#935606; --red:#C0262D;
+  --blue:#2B5C8A; --grey:#64748b; --orange:#935606;
+  --accent:#2B5C8A;
   --glass:#FFFFFF;
   --shadow:none;
   --glow:none;
@@ -46,7 +46,7 @@ body{background:var(--bg);min-height:100vh;
 .tabs button{flex:1;background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;
   padding:6px 2px;border-radius:12px;font-family:inherit;position:relative;transition:all 0.2s ease;}
 .tabs button:hover{color:var(--txt)}
-.bdg{position:absolute;top:0;right:16%;background:var(--red);color:#fff;border-radius:9px;font-size:13px;padding:1px 5px;font-weight:700}
+.bdg{position:absolute;top:0;right:16%;background:var(--gold);color:#fff;border-radius:9px;font-size:13px;padding:1px 5px;font-weight:700}
 .tabs button .ico{display:block;font-size:20px;margin-bottom:2px;transition:transform 0.2s ease;}
 .tabs button:hover .ico{transform:scale(1.1)}
 .tabs button.on{color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);font-weight:700;}
@@ -54,7 +54,7 @@ main{max-width:860px;margin:0 auto;padding:14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;transition:border-color 0.2s ease;}
 .card:hover{border-color:var(--accent);}
 .card h2{font-size:15px;color:var(--accent);margin-bottom:12px;font-weight:800;letter-spacing:0.5px;text-transform:uppercase}
-.hint{color:var(--sub);font-size:13px;line-height:1.7}
+.hint{color:var(--sub);font-size:15px;line-height:1.7}
 select,input[type=number],input[type=text]{background:#FFFFFF;border:1px solid var(--line);color:var(--txt);
   border-radius:10px;padding:8px 10px;font-size:14px;font-family:inherit;outline:none;transition:all 0.2s ease;}
 select:focus,input:focus{border-color:var(--accent);box-shadow:none}
@@ -73,38 +73,38 @@ button.btn.warn:hover{opacity:.9;}
 .swap{background:var(--card2);border:1px solid var(--line);color:var(--accent);border-radius:10px;
   padding:8px 0;cursor:pointer;font-size:16px;transition:all 0.2s ease;}
 .swap:hover{background:var(--tint);transform:rotate(180deg);border-color:var(--accent)}
-.probbar{display:flex;height:34px;border-radius:10px;overflow:hidden;margin:12px 0 6px;font-size:13px;font-weight:800}
+.probbar{display:flex;height:34px;border-radius:10px;overflow:hidden;margin:12px 0 6px;font-size:15px;font-weight:800}
 .probbar div{display:flex;align-items:center;justify-content:center;min-width:34px;color:#fff;white-space:nowrap;transition:flex 0.3s ease-in-out;}
 .pb-w{background:var(--green);color:#fff}
 .pb-d{background:var(--grey);color:#fff}
 .pb-l{background:var(--blue);color:#fff}
-.problab{display:flex;justify-content:space-between;font-size:13px;color:var(--sub);margin-bottom:8px}
+.problab{display:flex;justify-content:space-between;font-size:15px;color:var(--sub);margin-bottom:8px}
 .bigvs{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;text-align:center;margin:6px 0}
 .bigvs .tn{font-size:18px;font-weight:800;letter-spacing:0.5px}
 .bigvs .xg{font-size:28px;font-weight:800;color:var(--gold)}
-.bigvs .sub2{font-size:13px;color:var(--sub);text-transform:uppercase}
+.bigvs .sub2{font-size:15px;color:var(--sub);text-transform:uppercase}
 .breakdown{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
-.bd{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:13px}
-.bd b{display:block;margin-bottom:8px;font-size:13px;color:var(--accent)}
+.bd{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:15px}
+.bd b{display:block;margin-bottom:8px;font-size:15px;color:var(--accent)}
 .bd .li{display:flex;justify-content:space-between;color:var(--sub);padding:3px 0;border-bottom:1px solid var(--line)}
 .bd .li:last-of-type{border-bottom:none}
 .bd .li span:last-child{font-variant-numeric:tabular-nums;font-weight:600}
 .bd .li.tot{color:var(--gold);font-weight:700;border-top:1px dashed var(--line);margin-top:6px;padding-top:6px}
 .pos{color:var(--green)} .neg{color:var(--red)}
-table.score{border-collapse:collapse;margin:6px auto;font-size:13px;border-radius:8px;overflow:hidden;box-shadow:var(--shadow)}
+table.score{border-collapse:collapse;margin:6px auto;font-size:15px;border-radius:8px;overflow:hidden;box-shadow:var(--shadow)}
 table.score td,table.score th{width:38px;height:32px;text-align:center;border:1px solid var(--line);font-variant-numeric:tabular-nums}
 table.score th{color:var(--sub);background:var(--card2);font-weight:700}
 .toplist{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.toplist span{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font-size:13px}
+.toplist span{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font-size:15px}
 .toplist b{color:var(--gold)}
 .gfilter{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px}
 .gfilter button{background:var(--card);border:1px solid var(--line);color:var(--sub);border-radius:8px;
-  padding:6px 12px;cursor:pointer;font-size:13px;flex-shrink:0;font-family:inherit;transition:all 0.2s ease;}
+  padding:6px 12px;cursor:pointer;font-size:15px;flex-shrink:0;font-family:inherit;transition:all 0.2s ease;}
 .gfilter button:hover{color:var(--txt);background:var(--card2)}
 .gfilter button.on{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:800}
 .match{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--shadow)}
-.match .top{display:flex;justify-content:space-between;font-size:13px;color:var(--sub);margin-bottom:8px;gap:6px;flex-wrap:wrap}
-.match .tz{display:flex;flex-wrap:wrap;gap:3px 12px;font-size:13px;color:var(--sub);margin-bottom:8px}
+.match .top{display:flex;justify-content:space-between;font-size:15px;color:var(--sub);margin-bottom:8px;gap:6px;flex-wrap:wrap}
+.match .tz{display:flex;flex-wrap:wrap;gap:3px 12px;font-size:15px;color:var(--sub);margin-bottom:8px}
 .match .tz span{white-space:nowrap}
 .match .tz b{color:var(--txt);font-weight:600}
 .match .tz .tw b{color:var(--gold)}
@@ -115,13 +115,13 @@ table.score th{color:var(--sub);background:var(--card2);font-weight:700}
 .match input.done{border-color:var(--green);color:var(--green);background:rgba(16,185,129,0.08)}
 .minibar{display:flex;height:6px;border-radius:3px;overflow:hidden;margin-top:10px}
 .minibar div:nth-child(1){background:var(--green)}.minibar div:nth-child(2){background:var(--grey)}.minibar div:nth-child(3){background:var(--blue)}
-.match .pr{display:flex;justify-content:space-between;font-size:13px;color:var(--sub);margin-top:4px}
-.match .use{background:none;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:2px 0;font-family:inherit;transition:opacity 0.2s;}
+.match .pr{display:flex;justify-content:space-between;font-size:15px;color:var(--sub);margin-top:4px}
+.match .use{background:none;border:none;color:var(--blue);font-size:15px;cursor:pointer;padding:2px 0;font-family:inherit;transition:opacity 0.2s;}
 .match .use:hover{opacity:0.8}
-.match .wx{background:none;border:none;color:var(--orange);font-size:13px;cursor:pointer;padding:2px 0 2px 12px;font-family:inherit;transition:opacity 0.2s;}
+.match .wx{background:none;border:none;color:var(--orange);font-size:15px;cursor:pointer;padding:2px 0 2px 12px;font-family:inherit;transition:opacity 0.2s;}
 .match .wx:hover{opacity:0.8}
-.wxr{font-size:13px;color:var(--orange);margin-left:8px}
-.vtag{font-size:13px;background:rgba(249,115,22,0.15);color:var(--orange);border-radius:5px;padding:1px 5px}
+.wxr{font-size:15px;color:var(--orange);margin-left:8px}
+.vtag{font-size:15px;background:rgba(249,115,22,0.15);color:var(--orange);border-radius:5px;padding:1px 5px}
 .vtag.roof{background:rgba(59,130,246,0.15);color:var(--blue)}
 .tgroup{margin-bottom:16px}
 .tgroup h3{font-size:14px;color:var(--accent);margin:4px 2px 10px;letter-spacing:0.5px}
@@ -129,29 +129,29 @@ table.score th{color:var(--sub);background:var(--card2);font-weight:700}
 .trow .head{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
 .trow .head .nm{font-weight:700;flex:1}
 .trow .head .elo{font-variant-numeric:tabular-nums;font-size:14px;color:var(--gold);font-weight:800;text-shadow:var(--glow)}
-.trow .head .delta{font-size:13px;margin-left:4px;font-weight:600}
+.trow .head .delta{font-size:15px;margin-left:4px;font-weight:600}
 .trow .body{border-top:1px solid var(--line);padding:14px;background:var(--card2)}
-.prow{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.prow{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:15px}
 .prow:last-of-type{border-bottom:none}
 .prow .pn{flex:1;font-weight:600}
-.prow .pp{color:var(--sub);font-size:13px;width:28px}
-.prow .pw{color:var(--gold);font-size:13px;width:42px;text-align:right}
-.prow select{font-size:13px;padding:4px 6px}
+.prow .pp{color:var(--sub);font-size:15px;width:28px}
+.prow .pw{color:var(--gold);font-size:15px;width:42px;text-align:right}
+.prow select{font-size:15px;padding:4px 6px}
 .prow.st3 .pn{color:var(--red);text-decoration:line-through;opacity:0.6}
 .prow.st1 .pn{color:var(--orange)}
 .prow.st2 .pn{color:var(--green)}
-.traits{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;font-size:13px;display:flex;flex-direction:column;gap:6px}
+.traits{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;font-size:15px;display:flex;flex-direction:column;gap:6px}
 .traits .tl{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:3px 0;color:var(--sub)}
-.traits select,.traits input{width:90px;font-size:13px;padding:4px 6px}
+.traits select,.traits input{width:90px;font-size:15px;padding:4px 6px}
 .newsitem{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px;box-shadow:var(--shadow)}
 .newsitem.off{opacity:.45}
 .newsitem .nt{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .newsitem .nt b{flex:1;font-size:14px;font-weight:700}
-.newsitem .nd{font-size:13px;color:var(--sub);line-height:1.6}
-.newsitem .nc{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--sub)}
+.newsitem .nd{font-size:15px;color:var(--sub);line-height:1.6}
+.newsitem .nc{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:15px;color:var(--sub)}
 .newsitem .nc input[type=number]{width:64px}
-.newsitem .del{margin-left:auto;background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;font-family:inherit}
-.tagD{font-size:13px;font-weight:800;padding:2px 8px;border-radius:6px;font-variant-numeric:tabular-nums}
+.newsitem .del{margin-left:auto;background:none;border:none;color:var(--red);cursor:pointer;font-size:15px;font-family:inherit}
+.tagD{font-size:15px;font-weight:800;padding:2px 8px;border-radius:6px;font-variant-numeric:tabular-nums}
 .tagD.pos{background:rgba(16,185,129,0.15);color:var(--green)}
 .tagD.neg{background:rgba(239,68,68,0.15);color:var(--red)}
 .switch{position:relative;width:38px;height:22px;flex-shrink:0}
@@ -160,15 +160,15 @@ table.score th{color:var(--sub);background:var(--card2);font-weight:700}
 .switch i:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
 .switch input:checked+i{background:var(--green)}
 .switch input:checked+i:before{transform:translateX(16px)}
-table.sim{width:100%;border-collapse:collapse;font-size:13px}
+table.sim{width:100%;border-collapse:collapse;font-size:15px}
 table.sim th{color:var(--sub);font-weight:700;padding:8px 4px;text-align:right;border-bottom:1px solid var(--line)}
 table.sim th:first-child,table.sim td:first-child{text-align:left}
 table.sim td{padding:8px 4px;text-align:right;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
 table.sim td.ch{color:var(--gold);font-weight:800}
 table.sim td.mk{color:var(--blue)}
-.lup{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:13px;color:var(--sub);line-height:1.7}
+.lup{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;font-size:15px;color:var(--sub);line-height:1.7}
 .lup b{color:var(--txt)}
-.chip{display:inline-block;border-radius:6px;padding:3px 8px;font-size:13px;margin:3px 3px 0 0;cursor:pointer;border:1px solid var(--line);background:var(--card2);color:var(--txt);transition:all 0.15s ease;}
+.chip{display:inline-block;border-radius:6px;padding:3px 8px;font-size:15px;margin:3px 3px 0 0;cursor:pointer;border:1px solid var(--line);background:var(--card2);color:var(--txt);transition:all 0.15s ease;}
 .chip:hover{background:rgba(255,255,255,0.08);border-color:var(--blue)}
 .chip.red{color:var(--red);border-color:rgba(239,68,68,0.4)}
 .chip.red:hover{background:rgba(239,68,68,0.1)}
@@ -176,13 +176,13 @@ table.sim td.mk{color:var(--blue)}
 .chip.org:hover{background:rgba(249,115,22,0.1)}
 .chip.grn{color:var(--green);border-color:rgba(16,185,129,0.4);cursor:default}
 .chip.grn:hover{background:none}
-.pitem{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px;font-size:13px}
-.pitem .ph{font-weight:700;font-size:13px;margin-bottom:4px;color:var(--txt)}
+.pitem{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px;font-size:15px}
+.pitem .ph{font-weight:700;font-size:15px;margin-bottom:4px;color:var(--txt)}
 .pitem .pd{color:var(--sub);line-height:1.6;margin-bottom:8px}
 .pitem .pd a,.newsitem .nd a{color:var(--blue);font-weight:700;text-decoration:none;white-space:nowrap}
-.pitem .pc{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--sub)}
-.pitem select{max-width:150px;font-size:13px;padding:4px 6px}
-.pitem input{width:60px;font-size:13px;padding:4px 6px}
+.pitem .pc{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:15px;color:var(--sub)}
+.pitem select{max-width:150px;font-size:15px;padding:4px 6px}
+.pitem input{width:60px;font-size:15px;padding:4px 6px}
 .bk-wrap{overflow:auto;padding-bottom:12px;-webkit-overflow-scrolling:touch;position:relative}
 .bk{position:relative}
 .bk svg{position:absolute;inset:0;pointer-events:none}
@@ -194,7 +194,7 @@ table.sim td.mk{color:var(--blue)}
 .bkt+.bkt{border-top:1px dashed var(--line)}
 .bkt.win{background:rgba(16,185,129,0.12);font-weight:700;color:#34d399}
 .bkt.lose{opacity:.45}
-.bkt .pcv{color:var(--sub);font-size:13px;font-variant-numeric:tabular-nums;font-weight:600}
+.bkt .pcv{color:var(--sub);font-size:15px;font-variant-numeric:tabular-nums;font-weight:600}
 .bkt.win .pcv{color:#34d399}
 .bklab{position:absolute;color:var(--gold);font-weight:800;font-size:13px;text-align:center;letter-spacing:0.5px;text-transform:uppercase}
 .bkchamp{position:absolute;border:1.5px solid var(--gold);border-radius:12px;background:color-mix(in srgb,var(--gold) 12%,transparent);text-align:center;padding:6px 4px}
@@ -202,30 +202,30 @@ table.sim td.mk{color:var(--blue)}
 .bkchamp .n{font-size:13px;font-weight:800;color:var(--gold);white-space:nowrap}
 .flow{display:flex;align-items:stretch;gap:8px;overflow-x:auto;padding:4px 0}
 .flow .step{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:100px;flex-shrink:0;text-align:center}
-.flow .step b{display:block;font-size:13px;color:var(--gold);margin-bottom:4px}
-.flow .step small{color:var(--sub);font-size:13px;line-height:1.4;display:block}
+.flow .step b{display:block;font-size:15px;color:var(--gold);margin-bottom:4px}
+.flow .step small{color:var(--sub);font-size:15px;line-height:1.4;display:block}
 .flow .arr{display:flex;align-items:center;color:var(--sub);font-size:16px;flex-shrink:0}
 .mf{border-left:3px solid var(--blue);padding:8px 0 8px 12px;margin-bottom:10px;background:rgba(255,255,255,0.01)}
 .mf b{font-size:14px;color:var(--txt)}
-.mf .form{color:var(--gold);font-size:13px;font-variant-numeric:tabular-nums;margin:3px 0;font-weight:600}
-.mf .src{color:var(--sub);font-size:13px;line-height:1.6}
+.mf .form{color:var(--gold);font-size:15px;font-variant-numeric:tabular-nums;margin:3px 0;font-weight:600}
+.mf .src{color:var(--sub);font-size:15px;line-height:1.6}
 .mf .src em{color:var(--green);font-style:normal}
-.srcgrid{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px;color:var(--sub)}
+.srcgrid{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:15px;color:var(--sub)}
 .srcgrid b{color:var(--txt);white-space:nowrap}
-.calib{display:flex;gap:10px;flex-wrap:wrap;font-size:13px}
+.calib{display:flex;gap:10px;flex-wrap:wrap;font-size:15px}
 .calib .cc{flex:1;min-width:130px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px}
 .calib .cc .tm{display:flex;justify-content:space-between;padding:3px 0;color:var(--sub);border-bottom:1px solid rgba(255,255,255,0.02)}
 .calib .cc .tm:last-of-type{border-bottom:none}
 .calib .cc .tm b{color:var(--txt)}
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:86px;background:rgba(16,185,129,0.95);color:#022c22;
-  font-weight:700;padding:10px 20px;border-radius:12px;z-index:99;opacity:0;pointer-events:none;transition:opacity .3s;font-size:13px;white-space:nowrap}
+  font-weight:700;padding:10px 20px;border-radius:12px;z-index:99;opacity:0;pointer-events:none;transition:opacity .3s;font-size:15px;white-space:nowrap}
 #toast.show{opacity:1}
 .modal{position:fixed;inset:0;background:rgba(20,30,43,0.45);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
 .modal.show{display:flex}
 .modal .box{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;width:100%;max-width:440px;max-height:85vh;overflow-y:auto}
 .modal .box h2{color:var(--accent);font-size:17px;margin-bottom:16px;font-weight:800;letter-spacing:0.5px}
 .set{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line);font-size:14px}
-.set small{display:block;color:var(--sub);font-size:13px;margin-top:3px}
+.set small{display:block;color:var(--sub);font-size:15px;margin-top:3px}
 .set small.why{color:var(--blue);margin-top:4px;line-height:1.5}
 .set small.why b{color:var(--gold)}
 .set>div:first-child{flex:1;padding-right:10px}
@@ -236,42 +236,64 @@ table.sim td.mk{color:var(--blue)}
 .near .nr{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer;transition:all .15s ease}
 .near .nr:hover{border-color:var(--blue);background:rgba(255,255,255,0.05);transform:translateY(-1px)}
 .near .nr.today{border-color:var(--gold);box-shadow:var(--glow);background:rgba(251,191,36,.05)}
-.near .nd{font-size:13px;color:var(--sub);text-align:center;line-height:1.3;min-width:42px}
-.near .nd b{display:block;color:var(--gold);font-size:13px}
-.near .nt{font-size:13px;font-weight:600;line-height:1.4}
+.near .nd{font-size:15px;color:var(--sub);text-align:center;line-height:1.3;min-width:42px}
+.near .nd b{display:block;color:var(--gold);font-size:15px}
+.near .nt{font-size:15px;font-weight:600;line-height:1.4}
 .near .ns{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--gold);white-space:nowrap}
-.near .ns.pred{color:var(--sub);font-size:13px;font-weight:600}
+.near .ns.pred{color:var(--sub);font-size:15px;font-weight:600}
 .match.today{border-color:var(--gold);box-shadow:var(--glow)}
 .koround{margin:14px 0 6px;color:var(--gold);font-weight:800;font-size:14px;letter-spacing:.5px}
-.koround small{color:var(--sub);font-weight:500;font-size:13px;margin-left:6px}
+.koround small{color:var(--sub);font-weight:500;font-size:15px;margin-left:6px}
 /* 直式對陣卡 */
 .kmatch{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px;box-shadow:var(--shadow)}
 .kmatch.today{border-color:var(--gold);box-shadow:var(--glow)}
-.kmeta{display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;font-size:13px;color:var(--sub);margin-bottom:7px}
+.kmeta{display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap;font-size:15px;color:var(--sub);margin-bottom:7px}
 .kmeta .kstat{font-weight:700;white-space:nowrap}
 .krow{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:10px;font-size:15px;font-weight:700;border:1.5px solid transparent}
 .krow+.krow{margin-top:5px}
 .krow .kteam{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .krow .kprob{color:var(--sub);font-variant-numeric:tabular-nums}
 .krow .knum{color:var(--txt);font-size:18px;font-variant-numeric:tabular-nums}
-.krow .kchk{color:var(--green);font-weight:800}
-.krow.win{background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.45)}
-.krow.win .kprob{color:var(--green)}
-.krow.lose{opacity:.6}
+.krow .kchk{font-weight:800}
+.krow.lose .kteam{color:var(--sub)}
 .krow.pick{cursor:pointer}.krow.pick:active{background:rgba(59,130,246,.12)}
 .kbar{display:flex;height:5px;border-radius:3px;overflow:hidden;margin:8px 2px 6px}
-.kbar i:nth-child(1){background:var(--green)}.kbar i:nth-child(2){background:var(--blue)}
-.kuse{background:none;border:none;color:var(--blue);font-size:13px;cursor:pointer;padding:2px 0;font-family:inherit}
+.kuse{background:none;border:none;color:var(--blue);font-size:15px;cursor:pointer;padding:2px 0;font-family:inherit}
 .kchamp{background:color-mix(in srgb,var(--gold) 12%,transparent);border:1.5px solid var(--gold);border-radius:16px;padding:14px 16px;margin-bottom:10px;text-align:center}
-.kchamp .kct{font-size:13px;color:var(--sub);font-weight:700}
+.kchamp .kct{font-size:15px;color:var(--sub);font-weight:700}
 .kchamp .kcn{font-size:23px;font-weight:900;margin-top:3px}
-.bt-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px}
+.bt-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:15px}
 .bt-row:last-child{border-bottom:none}
 .bt-row .ok{color:var(--green);font-weight:700}
 .bt-row .no{color:var(--red);font-weight:700}
 .bt-row .pp{font-variant-numeric:tabular-nums;color:var(--sub);white-space:nowrap}
-.fix{display:flex;justify-content:space-between;align-items:center;gap:10px;background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.25);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:13px}
+.fix{display:flex;justify-content:space-between;align-items:center;gap:10px;background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.25);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:15px}
 .fix b{color:var(--txt)}
+/* ---- 2026-10-12 體驗改善 ---- */
+body.theme-stone{--accent:#2B5C8A}
+.rl-signature{--muted:#4A6279}
+.rl-sig-quote{color:#141E2B}
+.rl-sig-by{color:#4A6279}
+.rl-appbar .reportFab{width:40px;height:40px}
+.rl-appbar .rl-btn{min-height:40px}
+.sec{scroll-margin-top:84px}
+.btn.big{width:100%;max-width:420px;display:block;margin-left:auto;margin-right:auto;min-height:48px;font-size:17px;margin-top:12px}
+.welcome .steps{margin:10px 0 0 22px;line-height:1.7;font-size:15px}
+.jump{display:flex;gap:8px;overflow-x:auto;margin-bottom:14px;padding-bottom:2px}
+.jump button{flex:1 0 auto;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid var(--line);background:var(--card);color:var(--accent);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer}
+.jump button:active{background:var(--card2)}
+.progtxt{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:15px}.progtxt span{color:var(--sub)}
+.progbar{height:10px;border-radius:5px;background:var(--card2);border:1px solid var(--line);overflow:hidden;margin-top:8px}
+.progbar i{display:block;height:100%;background:var(--accent)}
+#topfab{position:fixed;right:12px;bottom:84px;z-index:49;min-width:48px;height:48px;border-radius:24px;border:1px solid var(--line);background:var(--card);color:var(--accent);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);display:none}
+#topfab.show{display:block}
+main.t-ko{max-width:720px}
+.kuse,.match .use,.match .wx{min-height:44px}
+.krow.win{background:color-mix(in srgb,var(--accent) 10%,transparent);border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+.krow.win .kprob,.krow .kchk{color:var(--accent)}
+.kbar i:nth-child(1){background:var(--accent)}.kbar i:nth-child(2){background:#B9C3CC}
+.rl-appbar .rl-sub{color:color-mix(in srgb,var(--on) 85%,transparent)}
+.near .ns.pred{text-align:right;line-height:1.35}
 @media(max-width:480px){ table.score td,table.score th{width:32px;height:28px} .breakdown{grid-template-columns:1fr} }
 @media(max-width:430px){ .tabs{padding:5px 2px calc(5px + env(safe-area-inset-bottom))} .tabs button{font-size:13px;padding:6px 1px} .tabs button .ico{font-size:18px} }
 /* 手機頂欄防跑版：標題那格可縮(min-width:0)、字級收斂、副標不換行(過長顯示…) */
@@ -317,19 +339,20 @@ table.sim td.mk{color:var(--blue)}
     <div class="rl-sub">美加墨 48 強 · 四強聚焦版 v4.7</div>
   </div>
   <span class="rl-spacer"></span>
-  <button class="rl-btn rl-btn--primary" onclick="openSettings()">⚙️ 設定</button>
+  <button class="rl-btn rl-btn--primary" onclick="openSettings()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="vertical-align:-3px;margin-right:4px"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>設定</button>
 </header>
 <main id="main"></main>
 <footer class="rl-signature">
   <div class="rl-sig-row">
-    <span class="rl-mkcol" style="display:inline-flex;flex-direction:column;align-items:center;gap:3px"><img class="rl-sig-glyph" src="rl-mark-aconcagua-navy.png" width="66" height="34" alt="" style="object-fit:contain"><span style="font-family:'Noto Serif TC',serif;font-size:14px;font-weight:600;letter-spacing:.5px;color:currentColor">Aconcagua</span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:2px;color:#8794a3">6,961 M</span></span>
+    <span class="rl-mkcol" style="display:inline-flex;flex-direction:column;align-items:center;gap:3px"><img class="rl-sig-glyph" src="rl-mark-aconcagua-navy.png" width="66" height="34" alt="" style="object-fit:contain"><span style="font-family:'Noto Serif TC',serif;font-size:14px;font-weight:600;letter-spacing:.5px;color:currentColor">Aconcagua</span><span style="font-family:'IBM Plex Mono',monospace;font-size:15px;letter-spacing:2px;color:#4A6279">6,961 M</span></span>
     <span class="rl-sig-rule" style="height:88px"></span>
     <p class="rl-sig-quote">Messi 就是我的神。</p>
   </div>
   <p class="rl-sig-by">Ridgeline · by Lucas</p>
-  <p style="font-size:13px;line-height:1.7;color:var(--muted,#6E8BA3);max-width:640px;margin:14px auto 0">© 2026 Ridgeline · Ridgeline · by Lucas｜免費使用；著作權皆屬作者，未經同意請勿重製、散布或作商業用途。<br>⚠️ 免責聲明：本 App 之推估結果僅供娛樂參考，非投注建議，實際賽事結果請以官方公告為準，請理性看待、量力而為。</p>
+  <p style="font-size:15px;line-height:1.7;color:var(--muted,#6E8BA3);max-width:640px;margin:14px auto 0">© 2026 Ridgeline · Ridgeline · by Lucas｜免費使用；著作權皆屬作者，未經同意請勿重製、散布或作商業用途。<br>⚠️ 免責聲明：本 App 之推估結果僅供娛樂參考，非投注建議，實際賽事結果請以官方公告為準，請理性看待、量力而為。</p>
 </footer>
 <nav class="tabs" id="tabs"></nav>
+<button id="topfab" aria-label="回到頁面頂端" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑ 頂端</button>
 
 <div class="modal" id="modal"><div class="box" id="modalBox"></div></div>
 
@@ -338,6 +361,19 @@ table.sim td.mk{color:var(--blue)}
 'use strict';
 /* 內建資料已移至 世界盃資料.js（於上方先行載入）；以下為程式邏輯。 */
 const STORE_KEY='wc2026_predictor_v2';
+/* 旗幟一致化：Windows 等平台不支援國旗 emoji，會把多數隊伍顯示成「FR」字母、英蘇格蘭卻是黑旗。
+   偵測不支援就全部改用同一種字母代碼，支援就全部用 emoji 旗，避免同一列混用兩種風格。 */
+(function(){ try{
+  const cx=document.createElement('canvas').getContext('2d'); cx.font='32px sans-serif';
+  const w=s=>cx.measureText(s).width;
+  const ok=w(String.fromCodePoint(0x1F1EB,0x1F1F7))<w(String.fromCodePoint(0x1F1EB))+w(String.fromCodePoint(0x1F1F7))-1;
+  if(ok)return;
+  const TAG={gbeng:'ENG',gbsct:'SCO',gbwls:'WAL',gbnir:'NIR'};
+  TEAMS.forEach(t=>{ const cps=Array.from(t[5]||'').map(c=>c.codePointAt(0)); let code='';
+    if(cps.length&&cps[0]>=0x1F1E6&&cps[0]<=0x1F1FF) code=cps.map(c=>String.fromCharCode(65+c-0x1F1E6)).join('');
+    else{ const tag=cps.filter(c=>c>=0xE0061&&c<=0xE007A).map(c=>String.fromCharCode(c-0xE0000)).join(''); code=TAG[tag]||''; }
+    if(code)t[5]=code; });
+}catch(e){} })();
 
 const SIM_WORKER_CODE = `
 self.onmessage = function(e) {
@@ -815,10 +851,11 @@ function renderTabs(){
   document.getElementById('tabs').innerHTML=TABS.map(t=>
     `<button class="${curTab===t[0]?'on':''}" onclick="goTab('${t[0]}')">${t[0]==='news'&&pendingNews.length?`<span class="bdg">${pendingNews.length}</span>`:''}<span class="ico">${t[1]}</span>${t[2]}</button>`).join('');
 }
+window.addEventListener('scroll',()=>{ const f=document.getElementById('topfab'); if(f)f.classList.toggle('show',window.scrollY>900); },{passive:true});
 function goTab(t){ curTab=t; render(); window.scrollTo(0,0); }
 function render(){
   renderTabs();
-  const m=document.getElementById('main');
+  const m=document.getElementById('main'); m.className='t-'+curTab;
   if(curTab==='pred')m.innerHTML=viewPred();
   else if(curTab==='sched')m.innerHTML=viewSched();
   else if(curTab==='ko')m.innerHTML=viewKO();
@@ -898,7 +935,7 @@ function viewPred(){
       <button class="swap" aria-label="對調主客隊" onclick="[S.pA,S.pB]=[S.pB,S.pA];[S.restA,S.restB]=[S.restB,S.restA];save();render()">⇄</button>
       <select onchange="S.pB=+this.value;save();render()">${teamOptions(b)}</select>
     </div>
-    <div class="row" style="margin-top:10px;font-size:13px;color:var(--sub)">場地：
+    <div class="row" style="margin-top:10px;font-size:15px;color:var(--sub)">場地：
       <select onchange="S.pV=this.value;save();render()">${vOpts}</select>
       　休息天數：左 <input type="number" min="2" max="8" style="width:54px" value="${S.restA}" placeholder="–" onchange="S.restA=this.value;save();render()">
       右 <input type="number" min="2" max="8" style="width:54px" value="${S.restB}" placeholder="–" onchange="S.restB=this.value;save();render()">
@@ -974,7 +1011,7 @@ function nearRow(x){
   let right;
   if(x.sc) right=`<span class="ns">${x.sc[0]} : ${x.sc[1]}</span>`;
   else if(x.kind==='ko'&&x.winner!=null) right=`<span class="ns">✓ ${TEAMS[x.winner][1]}</span>`;
-  else right=`<span class="ns pred">${x.kind==='ko'&&x.pa!=null?Math.round(Math.max(x.pa,1-x.pa)*100)+'%':'預測'}</span>`;
+  else right=`<span class="ns pred">${x.kind==='ko'&&x.pa!=null?TEAMS[x.pa>=0.5?x.a:x.b][1]+'<br>晉級 '+Math.round(Math.max(x.pa,1-x.pa)*100)+'%':'預測'}</span>`;
   return `<div class="nr ${isToday?'today':''}" onclick="S.pA=${x.a};S.pB=${x.b};S.pV='${x.vi}';save();goTab('pred')">
     <div class="nd"><b>${md}</b>${wd?'週'+wd:''}${tw?'<br>'+tw:''}</div>
     <div class="nt">${tag}${TEAMS[x.a][5]} ${TEAMS[x.a][1]} <span style="color:var(--sub)">vs</span> ${TEAMS[x.b][5]} ${TEAMS[x.b][1]}</div>
@@ -989,7 +1026,7 @@ function nearCard(){
   if(win.length<3){ win=all.slice().sort((a,b)=>Math.abs(a._d)-Math.abs(b._d)).slice(0,6); }
   win.sort((a,b)=>a._d-b._d||((a.kick||'9')<(b.kick||'9')?-1:1));
   const todayN=win.filter(x=>x._d===0).length;
-  return `<div class="card"><h2>📍 近期賽事${todayN?`（今日 ${todayN} 場）`:''}</h2>
+  return `<div class="card sec" id="sec-near"><h2>📍 近期賽事${todayN?`（今日 ${todayN} 場）`:''}</h2>
     <div class="near">${win.map(nearRow).join('')}</div>
     <div class="hint" style="margin-top:8px">顯示今天前後的比賽（小組賽標組別、淘汰賽標輪次；「預測」＝尚未鎖定的推估對陣）。點任一場即帶入對戰預測。</div></div>`;
 }
@@ -1376,7 +1413,7 @@ function viewTeams(){
       if(t[2]!==g)return;
       const bk=eloBreak(i); const d=bk.eff-bk.base;
       h+=`<div class="trow"><div class="head" onclick="openTeam=openTeam===${i}?-1:${i};render()">
-        <span style="font-size:20px">${t[5]}</span><span class="nm">${t[1]} <span style="color:var(--sub);font-size:13px">${t[0]}</span></span>
+        <span style="font-size:20px">${t[5]}</span><span class="nm">${t[1]} <span style="color:var(--sub);font-size:15px">${t[0]}</span></span>
         <span class="elo">${Math.round(bk.eff)}</span>
         ${d!==0?`<span class="delta ${d>0?'pos':'neg'}">(${sgn(Math.round(d))})</span>`:''}
         <span style="color:var(--sub)">${openTeam===i?'▲':'▼'}</span>
@@ -1386,7 +1423,7 @@ function viewTeams(){
         const trSel=(k,lab)=>`<div class="tl"><span>${lab}</span>
           <select onchange="setTrait(${i},${k},+this.value)">${[1,2,3,4,5].map(v=>`<option value="${v}" ${tr[k]===v?'selected':''}>${v}${v===3?'（中性）':''}</option>`).join('')}</select></div>`;
         h+=`<div class="body">
-        <div class="row" style="margin-bottom:8px;font-size:13px;color:var(--sub)">
+        <div class="row" style="margin-bottom:8px;font-size:15px;color:var(--sub)">
           基準 Elo ${bk.base}｜身價 €${MV[i]}M｜FIFA ${t[4]}｜手動調整
           <input type="number" step="5" value="${S.adj[i]||0}" style="width:70px" onchange="S.adj[${i}]=parseInt(this.value)||0;save();render()">
         </div>
@@ -1479,6 +1516,7 @@ function newsRelevant(txt,delta,players){
   return false;
 }
 async function fetchDailyNews(silent){
+  if(TOURNEY_ENDED){ if(!silent)toast('2026 世界盃已結束，ESPN 情報已停止更新'); return; } // 賽後不再連 ESPN 新聞端點（瀏覽器端 CORS 被擋、會在 console 留錯誤）
   try{
     const j=await(await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/news?limit=50')).json();
     const seen=new Set(S.seenNews||[]);
@@ -1552,7 +1590,7 @@ function acceptAllPending(){ // 只納入「球隊已判斷＋影響≠0」的�
 function viewNews(){
   let h=`<div class="card"><h2>📡 每日情報（ESPN 世界盃即時新聞）</h2>
     <div class="row" style="margin-bottom:4px">
-      <button class="btn" onclick="fetchDailyNews(false)">抓取最新情報</button>
+      ${TOURNEY_ENDED?'<span class="hint">✅ 賽事已結束，情報來源已停止更新。</span>':'<button class="btn" onclick="fetchDailyNews(false)">抓取最新情報</button>'}
       ${pendingNews.filter(p=>p.team>=0&&p.delta!==0).length?`<button class="btn" style="background:var(--gold);color:#3a2c00" onclick="acceptAllPending()">⚡ 一鍵納入（${pendingNews.filter(p=>p.team>=0&&p.delta!==0).length} 則有影響）</button>`:''}
       ${pendingNews.length?`<button class="btn sec" onclick="ignoreAllPending()">全部忽略</button>`:''}
       <span class="hint">${S.lastNewsTs?'上次抓取：'+new Date(S.lastNewsTs).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'尚未抓取'}</span>
@@ -1570,8 +1608,8 @@ function viewNews(){
           ${TEAMS.map((t,i)=>`<option value="${i}" ${p.team===i?'selected':''}>${t[5]} ${t[1]}</option>`).join('')}
         </select>
         影響 <input type="number" aria-label="影響值" value="${p.delta}" onchange="pendingNews[${k}].delta=parseInt(this.value)||0;save()">
-        <button class="btn" style="padding:5px 12px;font-size:13px" onclick="acceptPending(${k})">納入</button>
-        <button class="btn sec" style="padding:5px 12px;font-size:13px" onclick="ignorePending(${k})">忽略</button>
+        <button class="btn" style="padding:5px 12px;font-size:15px" onclick="acceptPending(${k})">納入</button>
+        <button class="btn sec" style="padding:5px 12px;font-size:15px" onclick="ignorePending(${k})">忽略</button>
       </div>
     </div>`;
   });
@@ -1695,7 +1733,7 @@ function viewAcc(){
     const golTxt=Math.abs(aT-pT)<0.15?'場均進球與推估吻合':aT>pT?`實際進球（${aT.toFixed(2)}）比推估（${pT.toFixed(2)}）<b>多</b>`:`實際進球（${aT.toFixed(2)}）比推估（${pT.toFixed(2)}）<b>少</b>`;
     const drwTxt=Math.abs(aD-pD)<0.04?'平手率吻合':aD>pD?`平手實際偏<b>多</b>（${pct1(aD)} vs 推估 ${pct1(pD)}）`:`平手實際偏<b>少</b>（${pct1(aD)} vs 推估 ${pct1(pD)}）`;
     h+=`<div class="card"><h2>📝 總評</h2>
-      <div class="hint" style="line-height:1.9;font-size:13px">
+      <div class="hint" style="line-height:1.9;font-size:15px">
       已驗證 <b>${G.n}</b> 場小組賽${K.n?`＋ <b>${K.n}</b> 場淘汰賽`:''}。勝平負<b>命中率 ${pct1(hit)}</b>（${G.hit}/${G.n}），技巧分 ${skillTxt}（Brier ${briA.toFixed(3)}，亂猜=0.667）。<br>
       • 強隊校準：${favTxt}。<br>
       • 進球規模：${golTxt}。<br>
@@ -1707,7 +1745,7 @@ function viewAcc(){
   /* ── B. 預測 vs 實際 差異表 ── */
   if(G.n>0){
     const drow=(lab,mod,real,delta,note)=>`<tr><td style="text-align:left">${lab}</td><td>${mod}</td><td>${real}</td>
-      <td style="color:var(--gold);font-weight:700">${delta}</td><td style="text-align:left;color:var(--sub);font-size:13px">${note||''}</td></tr>`;
+      <td style="color:var(--gold);font-weight:700">${delta}</td><td style="text-align:left;color:var(--sub);font-size:15px">${note||''}</td></tr>`;
     h+=`<div class="card"><h2>📊 預測 vs 實際（差異表）</h2>
       <div style="overflow-x:auto"><table class="sim"><tr><th style="text-align:left">指標</th><th>模型推估</th><th>真實</th><th>差異 Δ</th><th style="text-align:left">解讀</th></tr>
       ${drow('場均總進球',pT.toFixed(2),aT.toFixed(2),sg(aT-pT,2),Math.abs(aT-pT)<0.15?'吻合':(aT>pT?'實際更多進球':'實際更少進球'))}
@@ -1733,7 +1771,7 @@ function viewAcc(){
         <div class="cc"><div class="tm"><b>📉 低於預期 Top5</b><span>Δ勝點</span></div>
           ${under.length?under.map(t=>`<div class="tm"><span>${TEAMS[t.i][5]} ${TEAMS[t.i][1]}</span><b class="no">${sg(t.d,1)}</b></div>`).join(''):'<div class="tm"><span>—</span><span></span></div>'}</div>
       </div>
-      <details style="margin-top:10px"><summary style="cursor:pointer;color:var(--blue);font-size:13px">📄 全部 ${td.length} 隊（依 Δ 排序）</summary>
+      <details style="margin-top:10px"><summary style="cursor:pointer;color:var(--blue);font-size:15px">📄 全部 ${td.length} 隊（依 Δ 排序）</summary>
         <div style="overflow:auto;max-height:340px;margin-top:8px"><table class="sim"><tr><th style="text-align:left">球隊</th><th>場</th><th>實際分</th><th>期望分</th><th>Δ</th></tr>
         ${td.map(trow).join('')}</table></div></details></div>`;
   }
@@ -1799,7 +1837,7 @@ function viewAcc(){
       <div class="calib" style="margin-bottom:8px"><div class="cc">
         <div class="tm"><span>晉級命中率</span><b>${pct1(K.hit/K.n)}（${K.hit}/${K.n}）</b></div>
         <div class="tm"><span>對勝方平均信心</span><b>${pct1(K.conf/K.n)}</b></div>
-        <div class="tm"><span style="font-size:13px;color:var(--sub)">淘汰賽含加時/PK，僅評晉級方向（比分見淘汰賽分頁）</span><b></b></div>
+        <div class="tm"><span style="font-size:15px;color:var(--sub)">淘汰賽含加時/PK，僅評晉級方向（比分見淘汰賽分頁）</span><b></b></div>
       </div></div>
       <div style="overflow-x:auto"><table class="sim"><tr><th style="text-align:left">M</th><th style="text-align:left">對戰</th><th>實際晉級</th><th>模型給勝方</th></tr>
       ${ups.map(r=>`<tr><td style="text-align:left">M${r.m}</td><td style="text-align:left">${TEAMS[r.a][5]}${TEAMS[r.a][1].slice(0,3)} v ${TEAMS[r.b][5]}${TEAMS[r.b][1].slice(0,3)}</td>
@@ -1957,7 +1995,7 @@ function koMatchCard(ms,r,i){
     const isWin=ms.winner===t;
     return `<div class="krow ${isWin?'win':'lose'}${clickable?' pick':''}" ${clickable?`onclick="pickWin(${r},${i},${t})"`:''}>
       <span class="kteam">${TEAMS[t][5]} ${TEAMS[t][1]}</span>
-      ${played?`<b class="knum">${scv}</b>`:`<span class="kprob">${Math.round(prob*100)}%</span>`}${isWin?'<span class="kchk">✓</span>':''}</div>`;
+      ${played?`<b class="knum">${scv}</b>`:`<span class="kprob">晉級 ${Math.round(prob*100)}%</span>`}${isWin?'<span class="kchk">✓</span>':''}</div>`;
   };
   return `<div class="kmatch${today?' today':''}">
     <div class="kmeta"><span>${ms.fixed?'🔒 ':''}M${ms.m} · ${twWhen} · 📍${v[0]}${alt}${roof}</span><span class="kstat">${status}</span></div>
@@ -1974,23 +2012,23 @@ function semiFocus(){
   const D=SEMI_FOCUS;
   let h=`<style>
   .semitie{border:1px solid var(--line)}
-  .sttop{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--sub)}
+  .sttop{display:flex;justify-content:space-between;align-items:center;font-size:15px;color:var(--sub)}
   .stt{font-weight:700;color:var(--gold)} .stw{color:var(--sub)}
   .stvs{font-size:18px;font-weight:800;text-align:center;margin:6px 0 8px}
-  .sth2h{font-size:13px;color:var(--sub);line-height:1.55;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:10px}
+  .sth2h{font-size:15px;color:var(--sub);line-height:1.55;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:10px}
   .stgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .stcol{border:1px solid var(--line);border-radius:12px;padding:10px}
   .sthead{display:flex;align-items:center;gap:6px;font-size:15px;margin-bottom:6px;flex-wrap:wrap}
-  .stelo{margin-left:auto;font-size:13px;color:var(--sub);font-weight:400}
+  .stelo{margin-left:auto;font-size:15px;color:var(--sub);font-weight:400}
   .stbar{height:7px;background:var(--bg);border-radius:5px;overflow:hidden;border:1px solid var(--line)}
   .stbar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--gold))}
-  .stadv{font-size:13px;color:var(--sub);margin:3px 0 8px}
-  .stit{font-size:13px;line-height:1.5;margin-bottom:5px}
+  .stadv{font-size:15px;color:var(--sub);margin:3px 0 8px}
+  .stit{font-size:15px;line-height:1.5;margin-bottom:5px}
   .stit span{color:var(--sub);font-weight:700;margin-right:4px}
-  .stverdict{margin-top:10px;font-size:13px;line-height:1.55;background:var(--bg);border-left:3px solid var(--gold);border-radius:8px;padding:8px 10px}
+  .stverdict{margin-top:10px;font-size:15px;line-height:1.55;background:var(--bg);border-left:3px solid var(--gold);border-radius:8px;padding:8px 10px}
   @media(max-width:560px){.stgrid{grid-template-columns:1fr}}
   </style>`;
-  h+=`<div class="card sfhead"><h2>🔥 四強焦點</h2>
+  h+=`<div class="card sfhead sec" id="sec-focus"><h2>🔥 四強焦點</h2>
     <div class="hint">四隊的狀態、歷史教戰、近況戰績與盤口一覽；「模型晉級％」用本器有效 Elo（含傷病/特質/場館）計算，盤口為 ${D.asof} 快照。</div></div>`;
   D.ties.forEach(t=>{
     const a=t.a,b=t.b,vi=t.vi;
@@ -2021,23 +2059,39 @@ function semiFocus(){
       <div class="stverdict">💰 賭盤建議：${verdict}</div>
     </div>`;
   });
-  h+=`<div class="card hint" style="font-size:13px;line-height:1.6">⚠️「盤口／賭盤建議」僅為<b>模型 vs 市場</b>的分析參考，<b>非投注建議</b>；博弈有風險，請理性娛樂、量力而為。盤口為 ${D.asof} 快照，實際賠率隨時變動。</div>`;
+  h+=`<div class="card hint" style="font-size:15px;line-height:1.6">⚠️「盤口／賭盤建議」僅為<b>模型 vs 市場</b>的分析參考，<b>非投注建議</b>；博弈有風險，請理性娛樂、量力而為。盤口為 ${D.asof} 快照，實際賠率隨時變動。</div>`;
   return h;
 }
+function jumpTo(id){ const e=document.getElementById(id); if(e)e.scrollIntoView({behavior:'smooth',block:'start'}); }
+function progressCard(){
+  let all=[]; try{ all=allMatchesUnified(); }catch(e){}
+  const tot=all.length, done=all.filter(x=>x.kind==='ko'?!!x.locked:!!x.sc).length;
+  if(!tot)return '';
+  const pc=Math.round(done/tot*100);
+  return `<div class="card prog"><h2>✅ 賽果記錄進度</h2>
+    <div class="progtxt"><b>已有實際賽果 ${done} / ${tot} 場</b><span>（其餘場次為模型推估）</span></div>
+    <div class="progbar" role="img" aria-label="已有實際賽果 ${done} 場，共 ${tot} 場"><i style="width:${pc}%"></i></div>
+    <div class="progtxt" style="margin-top:10px"><b>情報已啟用 ${(S.news||[]).filter(n=>n.on).length} / ${(S.news||[]).length} 則</b><span>（影響球隊有效 Elo 的新聞）</span></div></div>`;
+}
 function viewKO(){
-  let h=`<div class="card" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-    ${TOURNEY_ENDED?ENDED_NOTE:`<button class="btn" onclick="updateScores(this)">🔄 一鍵更新對陣／比分</button>
-    <span class="hint">需網路。小組賽全部完賽後，自動抓官方 32 強對陣與淘汰賽賽果逐場鎖定（🔒＝官方對陣、✓＝官方賽果）。</span>`}</div>`;
+  let h=`<div class="card welcome"><h2>👋 第一次使用？三步驟上手</h2>
+    ${TOURNEY_ENDED?ENDED_NOTE:`<span class="hint">小組賽完賽後會自動抓官方對陣與賽果。</span>`}
+    <ol class="steps"><li><b>第一步</b>：先看下方「四強焦點」，了解四支球隊的狀態與盤口。</li>
+    <li><b>第二步</b>：到「對陣圖」點任一隊，可改派它晉級，後面自動重排。</li>
+    <li><b>第三步</b>：想自己試算，去「⚔️ 對戰」任選兩隊看勝率與比分。</li></ol>
+    <button class="btn big" onclick="jumpTo('sec-champ')">🏆 查看冠軍推估與對陣圖</button></div>
+  <nav class="jump" aria-label="頁內跳轉"><button onclick="jumpTo('sec-focus')">四強焦點</button><button onclick="jumpTo('sec-near')">近期賽事</button><button onclick="jumpTo('sec-champ')">推估冠軍</button><button onclick="jumpTo('sec-bracket')">對陣圖</button></nav>`;
+  h+=progressCard();
   h+=semiFocus();
   h+=nearCard();
   const rounds=buildBracketRounds();
   const champ=rounds[4][0].winner;
   const RL=[['32 強','R32 · 6/28–7/3'],['16 強','R16 · 7/4–7/7'],['8 強','QF · 7/9–7/11'],['4 強','SF · 7/14–7/15'],['🏆 決賽','Final · 7/19']];
   // 冠軍橫幅（最可能路徑；奪冠率請看模擬）
-  h+=`<div class="kchamp"><div class="kct">🏆 推估冠軍（最可能路徑）</div>
+  h+=`<div class="kchamp sec" id="sec-champ"><div class="kct">🏆 推估冠軍（最可能路徑）</div>
     <div class="kcn">${TEAMS[champ][5]} ${TEAMS[champ][1]}</div>
     <div class="hint" style="margin-top:4px">＝每場選機率高者一路推到底的單一劇本。想看「綜合奪冠率」請到 <b>📊 分析</b> 的模擬。</div></div>`;
-  h+=`<div class="card"><h2>🗂 對陣圖（四強起）</h2>
+  h+=`<div class="card sec" id="sec-bracket"><h2>🗂 對陣圖（四強起）</h2>
     <div class="hint" style="margin-bottom:6px">四強 → 決賽逐輪列出，每隊右側為晉級機率（含主場・高原・PK）。<b>點任一隊可改派它晉級</b>，後面立即重排；綠底＝晉級者、🔒官方對陣、✓官方賽果。已完賽輪次自動收合。${Object.keys(brOverride).length?` <a onclick="resetBracket()" style="color:var(--blue);cursor:pointer;font-weight:700">↺ 清除手動指定（${Object.keys(brOverride).length}）</a>`:''}</div>`;
   rounds.forEach((rd,ri)=>{
     const done=rd.length&&rd.every(ms=>ms.locked);
@@ -2062,7 +2116,7 @@ function viewSim(){
       <span id="simStatus" class="hint" style="margin-left:10px"></span>
     </div>
     <div id="simProgressWrap" style="display:none; margin-top:10px; display:flex; flex-direction:column; gap:4px">
-      <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--sub)">
+      <div style="display:flex; justify-content:space-between; font-size:15px; color:var(--sub)">
         <span>正在進行蒙地卡羅預測...</span>
         <span id="simPct">0%</span>
       </div>
@@ -2080,7 +2134,7 @@ function viewSim(){
       const f=x=>(x/simResult.n*100).toFixed(1);
       const mk=S.odds[r.i]?(100/S.odds[r.i]).toFixed(1)+'%':'';
       h+=`<tr><td>${flagName(r.i)}</td><td>${f(r.q32)}</td><td>${f(r.q16)}</td><td>${f(r.q8)}</td><td>${f(r.q4)}</td><td>${f(r.fin)}</td>
-      <td class="ch" style="background:linear-gradient(90deg,rgba(251,191,36,${Math.min(0.55,r.champ/simResult.n*2)}) ${f(r.champ)}%,transparent ${f(r.champ)}%)">${f(r.champ)}% <span style="opacity:.55;font-size:13px;font-weight:400">±${ci(r.champ)}</span></td>${hasOdds?`<td class="mk">${mk}</td>`:''}</tr>`;
+      <td class="ch" style="background:linear-gradient(90deg,rgba(251,191,36,${Math.min(0.55,r.champ/simResult.n*2)}) ${f(r.champ)}%,transparent ${f(r.champ)}%)">${f(r.champ)}% <span style="opacity:.55;font-size:15px;font-weight:400">±${ci(r.champ)}</span></td>${hasOdds?`<td class="mk">${mk}</td>`:''}</tr>`;
     });
     h+=`</table></div>
     <div class="hint" style="margin-top:8px">🏆冠軍欄的 <b>±值</b> 是蒙地卡羅 95% 抽樣誤差（=1.96×√(p(1−p)/N)）：模擬本身有隨機性，例如「16.2% ±1.0」代表真值約落在 15~17%，別把小數點當精確值。次數越多誤差越小（設定可調至 20000）。</div>
