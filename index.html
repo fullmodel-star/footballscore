@@ -295,6 +295,12 @@ main.t-ko{max-width:720px}
 .rl-appbar .rl-sub{color:color-mix(in srgb,var(--on) 85%,transparent)}
 .near .ns.pred{text-align:right;line-height:1.35}
 @media(max-width:480px){ table.score td,table.score th{width:32px;height:28px} .breakdown{grid-template-columns:1fr} }
+/* 2026-10-13：手機上模擬結果表的「🏆冠軍」欄被切到畫面外 → 收窄欄寬、球隊欄固定在左側 */
+@media(max-width:560px){
+  .simres table.sim th,.simres table.sim td{padding:6px 3px;font-size:13px;white-space:nowrap}
+  .simres table.sim td.ch span{display:none}
+  .simres table.sim th:first-child,.simres table.sim td:first-child{position:sticky;left:0;background:var(--card);z-index:1;max-width:92px;overflow:hidden;text-overflow:ellipsis}
+}
 @media(max-width:430px){ .tabs{padding:5px 2px calc(5px + env(safe-area-inset-bottom))} .tabs button{font-size:13px;padding:6px 1px} .tabs button .ico{font-size:18px} }
 /* 手機頂欄防跑版：標題那格可縮(min-width:0)、字級收斂、副標不換行(過長顯示…) */
 @media(max-width:480px){
@@ -852,7 +858,10 @@ function renderTabs(){
     `<button class="${curTab===t[0]?'on':''}" onclick="goTab('${t[0]}')">${t[0]==='news'&&pendingNews.length?`<span class="bdg">${pendingNews.length}</span>`:''}<span class="ico">${t[1]}</span>${t[2]}</button>`).join('');
 }
 window.addEventListener('scroll',()=>{ const f=document.getElementById('topfab'); if(f)f.classList.toggle('show',window.scrollY>900); },{passive:true});
-function goTab(t){ curTab=t; render(); window.scrollTo(0,0); }
+/* 返回鍵（2026-10-13）：分頁切換寫入瀏覽紀錄，手機返回鍵回上一個分頁，在首頁才離開 App */
+try{ if(!history.state||!history.state.tab) history.replaceState({tab:'ko'},''); }catch(_){}
+window.addEventListener('popstate',e=>{ const t=(e.state&&e.state.tab)||'ko'; if(t!==curTab){ curTab=t; render(); window.scrollTo(0,0); } });
+function goTab(t){ if(t!==curTab){ try{history.pushState({tab:t},'')}catch(_){} } curTab=t; render(); window.scrollTo(0,0); }
 function render(){
   renderTabs();
   const m=document.getElementById('main'); m.className='t-'+curTab;
@@ -881,6 +890,13 @@ function teamOptions(sel){
 }
 function viewPred(){
   const a=S.pA,b=S.pB;
+  if(a===b) return `<div class="card"><h2>⚔️ 對戰組合</h2>
+    <div class="vsbox">
+      <select onchange="S.pA=+this.value;save();render()">${teamOptions(a)}</select>
+      <span class="swap" style="cursor:default">vs</span>
+      <select onchange="S.pB=+this.value;save();render()">${teamOptions(b)}</select>
+    </div>
+    <div class="hint" style="margin-top:12px;padding:10px 12px;border:1px solid var(--red);border-radius:10px;color:var(--txt)">⚠️ 兩邊都選了 <b>${TEAMS[a][5]} ${TEAMS[a][1]}</b>，同一隊不能和自己對戰。請把其中一邊換成另一隊，才會算勝平負機率。</div></div>`;
   const bA=eloBreak(a),bB=eloBreak(b);
   let homeA=0,homeB=0,altA=0,altB=0,diaA=0,diaB=0;
   if(S.pV==='auto'){ homeA=TEAMS[a][6]?S.settings.homeAdv:0; homeB=TEAMS[b][6]?S.settings.homeAdv:0; }
@@ -1006,12 +1022,12 @@ function nearRow(x){
   const tw=x.kick?(zoneStr(x.kick,'Asia/Taipei',0).split(' ')[1]||''):'';
   const isToday=x._d===0;
   const tag=x.kind==='ko'
-    ? `<span style="color:var(--blue);font-weight:700">${x.round}${(x.fixed||x.locked)?'':' · 預測'}</span> `
+    ? `<span style="color:var(--blue);font-weight:700">${x.round}${(x.fixed||x.locked)?'':(TOURNEY_ENDED?' · 賽前推估':' · 預測')}</span> `
     : `<span style="color:var(--sub)">${x.g}組</span> `;
   let right;
   if(x.sc) right=`<span class="ns">${x.sc[0]} : ${x.sc[1]}</span>`;
   else if(x.kind==='ko'&&x.winner!=null) right=`<span class="ns">✓ ${TEAMS[x.winner][1]}</span>`;
-  else right=`<span class="ns pred">${x.kind==='ko'&&x.pa!=null?TEAMS[x.pa>=0.5?x.a:x.b][1]+'<br>晉級 '+Math.round(Math.max(x.pa,1-x.pa)*100)+'%':'預測'}</span>`;
+  else right=`<span class="ns pred">${x.kind==='ko'&&x.pa!=null?TEAMS[x.pa>=0.5?x.a:x.b][1]+'<br>推估晉級 '+Math.round(Math.max(x.pa,1-x.pa)*100)+'%':(TOURNEY_ENDED?'無賽果':'預測')}</span>`;
   return `<div class="nr ${isToday?'today':''}" onclick="S.pA=${x.a};S.pB=${x.b};S.pV='${x.vi}';save();goTab('pred')">
     <div class="nd"><b>${md}</b>${wd?'週'+wd:''}${tw?'<br>'+tw:''}</div>
     <div class="nt">${tag}${TEAMS[x.a][5]} ${TEAMS[x.a][1]} <span style="color:var(--sub)">vs</span> ${TEAMS[x.b][5]} ${TEAMS[x.b][1]}</div>
@@ -1044,7 +1060,7 @@ function viewSched(){
   let h=`<div class="card" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
     ${TOURNEY_ENDED?ENDED_NOTE:`<button class="btn" onclick="updateScores(this)">🔄 一鍵更新比分</button>
     <span class="hint">需網路。從 openfootball／TheSportsDB 抓最新戰績自動填入（也可手動輸入）。</span>`}</div>`;
-  if(gFilter==='全部') h+='<div class="card hint">📅 本頁為<b>小組賽歷史紀錄</b>與最終積分。淘汰賽對陣、近期賽事與逐場推估請看「🏆 八強」分頁。</div>';
+  if(gFilter==='全部') h+='<div class="card hint">📅 本頁為<b>小組賽紀錄</b>與積分（有比分的才是實際賽果；沒有比分的場次以模型推估計算）。淘汰賽對陣、近期賽事與逐場推估請看「🏆 四強」分頁。</div>';
   h+=`<div class="gfilter">${gs.map(g=>`<button class="${gFilter===g?'on':''}" onclick="gFilter='${g}';render()">${g==='全部'?'全部':g+'組'}</button>`).join('')}</div>`;
   if(gFilter!=='全部') h+=standingsCard(gFilter);
   MATCHES.forEach((m,idx)=>{
@@ -1148,9 +1164,11 @@ function toast(msg){
   clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove('show'),3500);
 }
 /* 2026-10-09：決賽 2026-07-19（美東）結束後不再連網抓比分——ESPN 的日期區間查詢會回 400、一鍵更新實際失效，畫面卻沒說。
-   結束後兩個「一鍵更新」按鈕改成「賽事已結束、以下為最終結果」說明。 */
+   結束後兩個「一鍵更新」按鈕改成「賽事已結束、本 App 不再更新」說明（2026-10-13 起不再宣稱最終結果）。 */
 const TOURNEY_ENDED = Date.now() > Date.parse('2026-07-21T00:00:00+08:00');
-const ENDED_NOTE = '<span class="hint">✅ <b>2026 世界盃已於 7/19 結束</b>，以下比分與對陣為最終結果，不需要再更新。</span>';
+// 2026-10-13：原本寫「以下比分與對陣為最終結果」，但 App 實際只收錄少數場次的真實比分（資料快照停在 7/12），
+// 決賽等其餘場次都是模型推估——不能宣稱是最終結果。改成照實說明（repo 內沒有完整賽果來源，不補資料）。
+const ENDED_NOTE = '<span class="hint">ℹ️ <b>2026 世界盃已於 7/19 結束，本 App 不再更新。</b>資料停在 7/12（四強出爐時）的快照：只有標「官方賽果」的場次是實際比分，<b>其餘場次（含決賽與冠軍）都是賽前模型推估，不是實際結果</b>；實際賽果請以 FIFA 官方公布為準。</span>';
 async function autoScores(){ // 開啟 App 自動更新比分（ESPN 單一請求、10 分鐘節流、靜默）
   if(TOURNEY_ENDED)return;
   if(!navigator.onLine)return;
@@ -1241,7 +1259,7 @@ async function updateKO(){ // 小組賽完賽後：抓官方 32 強對陣與淘�
   return n;
 }
 async function updateScores(btn){
-  if(TOURNEY_ENDED){ toast('2026 世界盃已結束，資料為最終結果'); return; }
+  if(TOURNEY_ENDED){ toast('2026 世界盃已結束，本 App 不再更新比分'); return; }
   btn.textContent='🔄 更新中…'; btn.disabled=true;
   let n=0, src='';
   const apply=(i1,i2,s1,s2)=>{ // 依隊伍對找到場次（小組賽每對只踢一次）
@@ -2069,7 +2087,7 @@ function progressCard(){
   if(!tot)return '';
   const pc=Math.round(done/tot*100);
   return `<div class="card prog"><h2>✅ 賽果記錄進度</h2>
-    <div class="progtxt"><b>已有實際賽果 ${done} / ${tot} 場</b><span>（其餘場次為模型推估）</span></div>
+    <div class="progtxt"><b>已有實際賽果 ${done} / ${tot} 場</b><span>（其餘 ${tot-done} 場${TOURNEY_ENDED?'是賽前模型推估，不是實際結果':'為模型推估'}）</span></div>
     <div class="progbar" role="img" aria-label="已有實際賽果 ${done} 場，共 ${tot} 場"><i style="width:${pc}%"></i></div>
     <div class="progtxt" style="margin-top:10px"><b>情報已啟用 ${(S.news||[]).filter(n=>n.on).length} / ${(S.news||[]).length} 則</b><span>（影響球隊有效 Elo 的新聞）</span></div></div>`;
 }
@@ -2088,11 +2106,11 @@ function viewKO(){
   const champ=rounds[4][0].winner;
   const RL=[['32 強','R32 · 6/28–7/3'],['16 強','R16 · 7/4–7/7'],['8 強','QF · 7/9–7/11'],['4 強','SF · 7/14–7/15'],['🏆 決賽','Final · 7/19']];
   // 冠軍橫幅（最可能路徑；奪冠率請看模擬）
-  h+=`<div class="kchamp sec" id="sec-champ"><div class="kct">🏆 推估冠軍（最可能路徑）</div>
+  h+=`<div class="kchamp sec" id="sec-champ"><div class="kct">🏆 推估冠軍（最可能路徑${TOURNEY_ENDED?'・賽前推估，非實際冠軍':''}）</div>
     <div class="kcn">${TEAMS[champ][5]} ${TEAMS[champ][1]}</div>
     <div class="hint" style="margin-top:4px">＝每場選機率高者一路推到底的單一劇本。想看「綜合奪冠率」請到 <b>📊 分析</b> 的模擬。</div></div>`;
-  h+=`<div class="card sec" id="sec-bracket"><h2>🗂 對陣圖（四強起）</h2>
-    <div class="hint" style="margin-bottom:6px">四強 → 決賽逐輪列出，每隊右側為晉級機率（含主場・高原・PK）。<b>點任一隊可改派它晉級</b>，後面立即重排；綠底＝晉級者、🔒官方對陣、✓官方賽果。已完賽輪次自動收合。${Object.keys(brOverride).length?` <a onclick="resetBracket()" style="color:var(--blue);cursor:pointer;font-weight:700">↺ 清除手動指定（${Object.keys(brOverride).length}）</a>`:''}</div>`;
+  h+=`<div class="card sec" id="sec-bracket"><h2>🗂 對陣圖（32 強 → 決賽）</h2>
+    <div class="hint" style="margin-bottom:6px">32 強 → 決賽逐輪列出${TOURNEY_ENDED?'（標「推估對陣」的場次是賽前推估，不是實際賽果）':''}，每隊右側為晉級機率（含主場・高原・PK）。<b>點任一隊可改派它晉級</b>，後面立即重排；綠底＝晉級者、🔒官方對陣、✓官方賽果。已完賽輪次自動收合。${Object.keys(brOverride).length?` <a onclick="resetBracket()" style="color:var(--blue);cursor:pointer;font-weight:700">↺ 清除手動指定（${Object.keys(brOverride).length}）</a>`:''}</div>`;
   rounds.forEach((rd,ri)=>{
     const done=rd.length&&rd.every(ms=>ms.locked);
     const body=rd.map((ms,i)=>koMatchCard(ms,ri,i)).join('');
@@ -2113,9 +2131,9 @@ function viewSim(){
     <div class="hint" style="margin-bottom:10px">依目前有效 Elo（含球員狀態、新聞、特質、年齡）與已輸入的真實比分，模擬剩餘小組賽＋淘汰賽 ${S.settings.sims} 次。淘汰賽採 <b>FIFA 官方對陣樹（M73–M104）</b>，每場依官方場館計算主辦國主場與高原效應；平手時以「Elo 勝率 × PK 大戰史」混合判定 PK 勝者。</div>
     <div class="row" style="align-items:center; margin-bottom:8px">
       <button id="simBtn" class="btn" onclick="runSim()">🎲 開始模擬（${S.settings.sims} 次）</button>
-      <span id="simStatus" class="hint" style="margin-left:10px"></span>
+      <span id="simStatus" class="hint" style="margin-left:10px">${simResult?`✅ 已完成 ${simResult.n} 次模擬，結果在下方`:''}</span>
     </div>
-    <div id="simProgressWrap" style="display:none; margin-top:10px; display:flex; flex-direction:column; gap:4px">
+    <div id="simProgressWrap" style="display:none; margin-top:10px; flex-direction:column; gap:4px">
       <div style="display:flex; justify-content:space-between; font-size:15px; color:var(--sub)">
         <span>正在進行蒙地卡羅預測...</span>
         <span id="simPct">0%</span>
@@ -2126,7 +2144,7 @@ function viewSim(){
     </div>
   </div>`;
   if(simResult){
-    h+=`<div class="card"><h2>模擬結果（${simResult.n} 次）</h2><div style="overflow-x:auto">
+    h+=`<div class="card"><h2>模擬結果（${simResult.n} 次）</h2>${TOURNEY_ENDED?'<div class="hint" style="margin-bottom:8px">ℹ️ 這是用 7/12 前資料做的<b>賽前推估</b>（只計入已收錄的實際賽果），不是世界盃的實際結果。</div>':''}<div class="simres" style="overflow-x:auto">
     <table class="sim"><tr><th>球隊</th><th>出線</th><th>16強</th><th>8強</th><th>4強</th><th>決賽</th><th>🏆冠軍</th>${hasOdds?'<th>市場%</th>':''}</tr>`;
     const rows=TEAMS.map((t,i)=>({i,...simResult.st[i]})).sort((a,b)=>b.champ-a.champ||b.fin-a.fin||b.q4-a.q4||b.q32-a.q32);
     const ci=x=>{ const p=x/simResult.n; return (1.96*Math.sqrt(p*(1-p)/simResult.n)*100).toFixed(1); };
