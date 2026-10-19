@@ -230,7 +230,7 @@ table.sim td.mk{color:var(--blue)}
 .set small.why b{color:var(--gold)}
 .set>div:first-child{flex:1;padding-right:10px}
 .set input{width:80px;text-align:center}
-.addform{display:grid;gap:8px;margin-top:8px}
+.addform{display:grid;gap:8px;margin-top:8px}.addform>*{min-width:0;max-width:100%}
 .flagn{white-space:nowrap}
 .near{display:flex;flex-direction:column;gap:6px}
 .near .nr{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer;transition:all .15s ease}
@@ -1064,9 +1064,9 @@ function scrollToNearMatch(){
 function viewSched(){
   const gs=['全部',..."ABCDEFGHIJKL".split('')];
   let h=`<div class="card" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-    ${TOURNEY_ENDED?ENDED_NOTE:`<button class="btn" onclick="updateScores(this)">🔄 一鍵更新比分</button>
+    ${TOURNEY_ENDED?ENDED_BRIEF.replace('<details class="endnote">','<details class="endnote" style="flex:1 1 100%;min-width:0">'):`<button class="btn" onclick="updateScores(this)">🔄 一鍵更新比分</button>
     <span class="hint">需網路。從 openfootball／TheSportsDB 抓最新戰績自動填入（也可手動輸入）。</span>`}</div>`;
-  if(gFilter==='全部') h+='<div class="card hint">📅 本頁為<b>小組賽紀錄</b>與積分（有比分的才是實際賽果；沒有比分的場次以模型推估計算）。淘汰賽對陣、近期賽事與逐場推估請看「🏆 四強」分頁。</div>';
+  if(gFilter==='全部') h+='<details class="card endnote"><summary><span class="endnote-t">📅 本頁＝小組賽紀錄與積分（點開看說明）</span><span class="endnote-m" aria-hidden="true">▾</span></summary><div class="hint">📅 本頁為<b>小組賽紀錄</b>與積分（有比分的才是實際賽果；沒有比分的場次以模型推估計算）。淘汰賽對陣、近期賽事與逐場推估請看「🏆 四強」分頁。</div></details>';
   h+=`<div class="gfilter">${gs.map(g=>`<button class="${gFilter===g?'on':''}" onclick="gFilter='${g}';render()">${g==='全部'?'全部':g+'組'}</button>`).join('')}</div>`;
   if(gFilter!=='全部') h+=standingsCard(gFilter);
   MATCHES.forEach((m,idx)=>{
@@ -1432,8 +1432,8 @@ function standingsCard(g){
 /* ---------- 球隊球員 ---------- */
 const STATE_NAMES=['正常','低迷/帶傷','巔峰','缺陣'];
 function viewTeams(){
-  let h=`<div class="card hint">點球隊展開：球員狀態四檔（正常／低迷帶傷 −50%／巔峰 +25%／缺陣 −100%，以權重×${S.settings.perWeight} 計）；
-  特質三項（大賽韌性＝民族性與大賽抗壓、團隊團結、中場強度，1~5、3 為中性）；平均年齡與 PK 大戰史為查核的真實資料。所有變動即時影響預測與模擬。</div>`;
+  let h=`<details class="card endnote"><summary><span class="endnote-t">👥 點球隊可調球員狀態與特質（點開看說明）</span><span class="endnote-m" aria-hidden="true">▾</span></summary><div class="hint">點球隊展開：球員狀態四檔（正常／低迷帶傷 −50%／巔峰 +25%／缺陣 −100%，以權重×${S.settings.perWeight} 計）；
+  特質三項（大賽韌性＝民族性與大賽抗壓、團隊團結、中場強度，1~5、3 為中性）；平均年齡與 PK 大戰史為查核的真實資料。所有變動即時影響預測與模擬。</div></details>`;
   "ABCDEFGHIJKL".split('').forEach(g=>{
     h+=`<div class="tgroup"><h3>${g} 組</h3>`;
     TEAMS.forEach((t,i)=>{
@@ -1622,7 +1622,7 @@ function viewNews(){
       ${pendingNews.length?`<button class="btn sec" onclick="ignoreAllPending()">全部忽略</button>`:''}
       <span class="hint">${S.lastNewsTs?'上次抓取：'+new Date(S.lastNewsTs).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'尚未抓取'}</span>
     </div>
-    <div class="hint"><b style="color:var(--gold)">只擷取會動到模型參數的新聞</b>——傷病、停賽、回歸、換帥、陣容異動；純預測、賽前口水、人物特寫等無關報導自動略過。比分每次開啟自動更新；情報超過 20 小時自動抓（離線靜默跳過）。待審清單會保存，重開不消失。已自動判斷球隊、建議影響值、比對主力球員；按「納入」變成新聞因素。<br>標題維持 ESPN 英文原文、不翻譯、不轉載內文，要看全文請點「閱讀原文 ↗」到 ESPN 網站。</div>`;
+    <details class="endnote"><summary><span class="endnote-t">📡 情報怎麼挑、怎麼用（點開看說明）</span><span class="endnote-m" aria-hidden="true">▾</span></summary><div class="hint"><b style="color:var(--gold)">只擷取會動到模型參數的新聞</b>——傷病、停賽、回歸、換帥、陣容異動；純預測、賽前口水、人物特寫等無關報導自動略過。比分每次開啟自動更新；情報超過 20 小時自動抓（離線靜默跳過）。待審清單會保存，重開不消失。已自動判斷球隊、建議影響值、比對主力球員；按「納入」變成新聞因素。<br>標題維持 ESPN 英文原文、不翻譯、不轉載內文，要看全文請點「閱讀原文 ↗」到 ESPN 網站。</div></details>`;
   pendingNews.forEach((p,k)=>{
     h+=`<div class="pitem">
       <div class="ph" lang="en">${escN(p.h)}</div>
@@ -1642,7 +1642,7 @@ function viewNews(){
   });
   h+=`</div>`;
   h+=`<div class="card"><h2>📰 新增新聞事件</h2>
-    <div class="addform" style="grid-template-columns:1fr 1fr">
+    <div class="addform" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
       <select id="nw_t">${TEAMS.map((t,i)=>`<option value="${i}">${t[5]} ${t[1]}</option>`).join('')}</select>
       <input type="number" id="nw_d" placeholder="影響 Elo（如 -15 / +10）">
       <input type="text" id="nw_h" placeholder="標題（如：主力前鋒傷退）" style="grid-column:1/-1">
@@ -1742,7 +1742,7 @@ function calibrateFactors(feats){
 function viewAcc(){
   const {G,K}=backtest();
   const intro=`<div class="card"><h2>🎯 差異分析（推估 vs 實際）</h2>
-    <div class="hint">用<b>目前模型設定</b>重算每一場的<b>賽前</b>推估（刻意排除「賽中動態」因子，以免拿賽果預測賽果自己），再對照你已輸入的真實結果，量化模型有多準、哪裡系統性偏掉、該怎麼修。樣本越多越可信。</div></div>`;
+    <details class="endnote"><summary><span class="endnote-t">🎯 怎麼比對推估與實際（點開看說明）</span><span class="endnote-m" aria-hidden="true">▾</span></summary><div class="hint">用<b>目前模型設定</b>重算每一場的<b>賽前</b>推估（刻意排除「賽中動態」因子，以免拿賽果預測賽果自己），再對照你已輸入的真實結果，量化模型有多準、哪裡系統性偏掉、該怎麼修。樣本越多越可信。</div></details></div>`;
   if(G.n===0&&K.n===0){
     return intro+`<div class="card"><div class="hint">目前還沒有任何已完成的比賽結果。請到「📅 小組」或「🏆 淘汰」分頁按「🔄 一鍵更新比分」（需網路）抓官方賽果，或手動輸入比分，這裡就會自動算出命中率、差異與修正建議。</div>
       <div class="row" style="margin-top:10px;gap:8px"><button class="btn sec" onclick="goTab('sched')">📅 去更新小組賽</button><button class="btn sec" onclick="goTab('ko')">🏆 去更新淘汰賽</button></div></div>`;
@@ -2137,7 +2137,7 @@ function viewKO(){
 function viewSim(){
   const hasOdds=Object.keys(S.odds).length>0;
   let h=`<div class="card"><h2>🏆 全屆蒙地卡羅模擬</h2>
-    <div class="hint" style="margin-bottom:10px">依目前有效 Elo（含球員狀態、新聞、特質、年齡）與已輸入的真實比分，模擬剩餘小組賽＋淘汰賽 ${S.settings.sims} 次。淘汰賽採 <b>FIFA 官方對陣樹（M73–M104）</b>，每場依官方場館計算主辦國主場與高原效應；平手時以「Elo 勝率 × PK 大戰史」混合判定 PK 勝者。</div>
+    <details class="endnote" style="margin-bottom:6px"><summary><span class="endnote-t">🎲 模擬怎麼算（點開看說明）</span><span class="endnote-m" aria-hidden="true">▾</span></summary><div class="hint">依目前有效 Elo（含球員狀態、新聞、特質、年齡）與已輸入的真實比分，模擬剩餘小組賽＋淘汰賽 ${S.settings.sims} 次。淘汰賽採 <b>FIFA 官方對陣樹（M73–M104）</b>，每場依官方場館計算主辦國主場與高原效應；平手時以「Elo 勝率 × PK 大戰史」混合判定 PK 勝者。</div></details>
     <div class="row" style="align-items:center; margin-bottom:8px">
       <button id="simBtn" class="btn" onclick="runSim()">🎲 開始模擬（${S.settings.sims} 次）</button>
       <span id="simStatus" class="hint" style="margin-left:10px">${simResult?`✅ 已完成 ${simResult.n} 次模擬，結果在下方`:''}</span>

@@ -578,6 +578,38 @@ try {
   const mtN = await mainText();
   ok('15.6 新聞分頁賽後不放「抓取最新情報」按鈕、有說明', !mtN.includes('抓取最新情報') && mtN.includes('情報來源已停止更新'));
 
+  /* ───────────────────────── 16 窄手機不能左右滑（2026-10-19 版面檢查） ───────────────────────── */
+  { // 自成區塊，變數名不跟前面各節衝突
+  console.log('\n[16 窄手機不能左右滑：360／375／390／412 × 6 個分頁＋球隊展開（賽後狀態）]');
+  // 2026-10-19 窄手機不能左右滑：判定照 04_管理工具\版面檢查\width_check.mjs（整頁不可橫捲、元件不可伸出螢幕左右緣、按鈕不可被擠扁 寬<24 或 寬<高×0.8 且 <40）。
+  // 與 width_check 唯一差別：被 overflow 非 visible 的祖先裁掉的子元件（例：Leaflet 地圖圖磚）不算伸出去——看不到、也撐不開頁面。
+  const NARROW = `(()=>{const vw=document.documentElement.clientWidth;
+    const clipped=e=>{for(let a=e.parentElement;a&&a!==document.body;a=a.parentElement){if(getComputedStyle(a).overflowX!=='visible')return true;}return false;};
+    const fixedUp=e=>{for(let a=e;a&&a!==document.body;a=a.parentElement)if(getComputedStyle(a).position==='fixed')return true;return false;};
+    const nm=e=>(e.id?'#'+e.id:'')+(typeof e.className==='string'&&e.className?'.'+e.className.trim().split(/\\s+/).slice(0,2).join('.'):'')||e.tagName;
+    const over=[],sq=[];let n=0;
+    for(const e of document.querySelectorAll('body *')){const r=e.getBoundingClientRect();if(!r.width||!r.height)continue;const cs=getComputedStyle(e);if(cs.visibility==='hidden'||cs.display==='none')continue;n++;
+      if((r.right>vw+1||r.left<-1)&&!fixedUp(e)&&!clipped(e))over.push(nm(e)+'['+Math.round(r.left)+'..'+Math.round(r.right)+']');
+      if((e.tagName==='BUTTON'||e.getAttribute('role')==='button'||(e.tagName==='A'&&/btn|button|fab/i.test(e.className)))&&r.top<innerHeight*3&&(r.width<24||(r.width<r.height*0.8&&r.width<40)))sq.push(nm(e)+'['+Math.round(r.width)+'x'+Math.round(r.height)+']');}
+    return {vw,iw:innerWidth,sw:document.documentElement.scrollWidth,n,over:over.slice(0,6),overN:over.length,sq:sq.slice(0,6)};})()`;
+  const narrowOk = (id, label, w, r) => ok(`${id} ${w}px ${label}：整頁不能左右滑（scrollWidth ${r.sw}／視窗 ${r.vw}）、伸出螢幕 ${r.overN} 個、擠扁按鈕 ${r.sq.length} 個（掃 ${r.n} 個元件）`,
+    r.n > 20 && r.sw <= r.vw + 1 && r.iw === w && r.overN === 0 && r.sq.length === 0, r);
+  for (const w of [360, 375, 390, 412]) {
+    await c.width(w, 800);
+    await c.open(BASE, { clock: '2026-10-12T10:00:00+08:00' });
+    await sleep(500);
+    for (const key of ['ko', 'pred', 'teams', 'news', 'analysis', 'sched']) {
+      await tab(key);
+      await sleep(150);
+      narrowOk(`16.${w}.${key}`, key + ' 分頁', w, await c.eval(NARROW));
+    }
+    await c.eval(`goTab('teams');openTeam=0;render();true`);
+    await sleep(150);
+    narrowOk(`16.${w}.team`, '球隊展開（含新增球員表單）', w, await c.eval(NARROW));
+  }
+  await c.width(390);
+  }
+
   console.log('\n[14 沒有錯誤]');
   ok('14.1 全程沒有未捕捉的 JS 例外（' + c.errors.length + ' 個）', c.errors.length === 0, c.errors.slice(0, 3));
 } catch (e) {
