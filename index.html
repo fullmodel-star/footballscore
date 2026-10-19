@@ -279,6 +279,12 @@ body.theme-stone{--accent:#2B5C8A}
 .sec{scroll-margin-top:84px}
 .btn.big{width:100%;max-width:420px;display:block;margin-left:auto;margin-right:auto;min-height:48px;font-size:17px;margin-top:12px}
 .welcome .steps{margin:10px 0 0 22px;line-height:1.7;font-size:15px}
+.endnote summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;min-height:44px;font-size:15px;line-height:1.5;color:var(--txt)}
+.endnote summary::-webkit-details-marker{display:none}
+.endnote-t{flex:0 1 auto;min-width:0}
+.endnote-m{flex:none;color:var(--blue);font-size:13px;transition:transform .15s}
+.endnote[open] .endnote-m{transform:rotate(180deg)}
+.endnote>.hint{display:block;margin:2px 0 4px}
 .jump{display:flex;gap:8px;overflow-x:auto;margin-bottom:14px;padding-bottom:2px}
 .jump button{flex:1 0 auto;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid var(--line);background:var(--card);color:var(--accent);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer}
 .jump button:active{background:var(--card2)}
@@ -1169,6 +1175,9 @@ const TOURNEY_ENDED = Date.now() > Date.parse('2026-07-21T00:00:00+08:00');
 // 2026-10-13：原本寫「以下比分與對陣為最終結果」，但 App 實際只收錄少數場次的真實比分（資料快照停在 7/12），
 // 決賽等其餘場次都是模型推估——不能宣稱是最終結果。改成照實說明（repo 內沒有完整賽果來源，不補資料）。
 const ENDED_NOTE = '<span class="hint">ℹ️ <b>2026 世界盃已於 7/19 結束，本 App 不再更新。</b>資料停在 7/12（四強出爐時）的快照：只有標「官方賽果」的場次是實際比分，<b>其餘場次（含決賽與冠軍）都是賽前模型推估，不是實際結果</b>；實際賽果請以 FIFA 官方公布為準。</span>';
+// 2026-10-19 修後重評：首頁說明卡把上面整段放在首屏，主按鈕「查看冠軍推估與對陣圖」被推下去（U1 退步）→
+// 首頁改成一行重點＋點開看完整說明（內容同 ENDED_NOTE，一字不少）；賽程頁仍直接顯示 ENDED_NOTE。
+const ENDED_BRIEF = '<details class="endnote"><summary><span class="endnote-t">ℹ️ 只有「官方賽果」是真實比分，<b>其餘是推估</b></span><span class="endnote-m" aria-hidden="true">▾</span></summary>'+ENDED_NOTE+'</details>';
 async function autoScores(){ // 開啟 App 自動更新比分（ESPN 單一請求、10 分鐘節流、靜默）
   if(TOURNEY_ENDED)return;
   if(!navigator.onLine)return;
@@ -2093,7 +2102,7 @@ function progressCard(){
 }
 function viewKO(){
   let h=`<div class="card welcome"><h2>👋 第一次使用？三步驟上手</h2>
-    ${TOURNEY_ENDED?ENDED_NOTE:`<span class="hint">小組賽完賽後會自動抓官方對陣與賽果。</span>`}
+    ${TOURNEY_ENDED?ENDED_BRIEF:`<span class="hint">小組賽完賽後會自動抓官方對陣與賽果。</span>`}
     <ol class="steps"><li><b>第一步</b>：先看下方「四強焦點」，了解四支球隊的狀態與盤口。</li>
     <li><b>第二步</b>：到「對陣圖」點任一隊，可改派它晉級，後面自動重排。</li>
     <li><b>第三步</b>：想自己試算，去「⚔️ 對戰」任選兩隊看勝率與比分。</li></ol>
