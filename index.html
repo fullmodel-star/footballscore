@@ -2472,5 +2472,33 @@ if('serviceWorker' in navigator){
 })();
 </script>
 <!--REPORT_BTN_END-->
+<!--RL_UPDATE_OPEN_START-->
+<script>
+/* 2026-10-19 全家族：打開時套用已下載好的新版（母版 04_管理工具\PWA新鮮度\rl_update_open.html，apply.py 套用，不要手改）。
+   原本更新提示只在「當下偵測到新版」才跳；新版在背景裝好或第一次沒按，之後每次打開都不再提示，手機 PWA 常不真的關 → 一直卡舊版。
+   這裡：打開後 10 秒內發現有等待中的新版就直接換（剛打開還沒操作，不打斷）；使用中才偵測到的新版仍走 App 原本的提示。回到前景時主動檢查新版。 */
+(function(){
+  if (window.__rlUpdOpen || !('serviceWorker' in navigator)) return; window.__rlUpdOpen = 1;
+  var t0 = Date.now(), done = false;
+  function apply(w){
+    if (done || !w || !navigator.serviceWorker.controller) return; done = true;
+    navigator.serviceWorker.addEventListener('controllerchange', function(){ if (window.__rlUpdReload) return; window.__rlUpdReload = 1; location.reload(); });
+    try { w.postMessage('SKIP_WAITING'); } catch (e) {}
+    try { w.postMessage({ type: 'SKIP_WAITING' }); } catch (e) {}
+    try { w.postMessage({ action: 'skipWaiting' }); } catch (e) {}
+  }
+  function watch(reg){
+    if (!reg) return;
+    if (reg.waiting && Date.now() - t0 < 10000) apply(reg.waiting);
+    function track(n){ if (n) n.addEventListener('statechange', function(){ if (n.state === 'installed' && Date.now() - t0 < 10000) apply(reg.waiting || n); }); }
+    track(reg.installing);
+    reg.addEventListener('updatefound', function(){ track(reg.installing); });
+    document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'visible') reg.update().catch(function(){}); });
+  }
+  function go(){ navigator.serviceWorker.getRegistration().then(watch).catch(function(){}); }
+  if (document.readyState === 'complete') go(); else window.addEventListener('load', go);
+})();
+</script>
+<!--RL_UPDATE_OPEN_END-->
 </body>
 </html>
