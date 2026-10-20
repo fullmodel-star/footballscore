@@ -610,6 +610,46 @@ try {
   await c.width(390);
   }
 
+  /* ───────────────────────── 17 首頁視覺改版（2026-10-20「開賽日球場」） ───────────────────────── */
+  {
+  console.log('\n[17 首頁視覺改版：主視覺、字型、3D 圖、線條分頁、只連本機、桌機分頁不蓋卡片]');
+  await c.width(390, 844);
+  const reqBefore = c.requests.length;
+  await c.open(BASE, { clock: '2026-10-12T10:00:00+08:00' });
+  await sleep(800);
+  const hero = await c.eval(`(()=>{const h=document.querySelector('#main > .hero');if(!h)return null;const b=h.querySelector('.btn.big');const r=b.getBoundingClientRect();
+    const s=h.querySelector('.endnote summary');const sr=s?s.getBoundingClientRect():null;
+    return {first:document.querySelector('#main').firstElementChild===h,inHeader:!!h.closest('header'),h1:(h.querySelector('h1')||{}).textContent||'',btn:b.textContent.trim(),btnBottom:r.bottom,
+      btnCount:h.querySelectorAll('button').length,brief:s?s.textContent:'',briefVis:!!sr&&sr.height>0&&sr.bottom<innerHeight}})()`);
+  ok('17.1 首屏主視覺在內容區第一個、不在頁首；一句大標＋唯一主鈕「查看冠軍推估與對陣圖」在 390×844 首屏內', !!hero && hero.first && !hero.inHeader && hero.h1.length > 0 && hero.btnCount === 1 && hero.btn.includes('查看冠軍推估與對陣圖') && hero.btnBottom < 844, hero);
+  ok('17.2 誠實紅線「只有「官方賽果」是真實比分，其餘是推估」在主視覺裡直接可見', !!hero && hero.brief.includes('只有「官方賽果」是真實比分') && hero.brief.includes('其餘是推估') && hero.briefVis, hero && hero.brief);
+  const font = await c.eval(`(async()=>{await document.fonts.ready;const ok=await document.fonts.load('16px WCRound','冠軍').then(f=>f.length>0);
+    return {ok,check:document.fonts.check('16px WCRound','冠軍'),h1:getComputedStyle(document.querySelector('.hero h1')).fontFamily,tab:getComputedStyle(document.querySelector('#tabs button')).fontFamily,
+      num:[...document.fonts].some(f=>f.family.replace(/"/g,'')==='WCNum'&&f.status==='loaded')}})()`);
+  ok('17.3 圓體字型 WCRound 載得到、主視覺大標與分頁有用到；Nunito 數字字型 WCNum 已載入', font.ok && font.check && /WCRound/.test(font.h1) && /WCRound/.test(font.tab) && font.num, font);
+  const imgs = await c.eval(`Promise.all(['trophy','ball','fire','calendar','dividers','check'].map(k=>new Promise(r=>{const i=new Image();i.onload=()=>r([k,i.naturalWidth]);i.onerror=()=>r([k,0]);i.src='vendor/fluent-3d/'+k+'.png?t='+Date.now();})))`);
+  ok('17.4 每種 3D 圖都載得出來（' + imgs.map((x) => x.join(':')).join(' ') + '）', imgs.length === 6 && imgs.every((x) => x[1] >= 64), imgs);
+  const emo = await c.eval(`(()=>{const re=/\\p{Extended_Pictographic}/u;return {tabs:[...document.querySelectorAll('#tabs button')].map(b=>b.textContent).filter(t=>re.test(t)),
+    jump:[...document.querySelectorAll('.jump button')].map(b=>b.textContent).filter(t=>re.test(t)),tabSvg:document.querySelectorAll('#tabs button svg use').length,jumpImg:document.querySelectorAll('.jump button img.f3').length,
+    hero:re.test(document.querySelector('.hero .btn.big').textContent)}})()`);
+  ok('17.5 分頁與四格入口不混用 emoji：分頁 6 個線條圖示、入口 4 張 3D 圖、主鈕文字無 emoji', emo.tabs.length === 0 && emo.jump.length === 0 && emo.tabSvg === 6 && emo.jumpImg === 4 && !emo.hero, emo);
+  const ext17 = c.requests.slice(reqBefore).filter((u) => /fonts\.(googleapis|gstatic)\.com|cdn|unpkg/i.test(u));
+  ok('17.6 字型與圖示只連本機（不再連 Google 字型／CDN）', ext17.length === 0, ext17.slice(0, 3));
+  // 桌機 1440：分頁搬進頁首工具列，捲到任何位置都不蓋卡片
+  await c.width(1440, 900);
+  await c.open(BASE, { clock: '2026-10-12T10:00:00+08:00' });
+  await sleep(800);
+  const cover = await c.eval(`(async()=>{const hits=[];const H=document.documentElement.scrollHeight;
+    for(let y=0;y<H;y+=400){scrollTo(0,y);await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+      const t=document.getElementById('tabs').getBoundingClientRect();const hb=document.querySelector('header.rl-appbar').getBoundingClientRect().bottom;
+      for(const e of document.querySelectorAll('#main .card, #main .hero, #main .kchamp, #main .jump, footer')){const r=e.getBoundingClientRect();const vt=Math.max(r.top,hb); // 捲到頁首底下的部分本來就被頁首蓋住，只看露出來的部分
+        if(r.bottom>t.top&&vt<t.bottom&&r.right>t.left&&r.left<t.right&&r.bottom>vt)hits.push((e.id||e.className)+'@'+y);}}
+    scrollTo(0,0);const t=document.getElementById('tabs').getBoundingClientRect();const hd=document.querySelector('header.rl-appbar').getBoundingClientRect();
+    return {hits:hits.slice(0,5),n:hits.length,tabsInHeader:t.top>=hd.top&&t.bottom<=hd.bottom+1,sw:document.documentElement.scrollWidth,vw:innerWidth}})()`);
+  ok('17.7 桌機 1440：分頁在頁首工具列內、捲到任何位置都不蓋卡片／主視覺／頁尾、無水平捲動', cover.n === 0 && cover.tabsInHeader && cover.sw <= cover.vw, cover);
+  await c.width(390);
+  }
+
   console.log('\n[14 沒有錯誤]');
   ok('14.1 全程沒有未捕捉的 JS 例外（' + c.errors.length + ' 個）', c.errors.length === 0, c.errors.slice(0, 3));
 } catch (e) {

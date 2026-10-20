@@ -51,7 +51,7 @@
    策略：同源 App 殼層用 stale-while-revalidate（離線可用、回連時自動更新）；
    跨源請求（ESPN 比分／新聞、openfootball、Open-Meteo、Google 字型）一律放行給瀏覽器，
    不攔截、不快取，確保即時資料永遠是最新。 */
-const CACHE='wc2026-v4.7.22';
+const CACHE='wc2026-v4.8.0';
 const SHELL = [
   './',
   './index.html',
@@ -64,6 +64,15 @@ const SHELL = [
   './icon-maskable-512.png',
   './apple-touch-icon.png',
   './favicon-32.png',
+  // 2026-10-20 首頁視覺改版：字型＋3D 圖
+  './vendor/round-ui/wc-round.woff2',
+  './vendor/nunito/nunito-latin-900-normal.woff2',
+  './vendor/fluent-3d/trophy.png',
+  './vendor/fluent-3d/ball.png',
+  './vendor/fluent-3d/fire.png',
+  './vendor/fluent-3d/calendar.png',
+  './vendor/fluent-3d/dividers.png',
+  './vendor/fluent-3d/check.png',
 ];
 
 self.addEventListener('install', e => {

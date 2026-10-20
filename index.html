@@ -15,9 +15,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="世界盃推估">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<!-- 2026-10-20 首頁視覺改版：不再連 Google 字型；改用本機 vendor 字型（圓體子集＋Nunito 數字），只連本機 -->
 <link rel="stylesheet" href="ridgeline-ui.css">
 <style>
 :root{
@@ -357,6 +355,89 @@ main.t-ko{max-width:720px}
 .stmore .sth2h{margin-top:6px}
 .stgrid.st2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .acclist{margin:0;padding-left:20px;line-height:1.8;font-size:15px;color:var(--sub)}
+/* ==== 2026-10-20 首頁視覺改版「開賽日球場」：草皮綠主視覺＋金色獎盃主鈕、圓體標題＋Nunito 記分板數字、3D 立體圖、Tabler 線條分頁 ====
+   只改呈現；功能、資料、模型不動。字型與圖都在 vendor/（只連本機）。 */
+@font-face{font-family:WCRound;src:url(vendor/round-ui/wc-round.woff2) format("woff2");font-display:swap}
+@font-face{font-family:WCNum;src:url(vendor/nunito/nunito-latin-900-normal.woff2) format("woff2");font-display:swap;unicode-range:U+0030-0039,U+0025,U+002B,U+002E,U+002F}
+:root{--round:WCNum,WCRound,"Microsoft JhengHei","PingFang TC","Noto Sans TC",system-ui,sans-serif;
+  --pitch:#0F6B45;--pitch-d:#0A4B31;--pitch-l:#1C8A5A;--trophy:#FFC83D;--trophy-edge:#C99400;--navy:#14304F}
+body.theme-stone{--bg:#F1F4EE;--bg2:#E7ECE3;--card2:#F2F5EF;--line:#DCE3D7}
+.f3{display:inline-block;flex:none;object-fit:contain;vertical-align:-5px}
+.rl-appbar .rl-title{font-family:var(--round);font-weight:400;letter-spacing:1px}
+.card h2,.welcome-steps>summary h2,.mdet>summary h2{font-family:var(--round);font-weight:400;font-size:17px;letter-spacing:.5px;color:var(--navy)}
+.card h2:has(.f3){display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.card.sfhead h2{margin-bottom:0}
+.card h2 .f3{width:24px;height:24px}
+button.btn,.jump button,.tabs button,.koround,.kround>summary,.gdet>summary{font-family:var(--round);font-weight:400}
+.tabs button .ico{display:flex;justify-content:center;margin:0 auto 2px}
+.tabs button .ico svg{width:24px;height:24px}
+.tabs button.on{color:var(--pitch);background:color-mix(in srgb,var(--pitch) 12%,transparent)}
+.tabs button.on .ico svg{stroke-width:2.4}
+/* 首屏主視覺（在內容區頂端，不在黏住的頁首；往下捲就收走） */
+.hero{position:relative;overflow:hidden;border-radius:24px;margin:0 0 12px;padding:16px 16px 16px;color:#fff;
+  background:
+    radial-gradient(circle at 50% 118%,transparent 0 54px,rgba(255,255,255,.22) 55px 57px,transparent 58px),
+    linear-gradient(90deg,transparent calc(50% - 1px),rgba(255,255,255,.16) calc(50% - 1px) calc(50% + 1px),transparent calc(50% + 1px)),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.055) 0 38px,transparent 38px 76px),
+    linear-gradient(160deg,var(--pitch-l) 0%,var(--pitch) 52%,var(--pitch-d) 100%);
+  box-shadow:0 18px 30px -20px rgba(10,75,49,.9)}
+.hero-title{margin:2px 0 14px;font:400 31px/1.15 var(--round);letter-spacing:2px;max-width:62%;text-shadow:0 2px 0 rgba(0,0,0,.18)}
+.hero-art{position:absolute;right:6px;top:6px;width:104px;height:60px;pointer-events:none;filter:drop-shadow(0 12px 14px rgba(0,0,0,.32))}
+.hero-art .t{position:absolute;right:0;top:0;width:60px;height:60px}
+.hero-art .b{position:absolute;left:14px;bottom:0;width:32px;height:32px}
+.hero .endnote{position:relative;z-index:1;margin:4px 0 0;background:rgba(255,255,255,.96);color:var(--txt);border-radius:14px;padding:0 12px}
+.hero .endnote summary{color:var(--txt)}
+.hero .endnote-t{text-wrap:balance}
+.hero .endnote .endnote-m{color:var(--pitch)}
+.hero .endnote>.hint{padding-bottom:10px}
+.hero .hint-pre{position:relative;z-index:1;color:#fff;opacity:.95;margin:6px 0 2px}
+.hero .btn.big{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0 0;max-width:none;min-height:50px;border-radius:999px;
+  background:var(--trophy);color:#1B1A10;font-size:18px;box-shadow:0 5px 0 var(--trophy-edge)}
+.hero .btn.big svg{width:24px;height:24px}
+.hero .btn.big:active{transform:translateY(3px);box-shadow:0 2px 0 var(--trophy-edge)}
+.hero .btn.big:focus-visible{outline:3px solid #fff;outline-offset:3px}
+/* 首頁四格入口（原頁內跳轉列；同一組入口全用 3D 圖） */
+.jump.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;overflow:visible;margin-bottom:12px}
+.jump.tiles button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:54px;padding:4px 2px;border-radius:18px;
+  background:var(--card);border:1px solid var(--line);color:var(--navy);font-size:15px;letter-spacing:.5px;box-shadow:0 4px 10px -8px rgba(20,48,79,.5)}
+.jump.tiles button .f3{width:28px;height:28px}
+.jump.tiles button:active{transform:translateY(1px);background:var(--card2)}
+/* 推估冠軍橫幅：獎盃台 */
+.kchamp{position:relative;background:linear-gradient(180deg,#FFF6DA 0%,#FFFFFF 100%);border:1.5px solid #E6C062}
+.kchamp .kct{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+.kchamp .kct .f3{width:24px;height:24px}
+.kchamp .kcn{font-family:var(--round);font-weight:400;font-size:26px;line-height:1.25;letter-spacing:1px;color:var(--navy)}
+/* 記分板數字：Elo、晉級％、完成數用 Nunito 900 */
+.progtxt b,.stelo,.stadv b,.krow .kprob,.near .ns,.trow .head .elo{font-family:WCNum,inherit}
+.progbar i{background:linear-gradient(90deg,var(--pitch-l),var(--pitch))}
+
+/* 桌機：主視覺加寬、底部分頁收成置中膠囊（不蓋卡片：body 底部留白加大） */
+/* 首頁卡片在手機上收緊留白（內容不變），抵消主視覺多出來的高度 */
+@media(max-width:560px){
+  main.t-ko{padding-top:10px}
+  main.t-ko .card{padding:14px;margin-bottom:12px}
+  main.t-ko .card.sfhead{padding:12px 14px}
+  main.t-ko .kchamp{padding:12px 14px}
+  main.t-ko .welcome .steps{line-height:1.6;margin-top:4px}
+  main.t-ko .welcome-steps>summary{min-height:40px}
+}
+@media(min-width:900px){
+  .hero{padding:30px 34px 30px}
+  .hero-title{font-size:40px;max-width:60%}
+  .hero-art{width:190px;height:160px;right:22px;top:14px}.hero-art .t{width:140px;height:140px}.hero-art .b{width:62px;height:62px}
+  .hero .btn.big{display:inline-flex;width:auto;min-width:360px;padding:0 28px}
+  .hero .endnote{max-width:62%}
+}
+/* 寬桌機：底部分頁搬進頁首工具列正中（靜態分段鈕，不再浮在內容上蓋住卡片） */
+@media(min-width:1100px){
+  body{padding-bottom:24px}
+  .tabs{top:12px;bottom:auto;left:50%;right:auto;transform:translateX(-50%);width:600px;border:1px solid var(--line);border-radius:16px;padding:4px;gap:2px;z-index:60}
+  .tabs button{display:flex;align-items:center;justify-content:center;gap:6px;font-size:15px;padding:8px 6px;min-height:40px}
+  .tabs button .ico{margin:0}
+  .tabs button .ico svg{width:20px;height:20px}
+  .bdg{top:-4px;right:4px}
+  #topfab{bottom:24px}
+}
 
 </style>
 
@@ -383,11 +464,14 @@ main.t-ko{max-width:720px}
 <meta name="twitter:image:alt" content="世界盃推估器 — 2026 美加墨 48 強推估">
 </head>
 <body class="theme-stone">
+<!-- TABLER_SPRITE_START：Tabler Icons 3.49.0（MIT，授權見 vendor/tabler-icons/LICENSE.txt）；由 _tools/build_icon_sprite.py 產生，勿手改 -->
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true" focusable="false"><symbol id="ti-trophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21l8 0"/><path d="M12 17l0 4"/><path d="M7 4l10 0"/><path d="M17 4v8a5 5 0 0 1 -10 0v-8"/><path d="M3 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/></symbol><symbol id="ti-swords" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3v5l-11 9l-4 4l-3 -3l4 -4l9 -11l5 0"/><path d="M5 13l6 6"/><path d="M14.32 17.32l3.68 3.68l3 -3l-3.365 -3.365"/><path d="M10 5.5l-2 -2.5h-5v5l3 2.5"/></symbol><symbol id="ti-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/></symbol><symbol id="ti-news" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 6h3a1 1 0 0 1 1 1v11a2 2 0 0 1 -4 0v-13a1 1 0 0 0 -1 -1h-10a1 1 0 0 0 -1 1v12a3 3 0 0 0 3 3h11"/><path d="M8 8l4 0"/><path d="M8 12l4 0"/><path d="M8 16l4 0"/></symbol><symbol id="ti-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -6"/><path d="M15 9a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -10"/><path d="M9 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1l0 -14"/><path d="M4 20h14"/></symbol><symbol id="ti-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2l0 -12"/><path d="M16 3l0 4"/><path d="M8 3l0 4"/><path d="M4 11l16 0"/><path d="M8 15h2v2h-2l0 -2"/></symbol><symbol id="ti-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l14 0"/><path d="M13 18l6 -6"/><path d="M13 6l6 6"/></symbol></svg>
+<!-- TABLER_SPRITE_END -->
 <header class="rl-appbar">
   <span class="rl-mark"><img class="rl-glyph" src="rl-mark-aconcagua-navy.png" width="30" height="30" alt="" style="object-fit:contain"></span>
   <div>
-    <div class="rl-title">⚽ 2026 世界盃推估器</div>
-    <div class="rl-sub">美加墨 48 強 · 四強聚焦版 v4.7</div>
+    <div class="rl-title">2026 世界盃推估器</div>
+    <div class="rl-sub">美加墨 48 強 · 四強聚焦版 v4.8</div>
   </div>
   <span class="rl-spacer"></span>
   <button class="rl-btn rl-btn--primary" onclick="openSettings()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="vertical-align:-3px;margin-right:4px"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>設定</button>
@@ -897,11 +981,14 @@ function predict(eA,eB,sA,sB,opts){
 function samplePois(l){ const L=Math.exp(-l); let k=0,p=1; do{k++;p*=Math.random();}while(p>L); return k-1; }
 
 /* ================= 主畫面 ================= */
-const TABS=[["ko","🏆","四強"],["pred","⚔️","對戰"],["teams","👥","球隊"],["news","📰","新聞"],["analysis","📊","分析"],["sched","📅","歷史"]];
+// 2026-10-20 首頁視覺改版：分頁圖示由彩色 emoji 改成同一套 Tabler 線條圖示（sprite 在 <body> 開頭）
+const TABS=[["ko","trophy","四強"],["pred","swords","對戰"],["teams","users","球隊"],["news","news","新聞"],["analysis","chart","分析"],["sched","calendar","歷史"]];
+function tIco(id){ return `<svg aria-hidden="true" focusable="false"><use href="#ti-${id}"/></svg>`; }
+function f3img(key,size,alt){ return `<img class="f3" src="vendor/fluent-3d/${key}.png" width="${size}" height="${size}" alt="${alt||''}"${alt?'':' aria-hidden="true"'}>`; }
 let curTab='ko', gFilter='全部', openTeam=-1, simResult=null, pendingNews=[], lineupCache={}, bkFit=true;
 function renderTabs(){
   document.getElementById('tabs').innerHTML=TABS.map(t=>
-    `<button class="${curTab===t[0]?'on':''}" onclick="goTab('${t[0]}')">${t[0]==='news'&&pendingNews.length?`<span class="bdg">${pendingNews.length}</span>`:''}<span class="ico">${t[1]}</span>${t[2]}</button>`).join('');
+    `<button class="${curTab===t[0]?'on':''}" onclick="goTab('${t[0]}')">${t[0]==='news'&&pendingNews.length?`<span class="bdg">${pendingNews.length}</span>`:''}<span class="ico">${tIco(t[1])}</span>${t[2]}</button>`).join('');
 }
 window.addEventListener('scroll',()=>{ const f=document.getElementById('topfab'); if(f)f.classList.toggle('show',window.scrollY>900); },{passive:true});
 /* 返回鍵（2026-10-13）：分頁切換寫入瀏覽紀錄，手機返回鍵回上一個分頁，在首頁才離開 App */
@@ -1088,7 +1175,7 @@ function nearCard(){
   if(win.length<3){ win=all.slice().sort((a,b)=>Math.abs(a._d)-Math.abs(b._d)).slice(0,6); }
   win.sort((a,b)=>a._d-b._d||((a.kick||'9')<(b.kick||'9')?-1:1));
   const todayN=win.filter(x=>x._d===0).length;
-  return `<div class="card sec" id="sec-near"><h2>📍 近期賽事${todayN?`（今日 ${todayN} 場）`:''}</h2>
+  return `<div class="card sec" id="sec-near"><h2>${f3img('calendar',24)}近期賽事${todayN?`（今日 ${todayN} 場）`:''}</h2>
     <div class="near">${win.map(nearRow).join('')}</div>
     <div class="hint" style="margin-top:8px">點任一場即帶入對戰預測。 ${estInfo('顯示今天前後的比賽（小組賽標組別、淘汰賽標輪次；「預測」＝尚未鎖定的推估對陣）。點任一場即帶入對戰預測。')}</div></div>`;
 }
@@ -2133,7 +2220,7 @@ function semiFocus(){
   .stverdict{margin-top:10px;font-size:15px;line-height:1.55;background:var(--bg);border-left:3px solid var(--gold);border-radius:8px;padding:8px 10px}
   @media(max-width:560px){.stgrid{grid-template-columns:1fr}}
   </style>`;
-  h+=`<div class="card sfhead sec" id="sec-focus"><h2>🔥 四強焦點 ${estInfo(`四隊的狀態、歷史教戰、近況戰績與盤口一覽；「模型晉級％」用本器有效 Elo（含傷病/特質/場館）計算，盤口為 ${D.asof} 快照。`,'說明',1)}</h2></div>`;
+  h+=`<div class="card sfhead sec" id="sec-focus"><h2>${f3img('fire',24)}四強焦點 ${estInfo(`四隊的狀態、歷史教戰、近況戰績與盤口一覽；「模型晉級％」用本器有效 Elo（含傷病/特質/場館）計算，盤口為 ${D.asof} 快照。`,'說明',1)}</h2></div>`;
   D.ties.forEach(t=>{
     const a=t.a,b=t.b,vi=t.vi;
     const sm=styleMul(a,b);
@@ -2182,20 +2269,25 @@ function progressCard(){
   const tot=all.length, done=all.filter(x=>x.kind==='ko'?!!x.locked:!!x.sc).length;
   if(!tot)return '';
   const pc=Math.round(done/tot*100);
-  return `<div class="card prog"><h2>✅ 賽果記錄進度</h2>
+  return `<div class="card prog"><h2>${f3img('check',24)}賽果記錄進度</h2>
     <div class="progtxt"><b>已有實際賽果 ${done} / ${tot} 場</b><span>其餘 ${tot-done} 場 ${estInfo(`其餘 ${tot-done} 場${TOURNEY_ENDED?'是賽前模型推估，不是實際結果':'為模型推估'}`)}</span></div>
     <div class="progbar" role="img" aria-label="已有實際賽果 ${done} 場，共 ${tot} 場"><i style="width:${pc}%"></i></div>
     <div class="progtxt" style="margin-top:10px"><b>情報已啟用 ${(S.news||[]).filter(n=>n.on).length} / ${(S.news||[]).length} 則</b><span>${estInfo('情報＝影響球隊有效 Elo 的新聞。','情報',1)}</span></div></div>`;
 }
 function viewKO(){
   if(welcomeOpen)markWelcomeSeen(); // 這次照常展開；下次打開就收成一行
-  let h=`<div class="card welcome"><details class="welcome-steps" id="welcomeSteps"${welcomeOpen?' open':''} ontoggle="welcomeOpen=this.open"><summary><h2>👋 第一次使用？三步驟上手</h2><span class="endnote-m" aria-hidden="true">▾</span></summary>
+  // 2026-10-20 首頁視覺改版「開賽日球場」：首屏＝草皮綠主視覺（一句大標＋唯一主鈕）；誠實紅線「只有官方賽果是真實比分，其餘是推估」留在主視覺裡直接可見；
+  // 頁內跳轉改成四格 3D 入口；三步驟教學移到入口下方（首訪展開、看過收起，規則同 10-20 文字量調整）。
+  let h=`<section class="hero" aria-labelledby="heroTitle">
+    <h1 class="hero-title" id="heroTitle">冠軍是誰？</h1>
+    <div class="hero-art" aria-hidden="true"><img class="t" src="vendor/fluent-3d/trophy.png" width="60" height="60" alt=""><img class="b" src="vendor/fluent-3d/ball.png" width="32" height="32" alt=""></div>
+    ${TOURNEY_ENDED?ENDED_BRIEF:`<span class="hint hint-pre">小組賽完賽後會自動抓官方對陣與賽果。</span>`}
+    <button class="btn big" onclick="welcomeDone()">${tIco('trophy')}<span>查看冠軍推估與對陣圖</span></button></section>
+  <nav class="jump tiles" aria-label="頁內跳轉"><button onclick="jumpTo('sec-focus')">${f3img('fire',28)}四強焦點</button><button onclick="jumpTo('sec-near')">${f3img('calendar',28)}近期賽事</button><button onclick="jumpTo('sec-champ')">${f3img('trophy',28)}推估冠軍</button><button onclick="jumpTo('sec-bracket')">${f3img('dividers',28)}對陣圖</button></nav>
+  <div class="card welcome"><details class="welcome-steps" id="welcomeSteps"${welcomeOpen?' open':''} ontoggle="welcomeOpen=this.open"><summary><h2>三步驟上手</h2><span class="endnote-m" aria-hidden="true">▾</span></summary>
     <ol class="steps"><li><b>第一步</b>：先看下方「四強焦點」，了解四支球隊的狀態與盤口。</li>
     <li><b>第二步</b>：到「對陣圖」點任一隊，可改派它晉級，後面自動重排。</li>
-    <li><b>第三步</b>：想自己試算，去「⚔️ 對戰」任選兩隊看勝率與比分。</li></ol></details>
-    ${TOURNEY_ENDED?ENDED_BRIEF:`<span class="hint">小組賽完賽後會自動抓官方對陣與賽果。</span>`}
-    <button class="btn big" onclick="welcomeDone()">🏆 查看冠軍推估與對陣圖</button></div>
-  <nav class="jump" aria-label="頁內跳轉"><button onclick="jumpTo('sec-focus')">四強焦點</button><button onclick="jumpTo('sec-near')">近期賽事</button><button onclick="jumpTo('sec-champ')">推估冠軍</button><button onclick="jumpTo('sec-bracket')">對陣圖</button></nav>`;
+    <li><b>第三步</b>：想自己試算，去「對戰」任選兩隊看勝率與比分。</li></ol></details></div>`;
   h+=progressCard();
   h+=semiFocus();
   h+=nearCard();
@@ -2204,10 +2296,10 @@ function viewKO(){
   const RL=[['32 強','R32 · 6/28–7/3'],['16 強','R16 · 7/4–7/7'],['8 強','QF · 7/9–7/11'],['4 強','SF · 7/14–7/15'],['🏆 決賽','Final · 7/19']];
   // 冠軍橫幅（最可能路徑；奪冠率請看模擬）
   const fin=rounds[4][0], semis=rounds[3];
-  h+=`<div class="kchamp sec" id="sec-champ"><div class="kct">🏆 推估冠軍 ${estInfo(`最可能路徑${TOURNEY_ENDED?'・賽前推估，非實際冠軍':''}。＝每場選機率高者一路推到底的單一劇本。想看「綜合奪冠率」請到 <b>📊 分析</b> 的模擬。`)}</div>
+  h+=`<div class="kchamp sec" id="sec-champ"><div class="kct">${f3img('trophy',24)}推估冠軍 ${estInfo(`最可能路徑${TOURNEY_ENDED?'・賽前推估，非實際冠軍':''}。＝每場選機率高者一路推到底的單一劇本。想看「綜合奪冠率」請到 <b>📊 分析</b> 的模擬。`)}</div>
     <div class="kcn">${TEAMS[champ][5]} ${TEAMS[champ][1]}</div>
     <div class="hint" style="margin-top:4px">決賽 ${TEAMS[fin.a][1]} vs ${TEAMS[fin.b][1]}・四強 ${semis.flatMap(ms=>[ms.a,ms.b]).map(t=>TEAMS[t][1]).join('、')}</div></div>`;
-  h+=`<div class="card sec" id="sec-bracket"><h2>🗂 對陣圖（32 強 → 決賽）</h2>
+  h+=`<div class="card sec" id="sec-bracket"><h2>${f3img('dividers',24)}對陣圖（32 強 → 決賽）</h2>
     <div class="hint" style="margin-bottom:6px"><b>點任一隊可改派它晉級</b>，後面立即重排。 ${estInfo(`32 強 → 決賽逐輪列出${TOURNEY_ENDED?'（標「推估對陣」的場次是賽前推估，不是實際賽果）':''}，每隊右側為晉級機率（含主場・高原・PK）。<b>點任一隊可改派它晉級</b>，後面立即重排；綠底＝晉級者、🔒官方對陣、✓官方賽果。32 強～8 強預設收合，點輪次標題展開。`)}${Object.keys(brOverride).length?` <a onclick="resetBracket()" style="color:var(--blue);cursor:pointer;font-weight:700">↺ 清除手動指定（${Object.keys(brOverride).length}）</a>`:''}</div>`;
   // 2026-10-20 文字量調整第二波：先看結論——32 強／16 強／8 強預設收合（點開可改派晉級，展開狀態會記住），4 強與決賽直接顯示
   rounds.forEach((rd,ri)=>{
