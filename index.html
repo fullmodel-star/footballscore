@@ -285,6 +285,18 @@ body.theme-stone{--accent:#2B5C8A}
 .endnote-m{flex:none;color:var(--blue);font-size:13px;transition:transform .15s}
 .endnote[open] .endnote-m{transform:rotate(180deg)}
 .endnote>.hint{display:block;margin:2px 0 4px}
+/* 2026-10-20 文字量調整：「推估」小標籤＋ⓘ（點開看完整但書，全文仍在 DOM）；三步驟教學看過一次後收起 */
+.esttag{display:inline-block;padding:0 8px;border-radius:10px;background:var(--card2);border:1px solid var(--line);color:var(--sub);font-size:13px;font-weight:700;line-height:1.6}
+details.info{display:inline-block;vertical-align:baseline;max-width:100%}
+details.info>summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:4px;min-height:40px;margin:-8px 0;padding:0 2px}
+details.info>summary::-webkit-details-marker{display:none}
+.info-i{display:inline-flex;align-items:center;justify-content:center;min-width:28px;color:var(--blue);font-size:16px;font-weight:700}
+details.info>.info-body{display:block;margin:10px 0 4px;font-size:14px;line-height:1.6;color:var(--sub);font-weight:400}
+details.info[open]{display:inline}
+.welcome-steps>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;min-height:44px}
+.welcome-steps>summary::-webkit-details-marker{display:none}
+.welcome-steps>summary h2{margin:0}
+.welcome-steps[open]>summary .endnote-m{transform:rotate(180deg)}
 .jump{display:flex;gap:8px;overflow-x:auto;margin-bottom:14px;padding-bottom:2px}
 .jump button{flex:1 0 auto;min-height:44px;padding:0 14px;border-radius:22px;border:1px solid var(--line);background:var(--card);color:var(--accent);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer}
 .jump button:active{background:var(--card2)}
@@ -1050,7 +1062,7 @@ function nearCard(){
   const todayN=win.filter(x=>x._d===0).length;
   return `<div class="card sec" id="sec-near"><h2>📍 近期賽事${todayN?`（今日 ${todayN} 場）`:''}</h2>
     <div class="near">${win.map(nearRow).join('')}</div>
-    <div class="hint" style="margin-top:8px">顯示今天前後的比賽（小組賽標組別、淘汰賽標輪次；「預測」＝尚未鎖定的推估對陣）。點任一場即帶入對戰預測。</div></div>`;
+    <div class="hint" style="margin-top:8px">點任一場即帶入對戰預測。 ${estInfo('顯示今天前後的比賽（小組賽標組別、淘汰賽標輪次；「預測」＝尚未鎖定的推估對陣）。點任一場即帶入對戰預測。')}</div></div>`;
 }
 function scrollToNearMatch(){
   try{
@@ -1178,6 +1190,17 @@ const ENDED_NOTE = '<span class="hint">ℹ️ <b>2026 世界盃已於 7/19 結�
 // 2026-10-19 修後重評：首頁說明卡把上面整段放在首屏，主按鈕「查看冠軍推估與對陣圖」被推下去（U1 退步）→
 // 首頁改成一行重點＋點開看完整說明（內容同 ENDED_NOTE，一字不少）；賽程頁仍直接顯示 ENDED_NOTE。
 const ENDED_BRIEF = '<details class="endnote"><summary><span class="endnote-t">ℹ️ 只有「官方賽果」是真實比分，<b>其餘是推估</b></span><span class="endnote-m" aria-hidden="true">▾</span></summary>'+ENDED_NOTE+'</details>';
+// 2026-10-20 文字量調整：各處反覆出現的「（…是賽前推估，不是實際結果）」括號但書 → 「推估」小標籤＋ⓘ，點開是原句（一字不少，仍在 DOM）。
+// 完整可見說明保留在首頁 ENDED_BRIEF 一行＋賽程頁 ENDED_NOTE 全文。
+function estInfo(full,label){
+  label=label||'推估';
+  return '<details class="info"><summary aria-label="'+label+'：點開看說明"><span class="esttag">'+label+'</span><span class="info-i" aria-hidden="true">ⓘ</span></summary><span class="info-body">'+full+'</span></details>';
+}
+// 2026-10-20：「三步驟上手」看過一次（或按過主鈕）後就收起；記在 localStorage，讀不到（無痕／被擋）就照常展開。
+const WELCOME_KEY='wc2026_welcome_seen';
+let welcomeOpen=(()=>{ try{ return localStorage.getItem(WELCOME_KEY)!=='1'; }catch(e){ return true; } })();
+function markWelcomeSeen(){ try{ localStorage.setItem(WELCOME_KEY,'1'); }catch(e){} }
+function welcomeDone(){ welcomeOpen=false; markWelcomeSeen(); const d=document.getElementById('welcomeSteps'); if(d)d.open=false; jumpTo('sec-champ'); }
 async function autoScores(){ // 開啟 App 自動更新比分（ESPN 單一請求、10 分鐘節流、靜默）
   if(TOURNEY_ENDED)return;
   if(!navigator.onLine)return;
@@ -2056,7 +2079,7 @@ function semiFocus(){
   @media(max-width:560px){.stgrid{grid-template-columns:1fr}}
   </style>`;
   h+=`<div class="card sfhead sec" id="sec-focus"><h2>🔥 四強焦點</h2>
-    <div class="hint">四隊的狀態、歷史教戰、近況戰績與盤口一覽；「模型晉級％」用本器有效 Elo（含傷病/特質/場館）計算，盤口為 ${D.asof} 快照。</div></div>`;
+    <div class="hint">四隊狀態、教戰、戰績與盤口一覽 ${estInfo(`四隊的狀態、歷史教戰、近況戰績與盤口一覽；「模型晉級％」用本器有效 Elo（含傷病/特質/場館）計算，盤口為 ${D.asof} 快照。`,'說明')}</div></div>`;
   D.ties.forEach(t=>{
     const a=t.a,b=t.b,vi=t.vi;
     const sm=styleMul(a,b);
@@ -2096,17 +2119,18 @@ function progressCard(){
   if(!tot)return '';
   const pc=Math.round(done/tot*100);
   return `<div class="card prog"><h2>✅ 賽果記錄進度</h2>
-    <div class="progtxt"><b>已有實際賽果 ${done} / ${tot} 場</b><span>（其餘 ${tot-done} 場${TOURNEY_ENDED?'是賽前模型推估，不是實際結果':'為模型推估'}）</span></div>
+    <div class="progtxt"><b>已有實際賽果 ${done} / ${tot} 場</b><span>其餘 ${tot-done} 場 ${estInfo(`其餘 ${tot-done} 場${TOURNEY_ENDED?'是賽前模型推估，不是實際結果':'為模型推估'}`)}</span></div>
     <div class="progbar" role="img" aria-label="已有實際賽果 ${done} 場，共 ${tot} 場"><i style="width:${pc}%"></i></div>
     <div class="progtxt" style="margin-top:10px"><b>情報已啟用 ${(S.news||[]).filter(n=>n.on).length} / ${(S.news||[]).length} 則</b><span>（影響球隊有效 Elo 的新聞）</span></div></div>`;
 }
 function viewKO(){
-  let h=`<div class="card welcome"><h2>👋 第一次使用？三步驟上手</h2>
-    ${TOURNEY_ENDED?ENDED_BRIEF:`<span class="hint">小組賽完賽後會自動抓官方對陣與賽果。</span>`}
+  if(welcomeOpen)markWelcomeSeen(); // 這次照常展開；下次打開就收成一行
+  let h=`<div class="card welcome"><details class="welcome-steps" id="welcomeSteps"${welcomeOpen?' open':''} ontoggle="welcomeOpen=this.open"><summary><h2>👋 第一次使用？三步驟上手</h2><span class="endnote-m" aria-hidden="true">▾</span></summary>
     <ol class="steps"><li><b>第一步</b>：先看下方「四強焦點」，了解四支球隊的狀態與盤口。</li>
     <li><b>第二步</b>：到「對陣圖」點任一隊，可改派它晉級，後面自動重排。</li>
-    <li><b>第三步</b>：想自己試算，去「⚔️ 對戰」任選兩隊看勝率與比分。</li></ol>
-    <button class="btn big" onclick="jumpTo('sec-champ')">🏆 查看冠軍推估與對陣圖</button></div>
+    <li><b>第三步</b>：想自己試算，去「⚔️ 對戰」任選兩隊看勝率與比分。</li></ol></details>
+    ${TOURNEY_ENDED?ENDED_BRIEF:`<span class="hint">小組賽完賽後會自動抓官方對陣與賽果。</span>`}
+    <button class="btn big" onclick="welcomeDone()">🏆 查看冠軍推估與對陣圖</button></div>
   <nav class="jump" aria-label="頁內跳轉"><button onclick="jumpTo('sec-focus')">四強焦點</button><button onclick="jumpTo('sec-near')">近期賽事</button><button onclick="jumpTo('sec-champ')">推估冠軍</button><button onclick="jumpTo('sec-bracket')">對陣圖</button></nav>`;
   h+=progressCard();
   h+=semiFocus();
@@ -2115,11 +2139,11 @@ function viewKO(){
   const champ=rounds[4][0].winner;
   const RL=[['32 強','R32 · 6/28–7/3'],['16 強','R16 · 7/4–7/7'],['8 強','QF · 7/9–7/11'],['4 強','SF · 7/14–7/15'],['🏆 決賽','Final · 7/19']];
   // 冠軍橫幅（最可能路徑；奪冠率請看模擬）
-  h+=`<div class="kchamp sec" id="sec-champ"><div class="kct">🏆 推估冠軍（最可能路徑${TOURNEY_ENDED?'・賽前推估，非實際冠軍':''}）</div>
+  h+=`<div class="kchamp sec" id="sec-champ"><div class="kct">🏆 推估冠軍 ${estInfo(`最可能路徑${TOURNEY_ENDED?'・賽前推估，非實際冠軍':''}`)}</div>
     <div class="kcn">${TEAMS[champ][5]} ${TEAMS[champ][1]}</div>
     <div class="hint" style="margin-top:4px">＝每場選機率高者一路推到底的單一劇本。想看「綜合奪冠率」請到 <b>📊 分析</b> 的模擬。</div></div>`;
   h+=`<div class="card sec" id="sec-bracket"><h2>🗂 對陣圖（32 強 → 決賽）</h2>
-    <div class="hint" style="margin-bottom:6px">32 強 → 決賽逐輪列出${TOURNEY_ENDED?'（標「推估對陣」的場次是賽前推估，不是實際賽果）':''}，每隊右側為晉級機率（含主場・高原・PK）。<b>點任一隊可改派它晉級</b>，後面立即重排；綠底＝晉級者、🔒官方對陣、✓官方賽果。已完賽輪次自動收合。${Object.keys(brOverride).length?` <a onclick="resetBracket()" style="color:var(--blue);cursor:pointer;font-weight:700">↺ 清除手動指定（${Object.keys(brOverride).length}）</a>`:''}</div>`;
+    <div class="hint" style="margin-bottom:6px"><b>點任一隊可改派它晉級</b>，後面立即重排。 ${estInfo(`32 強 → 決賽逐輪列出${TOURNEY_ENDED?'（標「推估對陣」的場次是賽前推估，不是實際賽果）':''}，每隊右側為晉級機率（含主場・高原・PK）。<b>點任一隊可改派它晉級</b>，後面立即重排；綠底＝晉級者、🔒官方對陣、✓官方賽果。已完賽輪次自動收合。`)}${Object.keys(brOverride).length?` <a onclick="resetBracket()" style="color:var(--blue);cursor:pointer;font-weight:700">↺ 清除手動指定（${Object.keys(brOverride).length}）</a>`:''}</div>`;
   rounds.forEach((rd,ri)=>{
     const done=rd.length&&rd.every(ms=>ms.locked);
     const body=rd.map((ms,i)=>koMatchCard(ms,ri,i)).join('');
