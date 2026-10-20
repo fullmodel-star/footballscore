@@ -291,7 +291,7 @@ details.info{display:inline-block;vertical-align:baseline;max-width:100%}
 details.info>summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:4px;min-height:40px;margin:-8px 0;padding:0 2px}
 details.info>summary::-webkit-details-marker{display:none}
 .info-i{display:inline-flex;align-items:center;justify-content:center;min-width:28px;color:var(--blue);font-size:16px;font-weight:700}
-details.info>.info-body{display:block;margin:10px 0 4px;font-size:14px;line-height:1.6;color:var(--sub);font-weight:400}
+details.info>.info-body{display:block;margin:10px 0 4px;font-size:15px;line-height:1.6;color:var(--sub);font-weight:400}
 details.info[open]{display:inline}
 .welcome-steps>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;min-height:44px}
 .welcome-steps>summary::-webkit-details-marker{display:none}
@@ -330,6 +330,33 @@ main.t-ko{max-width:720px}
   .rl-appbar .rl-btn{flex:none;padding:7px 11px;font-size:13px}
   .rl-appbar .rl-mark{width:34px;height:34px}
 }
+/* 2026-10-20 文字量調整第二波：頁尾免責收成一行「⚠ 使用前須知」（全文仍在 DOM；字級 15px 與原本相同；顏色沿用頁尾 --muted） */
+.rl-disc{max-width:640px;margin:10px auto 0;font-size:15px;line-height:1.7;color:var(--muted,#4A6279)}
+.rl-disc>summary{display:flex;align-items:center;justify-content:center;gap:6px;width:fit-content;margin:0 auto;min-height:44px;padding:6px 16px;box-sizing:border-box;border:1px solid var(--line);border-radius:999px;font-size:15px;line-height:1.4;cursor:pointer;list-style:none;color:inherit;-webkit-tap-highlight-color:transparent}
+.rl-disc>summary::-webkit-details-marker{display:none}
+.rl-disc>summary::after{content:"\203A";display:inline-block;font-size:18px;line-height:1;transition:transform .2s}
+.rl-disc[open]>summary::after{transform:rotate(90deg)}
+.rl-disc>summary:focus-visible,.endnote summary:focus-visible,details.info>summary:focus-visible,.mdet>summary:focus-visible,.gdet>summary:focus-visible,.kround>summary:focus-visible,.stmore>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+.rl-disc-body{margin-top:10px}
+/* 分析頁「怎麼算的」收合卡、歷史頁分組收合、對陣圖前三輪收合、四強焦點細節收合 */
+.mdet>summary,.gdet>summary,.kround>summary,.stmore>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;min-height:44px}
+.mdet>summary::-webkit-details-marker,.gdet>summary::-webkit-details-marker,.kround>summary::-webkit-details-marker,.stmore>summary::-webkit-details-marker{display:none}
+.mdet>summary h2{margin:0;flex:1 1 auto;min-width:0}
+.mdet[open]>summary .endnote-m,.gdet[open]>summary .endnote-m,.kround[open]>summary .endnote-m,.stmore[open]>summary .endnote-m{transform:rotate(180deg)}
+.mdet>summary+*{margin-top:10px}
+.gdet{padding-top:4px;padding-bottom:4px}
+.gdet>summary{font-size:16px;font-weight:700;color:var(--txt)}
+.gdet>summary .gflags{font-weight:400;letter-spacing:1px}
+.gdet>summary .gcnt{margin-left:auto;font-size:15px;font-weight:400;color:var(--sub);white-space:nowrap}
+.gdet[open]>summary{margin-bottom:6px}
+.kround{margin-top:8px}
+.kround>summary{color:var(--sub);font-weight:700;font-size:15px}
+.kround>summary small{font-weight:400}
+.stmore{margin-top:8px}
+.stmore>summary{font-size:15px;color:var(--blue);font-weight:700}
+.stmore .sth2h{margin-top:6px}
+.stgrid.st2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.acclist{margin:0;padding-left:20px;line-height:1.8;font-size:15px;color:var(--sub)}
 
 </style>
 
@@ -373,7 +400,8 @@ main.t-ko{max-width:720px}
     <p class="rl-sig-quote">Messi 就是我的神。</p>
   </div>
   <p class="rl-sig-by">Ridgeline · by Lucas</p>
-  <p style="font-size:15px;line-height:1.7;color:var(--muted,#6E8BA3);max-width:640px;margin:14px auto 0">© 2026 Ridgeline · Ridgeline · by Lucas｜免費使用；著作權皆屬作者，未經同意請勿重製、散布或作商業用途。<br>⚠️ 免責聲明：本 App 之推估結果僅供娛樂參考，非投注建議，實際賽事結果請以官方公告為準，請理性看待、量力而為。</p>
+  <p style="font-size:15px;line-height:1.7;color:var(--muted,#6E8BA3);max-width:640px;margin:14px auto 0">© 2026 Ridgeline · Ridgeline · by Lucas｜免費使用；著作權皆屬作者，未經同意請勿重製、散布或作商業用途。</p>
+  <details class="rl-disc"><summary>⚠ 使用前須知</summary><div class="rl-disc-body">⚠️ 免責聲明：本 App 之推估結果僅供娛樂參考，非投注建議，實際賽事結果請以官方公告為準，請理性看待、量力而為。</div></details>
 </footer>
 <nav class="tabs" id="tabs"></nav>
 <button id="topfab" aria-label="回到頁面頂端" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑ 頂端</button>
@@ -1070,6 +1098,7 @@ function scrollToNearMatch(){
     MATCHES.forEach((m,idx)=>{ if(gFilter!=='全部'&&m[1]!==gFilter)return; const d=Math.abs(dayDelta(m[0])); if(d<bd){bd=d;best=idx;} });
     if(best==null||bd>2)return;
     const el=document.getElementById('gm'+best);
+    const dd=el&&el.closest('details'); if(dd&&!dd.open)dd.open=true; // 比賽日收合時先展開
     if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
   }catch(e){}
 }
@@ -1081,6 +1110,7 @@ function viewSched(){
   if(gFilter==='全部') h+='<details class="card endnote"><summary><span class="endnote-t">📅 本頁＝小組賽紀錄與積分（點開看說明）</span><span class="endnote-m" aria-hidden="true">▾</span></summary><div class="hint">📅 本頁為<b>小組賽紀錄</b>與積分（有比分的才是實際賽果；沒有比分的場次以模型推估計算）。淘汰賽對陣、近期賽事與逐場推估請看「🏆 四強」分頁。</div></details>';
   h+=`<div class="gfilter">${gs.map(g=>`<button class="${gFilter===g?'on':''}" onclick="gFilter='${g}';render()">${g==='全部'?'全部':g+'組'}</button>`).join('')}</div>`;
   if(gFilter!=='全部') h+=standingsCard(gFilter);
+  const gHtml={}; // 「全部」時依組別收合（2026-10-20 文字量調整第二波）：每組一個 <details>，內容一場不少、仍在 DOM
   MATCHES.forEach((m,idx)=>{
     if(gFilter!=='全部'&&m[1]!==gFilter)return;
     const res=S.results[idx];
@@ -1090,7 +1120,7 @@ function viewSched(){
     const sm=styleMul(m[2],m[3]);
     const r=predict(eA,eB,sm[0],sm[1]);
     const vtags=(v[4]>=1400?`<span class="vtag">⛰${v[4]}m</span>`:'')+(v[5]?`<span class="vtag roof">🏟室內</span>`:'');
-    h+=`<div class="match${dayDelta(m[0])===0?' today':''}" id="gm${idx}">
+    gHtml[m[0]]=(gHtml[m[0]]||'')+`<div class="match${dayDelta(m[0])===0?' today':''}" id="gm${idx}">
       <div class="top"><span>${m[0]}（${m[1]} 組）</span><span>📍 ${v[0]} ${vtags}</span></div>
       ${tzRow(KICK[idx])}
       <div class="mid">
@@ -1109,8 +1139,31 @@ function viewSched(){
       <div id="lu${idx}">${lineupCache[idx]?`<div class="lup">${lineupCache[idx]}</div>`:''}</div>
     </div>`;
   });
-  h+=`<div class="card hint">輸入實際比分（兩格都填）後，積分榜與奪冠模擬都會採用真實結果；清空任一格即恢復為預測。高原（⛰）場館對不適應球隊按海拔扣分、拉美隊在美國場館有僑民主場加成；室內（🏟）場館不受高溫影響。</div>`;
+  if(gFilter!=='全部') h+=Object.values(gHtml).join('');
+  else{
+    // 依比賽日收合（賽程本來就照日期排，DOM 順序不變）；預設只展開「最近」或「還沒踢完」的那一天
+    const def=schedDefaultDay();
+    Object.keys(gHtml).forEach(md=>{
+      const ids=MATCHES.map((m,i)=>m[0]===md?i:-1).filter(i=>i>=0);
+      const doneN=ids.filter(i=>validRes(S.results[i])).length;
+      const rd=ids[0]<24?1:(ids[0]<48?2:3), wd=WDzh[mdToDate(md).getDay()];
+      const gs=[...new Set(ids.map(i=>MATCHES[i][1]))].join(' ');
+      const open=(md in gOpen)?gOpen[md]:(md===def);
+      h+=`<details class="card gdet" data-md="${md}"${open?' open':''} ontoggle="gOpen['${md}']=this.open"><summary><span>${md}${wd?'（'+wd+'）':''}</span><span class="gflags">第${rd}輪 · ${gs} 組</span><span class="gcnt">賽果 ${doneN}/${ids.length}</span><span class="endnote-m" aria-hidden="true">▾</span></summary>${gHtml[md]}</details>`;
+    });
+  }
+  h+=`<div class="card hint">輸入兩格比分即改用真實結果。 ${estInfo('輸入實際比分（兩格都填）後，積分榜與奪冠模擬都會採用真實結果；清空任一格即恢復為預測。高原（⛰）場館對不適應球隊按海拔扣分、拉美隊在美國場館有僑民主場加成；室內（🏟）場館不受高溫影響。','說明',1)}</div>`;
   return h;
+}
+var gOpen={}; // 歷史頁各比賽日展開狀態（使用者點過就記住，重繪不會收回去）
+function schedDefaultDay(){ // 預設展開：賽中＝今天前後 2 天內最近的比賽日；否則＝第一個還沒有完整賽果的比賽日；都踢完＝最後一天
+  if(!TOURNEY_ENDED){
+    let best=null,bd=99;
+    MATCHES.forEach((m,idx)=>{ const d=Math.abs(dayDelta(m[0])); if(d<bd){bd=d;best=idx;} });
+    if(best!=null&&bd<=2) return MATCHES[best][0];
+  }
+  const un=MATCHES.findIndex((m,idx)=>!validRes(S.results[idx]));
+  return un>=0?MATCHES[un][0]:MATCHES[MATCHES.length-1][0];
 }
 function setRes(idx,side,val){
   if(val===''){ delete S.results[idx]; save(); render(); return; } // 清空任一格→整場恢復為預測
@@ -1192,9 +1245,9 @@ const ENDED_NOTE = '<span class="hint">ℹ️ <b>2026 世界盃已於 7/19 結�
 const ENDED_BRIEF = '<details class="endnote"><summary><span class="endnote-t">ℹ️ 只有「官方賽果」是真實比分，<b>其餘是推估</b></span><span class="endnote-m" aria-hidden="true">▾</span></summary>'+ENDED_NOTE+'</details>';
 // 2026-10-20 文字量調整：各處反覆出現的「（…是賽前推估，不是實際結果）」括號但書 → 「推估」小標籤＋ⓘ，點開是原句（一字不少，仍在 DOM）。
 // 完整可見說明保留在首頁 ENDED_BRIEF 一行＋賽程頁 ENDED_NOTE 全文。
-function estInfo(full,label){
+function estInfo(full,label,bare){ // bare＝只顯示 ⓘ（說明類，不需要小標籤；標籤名留在 aria-label 給讀屏）
   label=label||'推估';
-  return '<details class="info"><summary aria-label="'+label+'：點開看說明"><span class="esttag">'+label+'</span><span class="info-i" aria-hidden="true">ⓘ</span></summary><span class="info-body">'+full+'</span></details>';
+  return '<details class="info"><summary aria-label="'+label+'：點開看說明">'+(bare?'':'<span class="esttag">'+label+'</span>')+'<span class="info-i" aria-hidden="true">ⓘ</span></summary><span class="info-body">'+full+'</span></details>';
 }
 // 2026-10-20：「三步驟上手」看過一次（或按過主鈕）後就收起；記在 localStorage，讀不到（無痕／被擋）就照常展開。
 const WELCOME_KEY='wc2026_welcome_seen';
@@ -1765,7 +1818,7 @@ function calibrateFactors(feats){
 function viewAcc(){
   const {G,K}=backtest();
   const intro=`<div class="card"><h2>🎯 差異分析（推估 vs 實際）</h2>
-    <details class="endnote"><summary><span class="endnote-t">🎯 怎麼比對推估與實際（點開看說明）</span><span class="endnote-m" aria-hidden="true">▾</span></summary><div class="hint">用<b>目前模型設定</b>重算每一場的<b>賽前</b>推估（刻意排除「賽中動態」因子，以免拿賽果預測賽果自己），再對照你已輸入的真實結果，量化模型有多準、哪裡系統性偏掉、該怎麼修。樣本越多越可信。</div></details></div>`;
+    <details class="endnote"><summary><span class="endnote-t">🎯 怎麼比對</span><span class="endnote-m" aria-hidden="true">▾</span></summary><div class="hint">用<b>目前模型設定</b>重算每一場的<b>賽前</b>推估（刻意排除「賽中動態」因子，以免拿賽果預測賽果自己），再對照你已輸入的真實結果，量化模型有多準、哪裡系統性偏掉、該怎麼修。樣本越多越可信。</div></details></div>`;
   if(G.n===0&&K.n===0){
     return intro+`<div class="card"><div class="hint">目前還沒有任何已完成的比賽結果。請到「📅 小組」或「🏆 淘汰」分頁按「🔄 一鍵更新比分」（需網路）抓官方賽果，或手動輸入比分，這裡就會自動算出命中率、差異與修正建議。</div>
       <div class="row" style="margin-top:10px;gap:8px"><button class="btn sec" onclick="goTab('sched')">📅 去更新小組賽</button><button class="btn sec" onclick="goTab('ko')">🏆 去更新淘汰賽</button></div></div>`;
@@ -1783,12 +1836,10 @@ function viewAcc(){
     const golTxt=Math.abs(aT-pT)<0.15?'場均進球與推估吻合':aT>pT?`實際進球（${aT.toFixed(2)}）比推估（${pT.toFixed(2)}）<b>多</b>`:`實際進球（${aT.toFixed(2)}）比推估（${pT.toFixed(2)}）<b>少</b>`;
     const drwTxt=Math.abs(aD-pD)<0.04?'平手率吻合':aD>pD?`平手實際偏<b>多</b>（${pct1(aD)} vs 推估 ${pct1(pD)}）`:`平手實際偏<b>少</b>（${pct1(aD)} vs 推估 ${pct1(pD)}）`;
     h+=`<div class="card"><h2>📝 總評</h2>
-      <div class="hint" style="line-height:1.9;font-size:15px">
-      已驗證 <b>${G.n}</b> 場小組賽${K.n?`＋ <b>${K.n}</b> 場淘汰賽`:''}。勝平負<b>命中率 ${pct1(hit)}</b>（${G.hit}/${G.n}），技巧分 ${skillTxt}（Brier ${briA.toFixed(3)}，亂猜=0.667）。<br>
-      • 強隊校準：${favTxt}。<br>
-      • 進球規模：${golTxt}。<br>
-      • 平手傾向：${drwTxt}。<br>
-      ${G.n<16?'⚠ 目前樣本 <16 場，單場爆冷會主導統計，下方數值建議暫不顯示，結論先當參考。':'下方有依差異自動算出的<b>可一鍵套用</b>修正建議。'}
+      <div class="hint" style="font-size:15px;line-height:1.7">
+      已驗證 <b>${G.n}</b> 場小組賽${K.n?`＋ <b>${K.n}</b> 場淘汰賽`:''}・勝平負<b>命中率 ${pct1(hit)}</b>（${G.hit}/${G.n}）・技巧分 ${skillTxt} ${estInfo(`技巧分看 Brier 分數：本模型 Brier ${briA.toFixed(3)}，亂猜=0.667，越低越準。`,'怎麼算的',1)}</div>
+      <details class="endnote"><summary><span class="endnote-t">📋 強隊／進球／平手 三項解讀</span><span class="endnote-m" aria-hidden="true">▾</span></summary><ul class="acclist"><li>強隊校準：${favTxt}。</li><li>進球規模：${golTxt}。</li><li>平手傾向：${drwTxt}。</li></ul></details>
+      <div class="hint" style="font-size:15px">${G.n<16?'⚠ 樣本 <16 場，結論先當參考 '+estInfo('⚠ 目前樣本 <16 場，單場爆冷會主導統計，下方數值建議暫不顯示，結論先當參考。','說明',1):'下方有依差異自動算出的<b>可一鍵套用</b>修正建議。'}
       </div></div>`;
   }
 
@@ -1804,7 +1855,7 @@ function viewAcc(){
       ${drow('勝平負命中','—',pct1(hit),'—','argmax 命中比例')}
       ${drow('Brier 分數','0.667（亂猜）',briA.toFixed(3),sg(briA-0.667,3),briA<0.667?'優於亂猜':'差於亂猜')}
       </table></div>
-      <div class="hint" style="margin-top:6px">pp＝百分點。「強隊」＝賽前有效 Elo 較高的一方；強隊勝率比較其「實際勝場率 vs 推估勝率」，是校準是否偏保守／過度自信的關鍵。</div></div>`;
+      <div class="hint" style="margin-top:6px">pp＝百分點 ${estInfo('pp＝百分點。「強隊」＝賽前有效 Elo 較高的一方；強隊勝率比較其「實際勝場率 vs 推估勝率」，是校準是否偏保守／過度自信的關鍵。','怎麼看',1)}</div></div>`;
   }
 
   /* ── C. 各隊表現 vs 推估 ── */
@@ -1814,7 +1865,7 @@ function viewAcc(){
       <td class="${t.d>0.5?'ok':(t.d<-0.5?'no':'')}" style="font-weight:700">${sg(t.d,1)}</td></tr>`;
     const over=td.filter(t=>t.d>0).slice(0,5), under=td.slice().reverse().filter(t=>t.d<0).slice(0,5);
     h+=`<div class="card"><h2>👥 各隊：實際 vs 賽前推估</h2>
-      <div class="hint" style="margin-bottom:8px">把每隊已踢小組賽的「<b>賽前期望勝點</b>」（依推估的勝平負機率）對照「<b>實際拿到的勝點</b>」。Δ 正＝<b style="color:var(--green)">超出預期</b>（黑馬/低估）、負＝<b style="color:var(--red)">低於預期</b>（高估/失常）。</div>
+      <div class="hint" style="margin-bottom:8px">Δ 正＝<b style="color:var(--green)">超出預期</b>、負＝<b style="color:var(--red)">低於預期</b> ${estInfo('把每隊已踢小組賽的「<b>賽前期望勝點</b>」（依推估的勝平負機率）對照「<b>實際拿到的勝點</b>」。Δ 正＝<b style="color:var(--green)">超出預期</b>（黑馬/低估）、負＝<b style="color:var(--red)">低於預期</b>（高估/失常）。','怎麼算的',1)}</div>
       <div class="calib">
         <div class="cc"><div class="tm"><b>🚀 超出預期 Top5</b><span>Δ勝點</span></div>
           ${over.length?over.map(t=>`<div class="tm"><span>${TEAMS[t.i][5]} ${TEAMS[t.i][1]}</span><b class="ok">${sg(t.d,1)}</b></div>`).join(''):'<div class="tm"><span>—</span><span></span></div>'}</div>
@@ -1831,7 +1882,7 @@ function viewAcc(){
     const ms=G.rows.slice().sort((a,b)=>a.pAct-b.pAct).slice(0,8);
     const lab=(r,o)=>o==='W'?TEAMS[r.a][1]:(o==='L'?TEAMS[r.b][1]:'平手');
     h+=`<div class="card"><h2>🌋 最意外的場次（模型最沒料到）</h2>
-      <div class="hint" style="margin-bottom:8px">依「模型賽前賦予真實結果的機率」由低到高排序——機率越低代表越爆冷、越值得檢討。</div>
+      <div class="hint" style="margin-bottom:8px">越上面越爆冷 ${estInfo('依「模型賽前賦予真實結果的機率」由低到高排序——機率越低代表越爆冷、越值得檢討。','怎麼排的',1)}</div>
       <div style="overflow-x:auto"><table class="sim"><tr><th>日期</th><th style="text-align:left">對戰</th><th>賽前推估</th><th>實際</th><th>命中真實機率</th></tr>
       ${ms.map(r=>{const mp=Math.max(r.pW,r.pD,r.pL);
         return `<tr><td>${r.md}</td><td style="text-align:left">${TEAMS[r.a][5]}${TEAMS[r.a][1].slice(0,3)} v ${TEAMS[r.b][5]}${TEAMS[r.b][1].slice(0,3)}</td>
@@ -1869,8 +1920,8 @@ function viewAcc(){
       }
     }
     h+=`<div class="card"><h2>🔧 修正因子建議（統計校準）</h2>
-      <div class="hint" style="margin-bottom:8px">每項建議都以標準統計方法從已完成比賽推導，<b>非拍腦袋</b>：①實力差敏感度＝logistic 尺度的<b>最大概似估計</b>（對數損失最小化 / Platt 重校）②平手係數＝<b>Dixon–Coles</b> 對角修正校準到實際平手率 ③總進球＝<b>Poisson 率的 MLE</b>（樣本平均）。並僅在偏差<b>超過抽樣誤差（|z|≥1.96，95%）</b>時才建議，以免擬合雜訊。</div>`;
-    if(!enough) h+=`<div class="hint">已驗 ${G.n} 場（<16）。樣本太小時估計量方差過大、抽樣誤差主導，暫不給數值建議——依大數法則，比賽越多校準越穩定。</div>`;
+      <div class="hint" style="margin-bottom:8px">偏差超過抽樣誤差才建議 ${estInfo('每項建議都以標準統計方法從已完成比賽推導，<b>非拍腦袋</b>：①實力差敏感度＝logistic 尺度的<b>最大概似估計</b>（對數損失最小化 / Platt 重校）②平手係數＝<b>Dixon–Coles</b> 對角修正校準到實際平手率 ③總進球＝<b>Poisson 率的 MLE</b>（樣本平均）。並僅在偏差<b>超過抽樣誤差（|z|≥1.96，95%）</b>時才建議，以免擬合雜訊。','怎麼算的',1)}</div>`;
+    if(!enough) h+=`<div class="hint">已驗 ${G.n} 場（<16），暫不給數值建議 ${estInfo(`已驗 ${G.n} 場（<16）。樣本太小時估計量方差過大、抽樣誤差主導，暫不給數值建議——依大數法則，比賽越多校準越穩定。`,'為什麼',1)}</div>`;
     else if(!sug.length) h+=`<div class="hint">✅ 目前各項推估與實際的偏差<b>都在 95% 抽樣誤差內（|z|<1.96）</b>，屬隨機波動而非系統性偏差，暫無需修正。（總進球 z=${zTot.toFixed(1)}、平手率 z=${zDraw.toFixed(1)}、強隊勝率 z=${zFav.toFixed(1)}）</div>`;
     else{
       sug.forEach(s=>{ h+=`<div class="fix"><div><b>${s[0]}</b><br><span class="hint">${s[1]}</span></div>
@@ -1903,9 +1954,11 @@ function viewModel(){
   const s=S.settings, pw=s.perWeight, az=Math.round((s.altSlope||43)*1.04);
   const mvPct=Math.round((s.mvWeight||0)*100);
   const mf=(name,form,src)=>`<div class="mf"><b>${name}</b><div class="form">${form}</div><div class="src">${src}</div></div>`;
+  // 2026-10-20 文字量調整第二波：①～⑤ 方法說明預設收合成標題列（「怎麼算的」），點開看全文；內容一字未刪、仍在 DOM
+  const det=(k,title)=>`<details class="card mdet"${mOpen[k]?' open':''} ontoggle="mOpen[${k}]=this.open"><summary><h2>${title}</h2><span class="endnote-m" aria-hidden="true">▾</span></summary>`;
   return `
   <div class="card"><h2>📊 這個推估器怎麼運作</h2>
-    <div class="hint" style="margin-bottom:10px">核心是「<b>Elo 實力評分</b>」：先把每隊的長期實力（Elo），用十多項因子修正成「<b>有效 Elo</b>」，再把兩隊的 Elo 差距換算成勝/平/負機率與比分；整屆冠軍則用蒙地卡羅模擬幾千次。全程透明、每個數字都可在設定調整。</div>
+    <div class="hint" style="margin-bottom:10px">核心是 <b>Elo 實力評分</b>，下方 ①～⑥ 點開看細節 ${estInfo('核心是「<b>Elo 實力評分</b>」：先把每隊的長期實力（Elo），用十多項因子修正成「<b>有效 Elo</b>」，再把兩隊的 Elo 差距換算成勝/平/負機率與比分；整屆冠軍則用蒙地卡羅模擬幾千次。全程透明、每個數字都可在設定調整。','說明',1)}</div>
     <div class="flow">
       <div class="step"><b>有效 Elo</b><small>實力±12項因子</small></div><div class="arr">→</div>
       <div class="step"><b>勝率 We</b><small>Elo 差→機率</small></div><div class="arr">→</div>
@@ -1915,7 +1968,7 @@ function viewModel(){
     </div>
   </div>
 
-  <div class="card"><h2>① 有效 Elo ＝ 基準 Elo ± 因子</h2>
+  ${det(1,'① 有效 Elo ＝ 基準 Elo ± 因子')}
     ${mf('基準 Elo','1421（卡達）～ 2157（西班牙）','<em>eloratings.net</em> 世界足球 Elo（2026/6/11）。由歷史對戰結果累積，學界公認比 FIFA 排名更能預測勝負。')}
     ${mf('市場身價','對數身價 z-score 對齊 Elo 後，混入 '+mvPct+'%','<em>Transfermarkt</em> 全隊身價（學界最強單一變數）。法國 €1530M 最高、約旦 €20M 最低。英格蘭身價高→拉高、阿根廷陣容老化→壓低。')}
     ${mf('球員狀態','四檔：缺陣 −權重×'+pw+'｜低迷帶傷 −50%｜巔峰 +25%','23 強隊主力名單（權重 1~5★）＋ESPN 出賽名單比對，一鍵標記缺陣/低迷。')}
@@ -1928,9 +1981,9 @@ function viewModel(){
     ${mf('僑民主場','拉美隊在美場館，墨西哥≈+'+s.diasporaAdv+'（他隊按權重、加拿大半額）','幽靈球賽研究：主場優勢約半數來自觀眾。墨西哥在美 NFL 球場形同主場。')}
     ${mf('休息差／手動調整','休息每天差 8（上限 24）；手動任意加減','淘汰賽休息天數差、以及你自己的判斷微調。')}
     <div class="hint">這 12 項因子的拆解，每場對戰在「⚔️ 對戰預測」下方都看得到逐項加減。</div>
-  </div>
+  </details>
 
-  <div class="card"><h2>② Elo 差距 → 勝負機率與比分</h2>
+  ${det(2,'② Elo 差距 → 勝負機率與比分')}
     <div class="mf"><b>勝率公式</b><div class="form">We ＝ 1 / (1 + 10^(−ΔElo / ${s.eloScale}))</div>
       <div class="src">兩隊有效 Elo 相減得 ΔElo。分母 <em>${s.eloScale}</em>（標準 Elo 用 400，我們用 ${s.eloScale} 讓單場勝率更貼近博彩市場、不過度自信）。</div></div>
     <div class="mf"><b>期望進球（含攻防節奏）</b><div class="form">λ ＝ ${s.totalGoals} × We × 節奏^${s.styleW}</div>
@@ -1939,9 +1992,9 @@ function viewModel(){
       <div class="src">獨立 Poisson 低估平局，故平手加成 <em>${s.drawBoost}</em>，但只在「勢均力敵」時給滿、一面倒時淡出（如加拿大 1-1 波士尼亞）。</div></div>
     <div class="mf"><b>淘汰賽 PK</b><div class="form">晉級率 ＝ ${Math.round((1-(s.pkHistW||0.1)-(s.pkGKW||0.2))*100)}%實力 ＋ ${Math.round((s.pkGKW||0.2)*100)}%門將 ＋ ${Math.round((s.pkHistW||0.1)*100)}%PK史</div>
       <div class="src">90 分鐘平手後混合判定。PK 大戰史（德 4-0、克 4-0、英 1-3…）樣本小、只佔一成，避免被放大；門將品質用名單星級。</div></div>
-  </div>
+  </details>
 
-  <div class="card"><h2>③ 蒙地卡羅整屆模擬（${s.sims} 次）</h2>
+  ${det(3,'③ 蒙地卡羅整屆模擬（'+s.sims+' 次）')}
     <div class="hint" style="line-height:1.9">
     • <b>逐場抽樣</b>：未踢的小組賽依比分分布隨機抽一個比分，已踢的用真實結果。<br>
     • <b>538 式擾動</b>：每次模擬給各隊隨機浮動狀態（σ=${s.simNoise} Elo），避免「強隊必勝」的過度自信。<br>
@@ -1949,9 +2002,9 @@ function viewModel(){
     • <b>背景執行緒（Web Worker）</b>：模擬在背景跑、附進度條，不卡畫面；可調 2000(快速)～20000(精準)。<br>
     • <b>統計＋信心區間</b>：跑 ${s.sims} 次後算各階段百分比，冠軍欄附 95% 抽樣誤差（±1.96√(p(1−p)/N)），提醒小數點不必當真。<br>
     • <b>官方對陣樹</b>：淘汰賽採 FIFA 官方 M73–M104 槽位（A 組第一 vs 指定組第三…），逐場依官方場館計主場/高原/僑民。小組賽全踢完按「一鍵更新」會鎖定官方真實對陣與賽果，模擬只跑還沒踢的部分。</div>
-  </div>
+  </details>
 
-  <div class="card"><h2>④ 資料來源（每次開啟自動更新）</h2>
+  ${det(4,'④ 資料來源（每次開啟自動更新）')}
     <div class="srcgrid">
       <b>實力 Elo</b><span>eloratings.net（2026/6/11）</span>
       <b>市場身價</b><span>Transfermarkt（GiveMeSport/SI 交叉查核）</span>
@@ -1963,9 +2016,9 @@ function viewModel(){
       <b>天氣</b><span>Open-Meteo（開球日氣溫/降雨）</span>
     </div>
     <div class="hint" style="margin-top:8px">所有編輯只存在本機（localStorage），不上傳；離線可照常使用，連網時才更新。</div>
-  </div>
+  </details>
 
-  <div class="card"><h2>⑤ 校準對標（與專家模型比較）</h2>
+  ${det(5,'⑤ 校準對標（與專家模型比較）')}
     <div class="calib">
       <div class="cc"><div class="tm"><b>球隊</b><span>本模型</span></div>
         ${[[36,'阿根廷'],[28,'西班牙'],[32,'法國'],[44,'英格蘭'],[40,'葡萄牙']].map(x=>`<div class="tm"><span>${x[1]}</span><span>${simResult?(simResult.st[x[0]].champ/simResult.n*100).toFixed(1)+'%':'跑模擬後顯示'}</span></div>`).join('')}
@@ -1979,18 +2032,20 @@ function viewModel(){
       </div>
     </div>
     <div class="hint" style="margin-top:8px">經多輪校準（特質減半、市場身價、實力差敏感度 ${s.eloScale}、538 擾動），本模型的冠軍分布已落入 Opta／博彩市場的共識區間。</div>
-  </div>
+  </details>
 
   <div class="card"><h2>⑥ 誠實的限制</h2>
+    <div class="hint" style="font-size:15px"><b>這是娛樂與學習用的推估工具，不是投注建議。</b></div>
+    <details class="endnote"${mOpen[6]?' open':''} ontoggle="mOpen[6]=this.open"><summary><span class="endnote-t">⚠ 其他 5 項限制（點開看）</span><span class="endnote-m" aria-hidden="true">▾</span></summary>
     <div class="hint" style="line-height:1.9">
     • Elo 是「長期實力」，單場爆冷只能靠你輸入比分與新聞修正——這正是賽中動態與新聞分頁的用途。<br>
     • 特質、僑民主場、PK 體質是<b>估計值</b>，非硬數據；可在設定調整或關閉。<br>
     • ESPN 新聞只列英文原文標題與原文連結（不翻譯、不轉載內文）；球隊與影響值為關鍵字自動判讀，請點原文確認後再納入。<br>
     • 比分來源 ESPN 為非官方介面，改版時可能失效（App 本體不受影響）。<br>
-    • 平手機率經修正仍可能略低於真實；第三名分配在官方表多解時可能與正式結果略異。<br>
-    • <b>這是娛樂與學習用的推估工具，不是投注建議。</b></div>
+    • 平手機率經修正仍可能略低於真實；第三名分配在官方表多解時可能與正式結果略異。</div></details>
   </div>`;
 }
+var mOpen={}; // 分析頁「怎麼運作」各段展開狀態（重繪不收回）
 
 /* ---------- 動態對陣圖（官方樹）---------- */
 let brOverride={};
@@ -2078,8 +2133,7 @@ function semiFocus(){
   .stverdict{margin-top:10px;font-size:15px;line-height:1.55;background:var(--bg);border-left:3px solid var(--gold);border-radius:8px;padding:8px 10px}
   @media(max-width:560px){.stgrid{grid-template-columns:1fr}}
   </style>`;
-  h+=`<div class="card sfhead sec" id="sec-focus"><h2>🔥 四強焦點</h2>
-    <div class="hint">四隊狀態、教戰、戰績與盤口一覽 ${estInfo(`四隊的狀態、歷史教戰、近況戰績與盤口一覽；「模型晉級％」用本器有效 Elo（含傷病/特質/場館）計算，盤口為 ${D.asof} 快照。`,'說明')}</div></div>`;
+  h+=`<div class="card sfhead sec" id="sec-focus"><h2>🔥 四強焦點 ${estInfo(`四隊的狀態、歷史教戰、近況戰績與盤口一覽；「模型晉級％」用本器有效 Elo（含傷病/特質/場館）計算，盤口為 ${D.asof} 快照。`,'說明',1)}</h2></div>`;
   D.ties.forEach(t=>{
     const a=t.a,b=t.b,vi=t.vi;
     const sm=styleMul(a,b);
@@ -2091,27 +2145,37 @@ function semiFocus(){
     const verdict = agree
       ? `盤口與模型<b>一致看好 ${TEAMS[modFav][1]}</b>（模型晉級 ${pct(Math.max(advA,advB))}、盤口隱含 ${pct(Math.max(mA,mB))}）。`
       : `盤口看好 <b>${TEAMS[mktFav][1]}</b>，但本模型看好 Elo 較高的 <b style="color:var(--gold)">${TEAMS[modFav][1]}</b>（模型晉級 ${pct(Math.max(advA,advB))}）→ 若想押冷門，價值可能在 ${TEAMS[modFav][1]}。`;
-    const col=(ti,adv)=>{ const d=t.row[ti],pk=PK[ti];
-      return `<div class="stcol">
+    // 2026-10-20 文字量調整第二波：卡片只留「Elo＋模型晉級％」一行結論＋賭盤建議；教戰／狀態／近況／PK 史／盤口收進「細節」，一字未刪
+    const col=(ti,adv)=>`<div class="stcol">
         <div class="sthead">${TEAMS[ti][5]} <b>${TEAMS[ti][1]}</b> <span class="stelo">Elo ${Math.round(effElo(ti))}</span></div>
         <div class="stbar"><i style="width:${(adv*100).toFixed(0)}%"></i></div>
         <div class="stadv">模型晉級 <b>${pct(adv)}</b></div>
+      </div>`;
+    const more=(ti)=>{ const d=t.row[ti],pk=PK[ti];
+      return `<div class="stcol">
+        <div class="sthead">${TEAMS[ti][5]} <b>${TEAMS[ti][1]}</b></div>
         <div class="stit"><span>📌 狀態</span>${d.form}</div>
         <div class="stit"><span>📅 近況</span>${d.y1}</div>
         <div class="stit"><span>🥅 PK 史</span>${pk?`${pk[0]}勝${pk[1]}敗 · 加權 ${(pkRate(ti)*100).toFixed(0)}%`:'無大賽 PK 紀錄'}</div>
         <div class="stit"><span>💰 盤口</span>奪冠 ${d.champ.toFixed(2)}（${d.champAm}）· 晉級 ${d.sf}</div>
       </div>`; };
+    const sk='s'+a+'_'+b;
     h+=`<div class="card semitie">
       <div class="sttop"><span class="stt">${t.r}</span><span class="stw">${t.tw}</span></div>
       <div class="stvs">${TEAMS[a][5]} ${TEAMS[a][1]}　<b style="color:var(--sub)">vs</b>　${TEAMS[b][5]} ${TEAMS[b][1]}</div>
-      <div class="sth2h">🤝 歷史教戰：${t.h2h}</div>
-      <div class="stgrid">${col(a,advA)}${col(b,advB)}</div>
+      <div class="stgrid st2">${col(a,advA)}${col(b,advB)}</div>
       <div class="stverdict">💰 賭盤建議：${verdict}</div>
+      <details class="stmore"${semiOpen[sk]?' open':''} ontoggle="semiOpen['${sk}']=this.open"><summary>📋 教戰・狀態・近況・PK・盤口<span class="endnote-m" aria-hidden="true">▾</span></summary>
+        <div class="sth2h">🤝 歷史教戰：${t.h2h}</div>
+        <div class="stgrid">${more(a)}${more(b)}</div>
+      </details>
     </div>`;
   });
   h+=`<div class="card hint" style="font-size:15px;line-height:1.6">⚠️「盤口／賭盤建議」僅為<b>模型 vs 市場</b>的分析參考，<b>非投注建議</b>；博弈有風險，請理性娛樂、量力而為。盤口為 ${D.asof} 快照，實際賠率隨時變動。</div>`;
   return h;
 }
+var semiOpen={}; // 四強焦點「細節」展開狀態（重繪不收回）
+var brOpen={};   // 對陣圖各輪展開狀態（重繪不收回）
 function jumpTo(id){ const e=document.getElementById(id); if(e)e.scrollIntoView({behavior:'smooth',block:'start'}); }
 function progressCard(){
   let all=[]; try{ all=allMatchesUnified(); }catch(e){}
@@ -2121,7 +2185,7 @@ function progressCard(){
   return `<div class="card prog"><h2>✅ 賽果記錄進度</h2>
     <div class="progtxt"><b>已有實際賽果 ${done} / ${tot} 場</b><span>其餘 ${tot-done} 場 ${estInfo(`其餘 ${tot-done} 場${TOURNEY_ENDED?'是賽前模型推估，不是實際結果':'為模型推估'}`)}</span></div>
     <div class="progbar" role="img" aria-label="已有實際賽果 ${done} 場，共 ${tot} 場"><i style="width:${pc}%"></i></div>
-    <div class="progtxt" style="margin-top:10px"><b>情報已啟用 ${(S.news||[]).filter(n=>n.on).length} / ${(S.news||[]).length} 則</b><span>（影響球隊有效 Elo 的新聞）</span></div></div>`;
+    <div class="progtxt" style="margin-top:10px"><b>情報已啟用 ${(S.news||[]).filter(n=>n.on).length} / ${(S.news||[]).length} 則</b><span>${estInfo('情報＝影響球隊有效 Elo 的新聞。','情報',1)}</span></div></div>`;
 }
 function viewKO(){
   if(welcomeOpen)markWelcomeSeen(); // 這次照常展開；下次打開就收成一行
@@ -2139,16 +2203,19 @@ function viewKO(){
   const champ=rounds[4][0].winner;
   const RL=[['32 強','R32 · 6/28–7/3'],['16 強','R16 · 7/4–7/7'],['8 強','QF · 7/9–7/11'],['4 強','SF · 7/14–7/15'],['🏆 決賽','Final · 7/19']];
   // 冠軍橫幅（最可能路徑；奪冠率請看模擬）
-  h+=`<div class="kchamp sec" id="sec-champ"><div class="kct">🏆 推估冠軍 ${estInfo(`最可能路徑${TOURNEY_ENDED?'・賽前推估，非實際冠軍':''}`)}</div>
+  const fin=rounds[4][0], semis=rounds[3];
+  h+=`<div class="kchamp sec" id="sec-champ"><div class="kct">🏆 推估冠軍 ${estInfo(`最可能路徑${TOURNEY_ENDED?'・賽前推估，非實際冠軍':''}。＝每場選機率高者一路推到底的單一劇本。想看「綜合奪冠率」請到 <b>📊 分析</b> 的模擬。`)}</div>
     <div class="kcn">${TEAMS[champ][5]} ${TEAMS[champ][1]}</div>
-    <div class="hint" style="margin-top:4px">＝每場選機率高者一路推到底的單一劇本。想看「綜合奪冠率」請到 <b>📊 分析</b> 的模擬。</div></div>`;
+    <div class="hint" style="margin-top:4px">決賽 ${TEAMS[fin.a][1]} vs ${TEAMS[fin.b][1]}・四強 ${semis.flatMap(ms=>[ms.a,ms.b]).map(t=>TEAMS[t][1]).join('、')}</div></div>`;
   h+=`<div class="card sec" id="sec-bracket"><h2>🗂 對陣圖（32 強 → 決賽）</h2>
-    <div class="hint" style="margin-bottom:6px"><b>點任一隊可改派它晉級</b>，後面立即重排。 ${estInfo(`32 強 → 決賽逐輪列出${TOURNEY_ENDED?'（標「推估對陣」的場次是賽前推估，不是實際賽果）':''}，每隊右側為晉級機率（含主場・高原・PK）。<b>點任一隊可改派它晉級</b>，後面立即重排；綠底＝晉級者、🔒官方對陣、✓官方賽果。已完賽輪次自動收合。`)}${Object.keys(brOverride).length?` <a onclick="resetBracket()" style="color:var(--blue);cursor:pointer;font-weight:700">↺ 清除手動指定（${Object.keys(brOverride).length}）</a>`:''}</div>`;
+    <div class="hint" style="margin-bottom:6px"><b>點任一隊可改派它晉級</b>，後面立即重排。 ${estInfo(`32 強 → 決賽逐輪列出${TOURNEY_ENDED?'（標「推估對陣」的場次是賽前推估，不是實際賽果）':''}，每隊右側為晉級機率（含主場・高原・PK）。<b>點任一隊可改派它晉級</b>，後面立即重排；綠底＝晉級者、🔒官方對陣、✓官方賽果。32 強～8 強預設收合，點輪次標題展開。`)}${Object.keys(brOverride).length?` <a onclick="resetBracket()" style="color:var(--blue);cursor:pointer;font-weight:700">↺ 清除手動指定（${Object.keys(brOverride).length}）</a>`:''}</div>`;
+  // 2026-10-20 文字量調整第二波：先看結論——32 強／16 強／8 強預設收合（點開可改派晉級，展開狀態會記住），4 強與決賽直接顯示
   rounds.forEach((rd,ri)=>{
     const done=rd.length&&rd.every(ms=>ms.locked);
     const body=rd.map((ms,i)=>koMatchCard(ms,ri,i)).join('');
-    if(done){
-      h+=`<details style="margin-top:8px"><summary style="cursor:pointer;color:var(--sub);font-weight:700;padding:8px 0">▸ ${RL[ri][0]}　<small style="font-weight:400">${RL[ri][1]}・已完賽，點開看歷史</small></summary>${body}</details>`;
+    const open=(ri in brOpen)?brOpen[ri]:(ri>=3);
+    if(ri<3||done){
+      h+=`<details class="kround"${open?' open':''} ontoggle="brOpen[${ri}]=this.open"><summary>${RL[ri][0]}　<small>${RL[ri][1]}・${rd.length} 場${done?'・已完賽':''}</small><span class="endnote-m" aria-hidden="true">▾</span></summary>${body}</details>`;
     }else{
       h+=`<div class="koround">${RL[ri][0]}<small>${RL[ri][1]}</small></div>${body}`;
     }
@@ -2161,7 +2228,7 @@ function viewKO(){
 function viewSim(){
   const hasOdds=Object.keys(S.odds).length>0;
   let h=`<div class="card"><h2>🏆 全屆蒙地卡羅模擬</h2>
-    <details class="endnote" style="margin-bottom:6px"><summary><span class="endnote-t">🎲 模擬怎麼算（點開看說明）</span><span class="endnote-m" aria-hidden="true">▾</span></summary><div class="hint">依目前有效 Elo（含球員狀態、新聞、特質、年齡）與已輸入的真實比分，模擬剩餘小組賽＋淘汰賽 ${S.settings.sims} 次。淘汰賽採 <b>FIFA 官方對陣樹（M73–M104）</b>，每場依官方場館計算主辦國主場與高原效應；平手時以「Elo 勝率 × PK 大戰史」混合判定 PK 勝者。</div></details>
+    <details class="endnote" style="margin-bottom:6px"><summary><span class="endnote-t">🎲 模擬怎麼算</span><span class="endnote-m" aria-hidden="true">▾</span></summary><div class="hint">依目前有效 Elo（含球員狀態、新聞、特質、年齡）與已輸入的真實比分，模擬剩餘小組賽＋淘汰賽 ${S.settings.sims} 次。淘汰賽採 <b>FIFA 官方對陣樹（M73–M104）</b>，每場依官方場館計算主辦國主場與高原效應；平手時以「Elo 勝率 × PK 大戰史」混合判定 PK 勝者。</div></details>
     <div class="row" style="align-items:center; margin-bottom:8px">
       <button id="simBtn" class="btn" onclick="runSim()">🎲 開始模擬（${S.settings.sims} 次）</button>
       <span id="simStatus" class="hint" style="margin-left:10px">${simResult?`✅ 已完成 ${simResult.n} 次模擬，結果在下方`:''}</span>
@@ -2188,7 +2255,7 @@ function viewSim(){
       <td class="ch" style="background:linear-gradient(90deg,rgba(251,191,36,${Math.min(0.55,r.champ/simResult.n*2)}) ${f(r.champ)}%,transparent ${f(r.champ)}%)">${f(r.champ)}% <span style="opacity:.55;font-size:15px;font-weight:400">±${ci(r.champ)}</span></td>${hasOdds?`<td class="mk">${mk}</td>`:''}</tr>`;
     });
     h+=`</table></div>
-    <div class="hint" style="margin-top:8px">🏆冠軍欄的 <b>±值</b> 是蒙地卡羅 95% 抽樣誤差（=1.96×√(p(1−p)/N)）：模擬本身有隨機性，例如「16.2% ±1.0」代表真值約落在 15~17%，別把小數點當精確值。次數越多誤差越小（設定可調至 20000）。</div>
+    <div class="hint" style="margin-top:8px">±值＝抽樣誤差，別把小數點當精確值 ${estInfo('🏆冠軍欄的 <b>±值</b> 是蒙地卡羅 95% 抽樣誤差（=1.96×√(p(1−p)/N)）：模擬本身有隨機性，例如「16.2% ±1.0」代表真值約落在 15~17%，別把小數點當精確值。次數越多誤差越小（設定可調至 20000）。','怎麼看',1)}</div>
     ${hasOdds?`<div class="hint" style="margin-top:6px">市場%＝你輸入的奪冠賠率倒數（未扣抽水，加總會超過 100%）。模型 vs 市場分歧大的隊，值得回頭檢查設定。</div>`:`<div class="hint" style="margin-top:6px">想對照市場看法：到「球隊球員」輸入各隊奪冠賠率，這裡會多一欄「市場%」。</div>`}</div>`;
   }
   return h;
