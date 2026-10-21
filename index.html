@@ -236,6 +236,7 @@ table.sim td.mk{color:var(--blue)}
 .near .nr.today{border-color:var(--gold);box-shadow:var(--glow);background:rgba(251,191,36,.05)}
 .near .nd{font-size:15px;color:var(--sub);text-align:center;line-height:1.3;min-width:42px}
 .near .nd b{display:block;color:var(--gold);font-size:15px}
+.near .nd .ndz{display:block;font-size:14px;color:var(--sub)} /* 2026-10-21 日期標明時區：有開球時間＝台灣日期，否則＝球場當地日期 */
 .near .nt{font-size:15px;font-weight:600;line-height:1.4}
 .near .ns{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--gold);white-space:nowrap}
 .near .ns.pred{color:var(--sub);font-size:15px;font-weight:600}
@@ -1162,7 +1163,7 @@ function nearRow(x){
   else if(x.kind==='ko'&&x.winner!=null) right=`<span class="ns">✓ ${TEAMS[x.winner][1]}</span>`;
   else right=`<span class="ns pred">${x.kind==='ko'&&x.pa!=null?TEAMS[x.pa>=0.5?x.a:x.b][1]+'<br>推估晉級 '+Math.round(Math.max(x.pa,1-x.pa)*100)+'%':(TOURNEY_ENDED?'無賽果':'預測')}</span>`;
   return `<div class="nr ${isToday?'today':''}" onclick="S.pA=${x.a};S.pB=${x.b};S.pV='${x.vi}';save();goTab('pred')">
-    <div class="nd"><b>${md}</b>${wd?'週'+wd:''}${tw?'<br>'+tw:''}</div>
+    <div class="nd"><span class="ndz">${x.kick?'台灣':'當地'}</span><b>${md}</b>${wd?'週'+wd:''}${tw?'<br>'+tw:''}</div>
     <div class="nt">${tag}${TEAMS[x.a][5]} ${TEAMS[x.a][1]} <span style="color:var(--sub)">vs</span> ${TEAMS[x.b][5]} ${TEAMS[x.b][1]}</div>
     ${right}
   </div>`;
@@ -2178,7 +2179,7 @@ function koMatchCard(ms,r,i){
   const a=ms.a,b=ms.b,inf=KO_INFO[ms.m]||['',0],v=VENUES[inf[1]];
   const alt=v[4]>=1400?' ⛰':'', roof=v[5]?' 🏟':'';
   const kick=S.koKick[ms.m];
-  const twWhen=kick?('🇹🇼 '+zoneStr(kick,'Asia/Taipei',1)):inf[0]; // 有開球時間→台灣日期(週X 時:分)，否則官方日期
+  const twWhen=kick?('🇹🇼 台灣 '+zoneStr(kick,'Asia/Taipei',1)):('當地 '+inf[0]); // 有開球時間→台灣日期(週X 時:分)，否則官方日期＝球場當地日期（2026-10-21 起兩種都標明，避免跟四強焦點的台灣日期混淆）
   const twMD=kick?(zoneStr(kick,'Asia/Taipei',0).split(' ')[0]):inf[0];
   const today=dayDelta(twMD)===0, sc=S.koScore[ms.m], played=!!(sc&&!isNaN(sc[0])&&!isNaN(sc[1]));
   const clickable=!ms.locked; // 官方賽果鎖定不可改；未鎖定可點隊指定晉級
@@ -2225,7 +2226,10 @@ function semiFocus(){
     const a=t.a,b=t.b,vi=t.vi;
     const sm=styleMul(a,b);
     const r=predict(effElo(a)+matchAdv(a,vi), effElo(b)+matchAdv(b,vi), sm[0], sm[1]);
-    const advA=pkProb(a,b,r.we), advB=1-advA;
+    // 2026-10-21 QA：原本用 pkProb（只算 PK 大戰勝率），跟同頁對陣圖／近期賽事用的 advProb（勝＋平×PK）對不起來（46.6% vs 42%）
+    // → 改用同一個 advProb；場次由場館對回四強場次（M101／M102）。對不到場次時照 advProb 同公式用上面的 r 算。
+    const mSemi=(ROUND_MS[3]||[]).find(k=>KO_INFO[k]&&KO_INFO[k][1]===vi);
+    const advA=mSemi!=null?advProb(a,b,mSemi):(r.pW+r.pD*pkProb(a,b,r.we)), advB=1-advA;
     const ia=amImplied(t.row[a].sf), ib=amImplied(t.row[b].sf);
     const mA=(ia&&ib)? ia/(ia+ib):0.5, mB=1-mA;
     const modFav=advA>=advB?a:b, mktFav=mA>=mB?a:b, agree=modFav===mktFav;

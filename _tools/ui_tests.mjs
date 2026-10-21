@@ -80,7 +80,9 @@ async function startServer() {
       res.end(b);
     } catch { res.writeHead(404); res.end(); }
   });
-  for (let port = 8800; port < 8840; port++) {
+  // 埠範圍可用環境變數 UI_PORT_FROM／UI_PORT_TO（含）指定，避免跟並行工作的其他伺服器搶（2026-10-21，照 605）
+  const pFrom = +process.env.UI_PORT_FROM || 8800, pTo = +process.env.UI_PORT_TO || 8839;
+  for (let port = pFrom; port <= pTo; port++) {
     const okBind = await new Promise((resolve) => {
       server.once('error', () => resolve(false));
       server.listen(port, '127.0.0.1', () => resolve(true));
@@ -648,6 +650,44 @@ try {
     return {hits:hits.slice(0,5),n:hits.length,tabsInHeader:t.top>=hd.top&&t.bottom<=hd.bottom+1,sw:document.documentElement.scrollWidth,vw:innerWidth}})()`);
   ok('17.7 桌機 1440：分頁在頁首工具列內、捲到任何位置都不蓋卡片／主視覺／頁尾、無水平捲動', cover.n === 0 && cover.tabsInHeader && cover.sw <= cover.vw, cover);
   await c.width(390);
+  }
+
+  { // 第 18 節（2026-10-21 QA）：同一場比賽在同一頁要說同一件事
+    // ① 四強焦點「模型晉級 %」原本用 pkProb（PK 大戰勝率），對陣圖／近期賽事用 advProb（勝＋平×PK）→ 46.6% vs 42%
+    // ② 四強焦點寫「台灣 7/15」，近期賽事與對陣圖寫沒標明的當地 7/14
+  console.log('\n[18 四強焦點與對陣圖／近期賽事一致：晉級 %、日期標明時區]');
+  await c.width(390);
+  await c.open(BASE, { clock: '2026-10-12T10:00:00+08:00' });
+  await sleep(600);
+  const sf = await c.eval(`(()=>{const out=[];
+    const nm=(i)=>TEAMS[i][1];
+    const pct=(s)=>{const m=String(s||'').match(/([0-9.]+)%/); return m?parseFloat(m[1]):null;};
+    SEMI_FOCUS.ties.forEach((t,k)=>{
+      const card=document.querySelectorAll('#main .semitie')[k]; if(!card) return;
+      const foc={}; card.querySelectorAll('.st2 .stcol').forEach(col=>{foc[col.querySelector('.sthead b').textContent.trim()]=pct((col.querySelector('.stadv b')||{}).textContent);});
+      const m=ROUND_MS[3].find(x=>KO_INFO[x]&&KO_INFO[x][1]===t.vi);
+      const km=[...document.querySelectorAll('#main .kmatch')].find(e=>{const mm=e.querySelector('.kmeta').textContent.match(/M([0-9]+)/); return mm&&+mm[1]===m;});
+      const br={}; if(km) km.querySelectorAll('.krow').forEach(row=>{const kt=row.querySelector('.kteam').textContent; const n=[nm(t.a),nm(t.b)].find(x=>kt.includes(x)); if(n) br[n]=pct((row.querySelector('.kprob')||{}).textContent);});
+      const nr=[...document.querySelectorAll('#main .near .nr')].find(e=>e.textContent.includes(nm(t.a))&&e.textContent.includes(nm(t.b))&&e.textContent.includes('4強'));
+      const ns=nr?(nr.querySelector('.ns')||{textContent:''}).textContent:'';
+      out.push({m,a:nm(t.a),b:nm(t.b),foc,br,nrPct:ns.includes('推估晉級')?pct(ns.split('推估晉級')[1]):null,nrFav:ns.split('推估晉級')[0].trim(),
+        focDate:t.tw, kmeta:km?km.querySelector('.kmeta span').textContent:null, nd:nr?nr.querySelector('.nd').textContent:null});
+    });
+    return out;})()`);
+  ok(`18.0 樣本：四強焦點 ${sf.length} 場都找得到對陣圖卡（${sf.map((x) => 'M' + x.m + (x.kmeta ? '✓' : '✗')).join(' ')}）與近期賽事列（${sf.map((x) => x.nd ? '✓' : '✗').join(' ')}）`,
+    sf.length === 2 && sf.every((x) => x.kmeta && x.nd), sf);
+  for (const x of sf) {
+    const same = [x.a, x.b].every((n) => x.foc[n] != null && x.br[n] != null && Math.round(x.foc[n]) === x.br[n]);
+    const fav = x.foc[x.a] >= x.foc[x.b] ? x.a : x.b;
+    const nrOk = x.nrPct === Math.round(Math.max(x.foc[x.a], x.foc[x.b])) && x.nrFav === fav;
+    ok(`18.${x.m}a M${x.m} ${x.a} vs ${x.b}：四強焦點 ${x.foc[x.a]}%／${x.foc[x.b]}% ＝ 對陣圖 ${x.br[x.a]}%／${x.br[x.b]}% ＝ 近期賽事「${x.nrFav} ${x.nrPct}%」`, same && nrOk, x);
+    // 日期：近期賽事與對陣圖都要標明時區（台灣／當地）；標「台灣」的日期要跟四強焦點的台灣日期一樣
+    const twFoc = (x.focDate.match(/台灣\s*(\d+\/\d+)/) || [])[1];
+    const lab = (s) => { const m = (s || '').match(/(台灣|當地)\s*(\d+\/\d+)/); return m ? { z: m[1], d: m[2] } : null; };
+    const k = lab(x.kmeta), n = lab(x.nd);
+    const dOk = !!(twFoc && k && n && [k, n].every((v) => v.z === '當地' || v.d === twFoc));
+    ok(`18.${x.m}b M${x.m} 日期都標明時區：四強焦點「${x.focDate}」、對陣圖「${k ? k.z + ' ' + k.d : x.kmeta}」、近期賽事「${n ? n.z + ' ' + n.d : x.nd}」`, dOk, x);
+  }
   }
 
   console.log('\n[14 沒有錯誤]');
