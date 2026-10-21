@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>2026 世界盃推估器</title>
-<meta name="description" content="2026 美加墨世界盃 48 強推估器：有效 Elo × Poisson × 蒙地卡羅，逐場勝負、比分與奪冠機率，可離線使用。">
+<meta name="description" content="2026 美加墨世界盃已結束，本 App 保留賽前推估存檔：有效 Elo × Poisson × 蒙地卡羅推估的逐場勝負、比分與奪冠機率（不是實際賽果），可離線使用。">
 <!-- PWA：可安裝於 Android / iPhone 主畫面、離線可用 -->
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#ECEBE4">
@@ -397,6 +397,11 @@ button.btn,.jump button,.tabs button,.koround,.kround>summary,.gdet>summary{font
 .hero .btn.big svg{width:24px;height:24px}
 .hero .btn.big:active{transform:translateY(3px);box-shadow:0 2px 0 var(--trophy-edge)}
 .hero .btn.big:focus-visible{outline:3px solid #fff;outline-offset:3px}
+/* 2026-10-21 回顧版：主視覺上方小字「2026 世界盃已結束」＋存檔卡的 FIFA 官方賽果連結 */
+.hero-kicker{position:relative;z-index:1;display:inline-block;margin:0 0 6px;padding:3px 10px;border-radius:999px;background:rgba(0,0,0,.28);color:#fff;font:400 15px/1.4 var(--round);letter-spacing:1px}
+a.fifa-btn{display:flex;align-items:center;justify-content:center;min-height:44px;margin-top:10px;background:var(--accent);color:#fff;border-radius:10px;padding:9px 16px;font-size:15px;font-weight:700;text-decoration:none}
+a.fifa-btn:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+a.fifa-link{color:var(--blue);font-weight:700;text-decoration:underline;margin-left:4px;white-space:nowrap}
 /* 首頁四格入口（原頁內跳轉列；同一組入口全用 3D 圖） */
 .jump.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;overflow:visible;margin-bottom:12px}
 .jump.tiles button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:54px;padding:4px 2px;border-radius:18px;
@@ -472,7 +477,7 @@ button.btn,.jump button,.tabs button,.koround,.kround>summary,.gdet>summary{font
   <span class="rl-mark"><img class="rl-glyph" src="rl-mark-aconcagua-navy.png" width="30" height="30" alt="" style="object-fit:contain"></span>
   <div>
     <div class="rl-title">2026 世界盃推估器</div>
-    <div class="rl-sub">美加墨 48 強 · 四強聚焦版 v4.8</div>
+    <div class="rl-sub">賽事已結束 · 賽前推估存檔 v4.9</div>
   </div>
   <span class="rl-spacer"></span>
   <button class="rl-btn rl-btn--primary" onclick="openSettings()"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="vertical-align:-3px;margin-right:4px"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>設定</button>
@@ -1172,6 +1177,16 @@ function nearCard(){
   const all=allMatchesUnified().filter(x=>x.md);
   if(!all.length)return '';
   all.forEach(x=>{ x._tw=x.kick?zoneStr(x.kick,'Asia/Taipei',0).split(' ')[0]:x.md; x._d=dayDelta(x._tw); }); // 台灣日期優先，今日判定也一致
+  // 2026-10-21 回顧版：賽事已結束時「近期賽事（今日 N 場）」沒有意義 → 改成固定列出淘汰賽後段（8 強→決賽）的賽前推估，依日期排序；
+  // 不再有「今日」標記與「顯示今天前後的比賽」說明。列的結構（.near .nr）不變。
+  if(TOURNEY_ENDED){
+    const late=all.filter(x=>x.kind==='ko'&&['8強','4強','決賽'].includes(x.round));
+    late.forEach(x=>{ x._d=null; });
+    late.sort((a,b)=>mdToDate(a._tw)-mdToDate(b._tw)||((a.kick||'9')<(b.kick||'9')?-1:1));
+    return `<div class="card sec" id="sec-near"><h2>${f3img('calendar',24)}淘汰賽後段：8 強→決賽（賽前推估）</h2>
+    <div class="near">${late.map(nearRow).join('')}</div>
+    <div class="hint" style="margin-top:8px">點任一場即帶入對戰預測。 ${estInfo('列出 8 強、4 強與決賽。標「賽前推估」的對陣與晉級 % 都是 7/12 前的模型推估，不是實際結果；只有標比分或 ✓ 的才是收錄的官方賽果。點任一場即帶入對戰預測。')}</div></div>`;
+  }
   let win=all.filter(x=>x._d>=-2&&x._d<=3);
   if(win.length<3){ win=all.slice().sort((a,b)=>Math.abs(a._d)-Math.abs(b._d)).slice(0,6); }
   win.sort((a,b)=>a._d-b._d||((a.kick||'9')<(b.kick||'9')?-1:1));
@@ -1223,7 +1238,7 @@ function viewSched(){
       <div class="minibar"><div style="flex:${r.pW}"></div><div style="flex:${r.pD}"></div><div style="flex:${r.pL}"></div></div>
       <div class="pr"><span>勝 ${pct(r.pW)}</span><span>平 ${pct(r.pD)}</span><span>勝 ${pct(r.pL)}</span></div>
       <button class="use" onclick="S.pA=${m[2]};S.pB=${m[3]};S.pV='${m[4]}';save();goTab('pred')">→ 帶入對戰預測</button>
-      ${!done?`<button class="wx" onclick="fetchWx(${idx},this)">🌡 查當天天氣</button><span class="wxr" id="wx${idx}"></span><button class="wx" onclick="fetchLineup(${idx},this)">📋 抓出賽名單</button>`:''}
+      ${!done&&!TOURNEY_ENDED?`<button class="wx" onclick="fetchWx(${idx},this)">🌡 查當天天氣</button><span class="wxr" id="wx${idx}"></span><button class="wx" onclick="fetchLineup(${idx},this)">📋 抓出賽名單</button>`:''}
       <div id="lu${idx}">${lineupCache[idx]?`<div class="lup">${lineupCache[idx]}</div>`:''}</div>
     </div>`;
   });
@@ -1237,7 +1252,7 @@ function viewSched(){
       const rd=ids[0]<24?1:(ids[0]<48?2:3), wd=WDzh[mdToDate(md).getDay()];
       const gs=[...new Set(ids.map(i=>MATCHES[i][1]))].join(' ');
       const open=(md in gOpen)?gOpen[md]:(md===def);
-      h+=`<details class="card gdet" data-md="${md}"${open?' open':''} ontoggle="gOpen['${md}']=this.open"><summary><span>${md}${wd?'（'+wd+'）':''}</span><span class="gflags">第${rd}輪 · ${gs} 組</span><span class="gcnt">賽果 ${doneN}/${ids.length}</span><span class="endnote-m" aria-hidden="true">▾</span></summary>${gHtml[md]}</details>`;
+      h+=`<details class="card gdet" data-md="${md}"${open?' open':''} ontoggle="gOpen['${md}']=this.open"><summary><span>${md}${wd?'（'+wd+'）':''}</span><span class="gflags">第${rd}輪 · ${gs} 組</span><span class="gcnt">${TOURNEY_ENDED?(doneN?'官方賽果 '+doneN+'/'+ids.length:'賽前推估'):'賽果 '+doneN+'/'+ids.length}</span><span class="endnote-m" aria-hidden="true">▾</span></summary>${gHtml[md]}</details>`;
     });
   }
   h+=`<div class="card hint">輸入兩格比分即改用真實結果。 ${estInfo('輸入實際比分（兩格都填）後，積分榜與奪冠模擬都會採用真實結果；清空任一格即恢復為預測。高原（⛰）場館對不適應球隊按海拔扣分、拉美隊在美國場館有僑民主場加成；室內（🏟）場館不受高溫影響。','說明',1)}</div>`;
@@ -1327,7 +1342,12 @@ function toast(msg){
 const TOURNEY_ENDED = Date.now() > Date.parse('2026-07-21T00:00:00+08:00');
 // 2026-10-13：原本寫「以下比分與對陣為最終結果」，但 App 實際只收錄少數場次的真實比分（資料快照停在 7/12），
 // 決賽等其餘場次都是模型推估——不能宣稱是最終結果。改成照實說明（repo 內沒有完整賽果來源，不補資料）。
-const ENDED_NOTE = '<span class="hint">ℹ️ <b>2026 世界盃已於 7/19 結束，本 App 不再更新。</b>資料停在 7/12（四強出爐時）的快照：只有標「官方賽果」的場次是實際比分，<b>其餘場次（含決賽與冠軍）都是賽前模型推估，不是實際結果</b>；實際賽果請以 FIFA 官方公布為準。</span>';
+// 2026-10-21 回顧版（v4.9.0）：App 定位改成「賽前推估存檔」。拿掉原本寫死的「已於 7/19 結束」（閉幕日期屬實際結果，本次不寫任何實際結果），
+// 改放 FIFA 官方賽果頁連結。網址查證：2026-10-21 用 FIFA 頁面 API（cxm-api.fifa.com/fifaplusweb/api/pages/en/…/scores-fixtures）
+// 回 200、internalTitle＝「FIFA World Cup 2026 > Scores & Fixtures」；同路徑亂打的頁面回 404（fifa.com 本身是 SPA，任何路徑都回 200，不能只看狀態碼）。
+const FIFA_RESULTS_URL = 'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/scores-fixtures';
+const FIFA_LINK = '<a class="fifa-link" href="'+FIFA_RESULTS_URL+'" target="_blank" rel="noopener">實際賽果請見 FIFA 官方 ↗</a>';
+const ENDED_NOTE = '<span class="hint">ℹ️ <b>2026 世界盃已結束，本 App 不再更新，改為「賽前推估存檔」。</b>資料停在 7/12（四強出爐時）的快照：只有標「官方賽果」的場次是實際比分，<b>其餘場次（含決賽與冠軍）都是賽前模型推估，不是實際結果</b>；實際賽果請以 FIFA 官方公布為準：'+FIFA_LINK+'</span>';
 // 2026-10-19 修後重評：首頁說明卡把上面整段放在首屏，主按鈕「查看冠軍推估與對陣圖」被推下去（U1 退步）→
 // 首頁改成一行重點＋點開看完整說明（內容同 ENDED_NOTE，一字不少）；賽程頁仍直接顯示 ENDED_NOTE。
 const ENDED_BRIEF = '<details class="endnote"><summary><span class="endnote-t">ℹ️ 只有「官方賽果」是真實比分，<b>其餘是推估</b></span><span class="endnote-m" aria-hidden="true">▾</span></summary>'+ENDED_NOTE+'</details>';
@@ -2183,7 +2203,7 @@ function koMatchCard(ms,r,i){
   const twMD=kick?(zoneStr(kick,'Asia/Taipei',0).split(' ')[0]):inf[0];
   const today=dayDelta(twMD)===0, sc=S.koScore[ms.m], played=!!(sc&&!isNaN(sc[0])&&!isNaN(sc[1]));
   const clickable=!ms.locked; // 官方賽果鎖定不可改；未鎖定可點隊指定晉級
-  const status=played?(sc[0]===sc[1]?('PK '+TEAMS[ms.winner][1]+' 晉'):'官方賽果'):(ms.locked?'官方對陣':(today?'🔴 今日開踢':'推估對陣'));
+  const status=played?(sc[0]===sc[1]?('PK '+TEAMS[ms.winner][1]+' 晉'):'官方賽果'):(ms.locked?'官方對陣':(TOURNEY_ENDED?'賽前推估':(today?'🔴 今日開踢':'推估對陣'))); // 2026-10-21 回顧版：賽後標「賽前推估」
   const teamRow=(t,prob,scv)=>{
     const isWin=ms.winner===t;
     return `<div class="krow ${isWin?'win':'lose'}${clickable?' pick':''}" ${clickable?`onclick="pickWin(${r},${i},${t})"`:''}>
@@ -2221,7 +2241,7 @@ function semiFocus(){
   .stverdict{margin-top:10px;font-size:15px;line-height:1.55;background:var(--bg);border-left:3px solid var(--gold);border-radius:8px;padding:8px 10px}
   @media(max-width:560px){.stgrid{grid-template-columns:1fr}}
   </style>`;
-  h+=`<div class="card sfhead sec" id="sec-focus"><h2>${f3img('fire',24)}四強焦點 ${estInfo(`四隊的狀態、歷史教戰、近況戰績與盤口一覽；「模型晉級％」用本器有效 Elo（含傷病/特質/場館）計算，盤口為 ${D.asof} 快照。`,'說明',1)}</h2></div>`;
+  h+=`<div class="card sfhead sec" id="sec-focus"><h2>${f3img('fire',24)}四強焦點${TOURNEY_ENDED?'（賽前）':''} ${estInfo(`四隊的狀態、歷史教戰、近況戰績與盤口一覽；「模型晉級％」用本器有效 Elo（含傷病/特質/場館）計算，盤口為 ${D.asof} 快照。`,'說明',1)}</h2></div>`;
   D.ties.forEach(t=>{
     const a=t.a,b=t.b,vi=t.vi;
     const sm=styleMul(a,b);
@@ -2233,9 +2253,14 @@ function semiFocus(){
     const ia=amImplied(t.row[a].sf), ib=amImplied(t.row[b].sf);
     const mA=(ia&&ib)? ia/(ia+ib):0.5, mB=1-mA;
     const modFav=advA>=advB?a:b, mktFav=mA>=mB?a:b, agree=modFav===mktFav;
-    const verdict = agree
-      ? `盤口與模型<b>一致看好 ${TEAMS[modFav][1]}</b>（模型晉級 ${pct(Math.max(advA,advB))}、盤口隱含 ${pct(Math.max(mA,mB))}）。`
-      : `盤口看好 <b>${TEAMS[mktFav][1]}</b>，但本模型看好 Elo 較高的 <b style="color:var(--gold)">${TEAMS[modFav][1]}</b>（模型晉級 ${pct(Math.max(advA,advB))}）→ 若想押冷門，價值可能在 ${TEAMS[modFav][1]}。`;
+    // 2026-10-21 回顧版：賽事已結束，「賭盤建議／若想押冷門」對已踢完的比賽是誤導 → 改成「賽前盤口存檔」對照句，不再有下注語氣（數字不變）
+    const verdict = TOURNEY_ENDED
+      ? (agree
+        ? `賽前盤口與模型<b>一致看好 ${TEAMS[modFav][1]}</b>（模型晉級 ${pct(Math.max(advA,advB))}、盤口隱含 ${pct(Math.max(mA,mB))}）。`
+        : `賽前盤口看好 <b>${TEAMS[mktFav][1]}</b>，本模型看好 Elo 較高的 <b style="color:var(--gold)">${TEAMS[modFav][1]}</b>（模型晉級 ${pct(Math.max(advA,advB))}）。`)
+      : (agree
+        ? `盤口與模型<b>一致看好 ${TEAMS[modFav][1]}</b>（模型晉級 ${pct(Math.max(advA,advB))}、盤口隱含 ${pct(Math.max(mA,mB))}）。`
+        : `盤口看好 <b>${TEAMS[mktFav][1]}</b>，但本模型看好 Elo 較高的 <b style="color:var(--gold)">${TEAMS[modFav][1]}</b>（模型晉級 ${pct(Math.max(advA,advB))}）→ 若想押冷門，價值可能在 ${TEAMS[modFav][1]}。`);
     // 2026-10-20 文字量調整第二波：卡片只留「Elo＋模型晉級％」一行結論＋賭盤建議；教戰／狀態／近況／PK 史／盤口收進「細節」，一字未刪
     const col=(ti,adv)=>`<div class="stcol">
         <div class="sthead">${TEAMS[ti][5]} <b>${TEAMS[ti][1]}</b> <span class="stelo">Elo ${Math.round(effElo(ti))}</span></div>
@@ -2255,14 +2280,16 @@ function semiFocus(){
       <div class="sttop"><span class="stt">${t.r}</span><span class="stw">${t.tw}</span></div>
       <div class="stvs">${TEAMS[a][5]} ${TEAMS[a][1]}　<b style="color:var(--sub)">vs</b>　${TEAMS[b][5]} ${TEAMS[b][1]}</div>
       <div class="stgrid st2">${col(a,advA)}${col(b,advB)}</div>
-      <div class="stverdict">💰 賭盤建議：${verdict}</div>
+      <div class="stverdict">${TOURNEY_ENDED?'💰 賽前盤口存檔：':'💰 賭盤建議：'}${verdict}</div>
       <details class="stmore"${semiOpen[sk]?' open':''} ontoggle="semiOpen['${sk}']=this.open"><summary>📋 教戰・狀態・近況・PK・盤口<span class="endnote-m" aria-hidden="true">▾</span></summary>
         <div class="sth2h">🤝 歷史教戰：${t.h2h}</div>
         <div class="stgrid">${more(a)}${more(b)}</div>
       </details>
     </div>`;
   });
-  h+=`<div class="card hint" style="font-size:15px;line-height:1.6">⚠️「盤口／賭盤建議」僅為<b>模型 vs 市場</b>的分析參考，<b>非投注建議</b>；博弈有風險，請理性娛樂、量力而為。盤口為 ${D.asof} 快照，實際賠率隨時變動。</div>`;
+  h+=TOURNEY_ENDED
+    ? `<div class="card hint" style="font-size:15px;line-height:1.6">⚠️ 以上盤口是 ${D.asof} 的<b>賽前盤口存檔</b>，「模型晉級 %」也是<b>賽前推估，不是實際結果</b>；僅為<b>模型 vs 市場</b>的分析參考，<b>非投注建議</b>；博弈有風險，請理性娛樂、量力而為。</div>`
+    : `<div class="card hint" style="font-size:15px;line-height:1.6">⚠️「盤口／賭盤建議」僅為<b>模型 vs 市場</b>的分析參考，<b>非投注建議</b>；博弈有風險，請理性娛樂、量力而為。盤口為 ${D.asof} 快照，實際賠率隨時變動。</div>`;
   return h;
 }
 var semiOpen={}; // 四強焦點「細節」展開狀態（重繪不收回）
@@ -2273,6 +2300,12 @@ function progressCard(){
   const tot=all.length, done=all.filter(x=>x.kind==='ko'?!!x.locked:!!x.sc).length;
   if(!tot)return '';
   const pc=Math.round(done/tot*100);
+  // 2026-10-21 回顧版：賽事已結束時不再顯示「賽果記錄進度」（進度條＋N/M 看起來像賽事還在進行），
+  // 改成「賽前推估存檔」說明卡：照實寫本 App 收錄幾場官方賽果、其餘是賽前推估，並放 FIFA 官方賽果連結。
+  if(TOURNEY_ENDED) return `<div class="card prog archive" id="sec-archive"><h2>${f3img('check',24)}這是賽前推估存檔</h2>
+    <div class="progtxt"><b>本 App 只收錄 ${done} 場官方賽果</b><span>其餘 ${tot-done} 場是<b>賽前推估，不是實際結果</b></span></div>
+    <div class="hint" style="margin-top:6px">資料停在 2026-07-12（四強出爐時），之後不再更新。</div>
+    <a class="btn fifa-btn" href="${FIFA_RESULTS_URL}" target="_blank" rel="noopener">實際賽果請見 FIFA 官方 ↗</a></div>`;
   return `<div class="card prog"><h2>${f3img('check',24)}賽果記錄進度</h2>
     <div class="progtxt"><b>已有實際賽果 ${done} / ${tot} 場</b><span>其餘 ${tot-done} 場 ${estInfo(`其餘 ${tot-done} 場${TOURNEY_ENDED?'是賽前模型推估，不是實際結果':'為模型推估'}`)}</span></div>
     <div class="progbar" role="img" aria-label="已有實際賽果 ${done} 場，共 ${tot} 場"><i style="width:${pc}%"></i></div>
@@ -2282,17 +2315,20 @@ function viewKO(){
   if(welcomeOpen)markWelcomeSeen(); // 這次照常展開；下次打開就收成一行
   // 2026-10-20 首頁視覺改版「開賽日球場」：首屏＝草皮綠主視覺（一句大標＋唯一主鈕）；誠實紅線「只有官方賽果是真實比分，其餘是推估」留在主視覺裡直接可見；
   // 頁內跳轉改成四格 3D 入口；三步驟教學移到入口下方（首訪展開、看過收起，規則同 10-20 文字量調整）。
+  // 2026-10-21 回顧版：賽事結束後主視覺改寫「2026 世界盃已結束」＋「賽前推估存檔」，主鈕改成回顧行動（行為不變＝收起教學並捲到推估冠軍）
   let h=`<section class="hero" aria-labelledby="heroTitle">
-    <h1 class="hero-title" id="heroTitle">冠軍是誰？</h1>
+    ${TOURNEY_ENDED?'<div class="hero-kicker">2026 世界盃已結束</div>':''}
+    <h1 class="hero-title" id="heroTitle">${TOURNEY_ENDED?'賽前推估存檔':'冠軍是誰？'}</h1>
     <div class="hero-art" aria-hidden="true"><img class="t" src="vendor/fluent-3d/trophy.png" width="60" height="60" alt=""><img class="b" src="vendor/fluent-3d/ball.png" width="32" height="32" alt=""></div>
     ${TOURNEY_ENDED?ENDED_BRIEF:`<span class="hint hint-pre">小組賽完賽後會自動抓官方對陣與賽果。</span>`}
-    <button class="btn big" onclick="welcomeDone()">${tIco('trophy')}<span>查看冠軍推估與對陣圖</span></button></section>
-  <nav class="jump tiles" aria-label="頁內跳轉"><button onclick="jumpTo('sec-focus')">${f3img('fire',28)}四強焦點</button><button onclick="jumpTo('sec-near')">${f3img('calendar',28)}近期賽事</button><button onclick="jumpTo('sec-champ')">${f3img('trophy',28)}推估冠軍</button><button onclick="jumpTo('sec-bracket')">${f3img('dividers',28)}對陣圖</button></nav>
+    <button class="btn big" onclick="welcomeDone()">${tIco('trophy')}<span>${TOURNEY_ENDED?'看賽前推估的冠軍與對陣圖':'查看冠軍推估與對陣圖'}</span></button></section>
+  <nav class="jump tiles" aria-label="頁內跳轉"><button onclick="jumpTo('sec-focus')">${f3img('fire',28)}四強焦點</button><button onclick="jumpTo('sec-near')">${f3img('calendar',28)}${TOURNEY_ENDED?'淘汰後段':'近期賽事'}</button><button onclick="jumpTo('sec-champ')">${f3img('trophy',28)}推估冠軍</button><button onclick="jumpTo('sec-bracket')">${f3img('dividers',28)}對陣圖</button></nav>
+  ${TOURNEY_ENDED?progressCard():''}
   <div class="card welcome"><details class="welcome-steps" id="welcomeSteps"${welcomeOpen?' open':''} ontoggle="welcomeOpen=this.open"><summary><h2>三步驟上手</h2><span class="endnote-m" aria-hidden="true">▾</span></summary>
     <ol class="steps"><li><b>第一步</b>：先看下方「四強焦點」，了解四支球隊的狀態與盤口。</li>
     <li><b>第二步</b>：到「對陣圖」點任一隊，可改派它晉級，後面自動重排。</li>
     <li><b>第三步</b>：想自己試算，去「對戰」任選兩隊看勝率與比分。</li></ol></details></div>`;
-  h+=progressCard();
+  if(!TOURNEY_ENDED) h+=progressCard(); // 回顧版：賽後「賽前推估存檔」卡（含 FIFA 官方賽果連結）移到入口下方、首屏內
   h+=semiFocus();
   h+=nearCard();
   const rounds=buildBracketRounds();
@@ -2304,7 +2340,7 @@ function viewKO(){
     <div class="kcn">${TEAMS[champ][5]} ${TEAMS[champ][1]}</div>
     <div class="hint" style="margin-top:4px">決賽 ${TEAMS[fin.a][1]} vs ${TEAMS[fin.b][1]}・四強 ${semis.flatMap(ms=>[ms.a,ms.b]).map(t=>TEAMS[t][1]).join('、')}</div></div>`;
   h+=`<div class="card sec" id="sec-bracket"><h2>${f3img('dividers',24)}對陣圖（32 強 → 決賽）</h2>
-    <div class="hint" style="margin-bottom:6px"><b>點任一隊可改派它晉級</b>，後面立即重排。 ${estInfo(`32 強 → 決賽逐輪列出${TOURNEY_ENDED?'（標「推估對陣」的場次是賽前推估，不是實際賽果）':''}，每隊右側為晉級機率（含主場・高原・PK）。<b>點任一隊可改派它晉級</b>，後面立即重排；綠底＝晉級者、🔒官方對陣、✓官方賽果。32 強～8 強預設收合，點輪次標題展開。`)}${Object.keys(brOverride).length?` <a onclick="resetBracket()" style="color:var(--blue);cursor:pointer;font-weight:700">↺ 清除手動指定（${Object.keys(brOverride).length}）</a>`:''}</div>`;
+    <div class="hint" style="margin-bottom:6px"><b>點任一隊可改派它晉級</b>，後面立即重排。 ${estInfo(`32 強 → 決賽逐輪列出${TOURNEY_ENDED?'（標「賽前推估」的場次是賽前推估，不是實際賽果）':''}，每隊右側為晉級機率（含主場・高原・PK）。<b>點任一隊可改派它晉級</b>，後面立即重排；綠底＝晉級者、🔒官方對陣、✓官方賽果。32 強～8 強預設收合，點輪次標題展開。`)}${Object.keys(brOverride).length?` <a onclick="resetBracket()" style="color:var(--blue);cursor:pointer;font-weight:700">↺ 清除手動指定（${Object.keys(brOverride).length}）</a>`:''}</div>`;
   // 2026-10-20 文字量調整第二波：先看結論——32 強／16 強／8 強預設收合（點開可改派晉級，展開狀態會記住），4 強與決賽直接顯示
   rounds.forEach((rd,ri)=>{
     const done=rd.length&&rd.every(ms=>ms.locked);

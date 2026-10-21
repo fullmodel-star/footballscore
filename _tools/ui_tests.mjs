@@ -572,8 +572,12 @@ try {
   const endReq = c.paused.slice(pausedEnd).map((p) => new URL(p.url).hostname);
   ok('15.1 賽後開啟不連 ESPN（外部請求 ' + JSON.stringify(endReq) + '）', loadedEnd && !endReq.some((h) => /espn\.com/.test(h)), endReq);
   const mt15 = await mainText();
-  ok('15.2 首頁有「第一步」引導與主要按鈕「查看冠軍推估與對陣圖」', mt15.includes('第一步') && mt15.includes('查看冠軍推估與對陣圖'));
-  ok('15.3 首頁有賽果完成數「已有實際賽果 N / M 場」', /已有實際賽果 \d+ \/ \d+ 場/.test(mt15), mt15.slice(0, 200));
+  // 2026-10-21 回顧版：賽後主鈕改「看賽前推估的冠軍與對陣圖」；「賽果記錄進度 N / M」改成「賽前推估存檔」卡（收錄 N 場官方賽果、其餘 M 場是賽前推估）
+  ok('15.2 首頁有「第一步」引導與主要按鈕「看賽前推估的冠軍與對陣圖」', mt15.includes('第一步') && mt15.includes('看賽前推估的冠軍與對陣圖'));
+  const arch15 = await c.eval(`(()=>{const e=document.getElementById('sec-archive');if(!e)return null;const all=allMatchesUnified();
+    return {t:e.innerText,done:all.filter(x=>x.kind==='ko'?!!x.locked:!!x.sc).length,tot:all.length}})()`);
+  ok('15.3 首頁有「賽前推估存檔」卡：本 App 只收錄 N 場官方賽果、其餘 M 場是賽前推估（N、M 對得上資料：' + (arch15 && arch15.done + '／' + (arch15.tot - arch15.done)) + '）',
+    !!arch15 && arch15.tot > 0 && arch15.t.includes('只收錄 ' + arch15.done + ' 場官方賽果') && arch15.t.includes('其餘 ' + (arch15.tot - arch15.done) + ' 場是賽前推估，不是實際結果'), arch15);
   ok('15.4 頁內跳轉：4 顆目錄按鈕都對得到區塊 id', await c.eval(`[...document.querySelectorAll('.jump button')].every(b=>{const id=/'([^']+)'/.exec(b.getAttribute('onclick'))[1];return !!document.getElementById(id)})`));
   ok('15.5 百分比都有標籤（近期賽事列與對陣卡不出現單獨的「NN%」）', await c.eval(`![...document.querySelectorAll('.near .ns, .krow .kprob')].some(e=>/^\s*\d+%\s*$/.test(e.textContent))`));
   await tab('news');
@@ -623,7 +627,7 @@ try {
     const s=h.querySelector('.endnote summary');const sr=s?s.getBoundingClientRect():null;
     return {first:document.querySelector('#main').firstElementChild===h,inHeader:!!h.closest('header'),h1:(h.querySelector('h1')||{}).textContent||'',btn:b.textContent.trim(),btnBottom:r.bottom,
       btnCount:h.querySelectorAll('button').length,brief:s?s.textContent:'',briefVis:!!sr&&sr.height>0&&sr.bottom<innerHeight}})()`);
-  ok('17.1 首屏主視覺在內容區第一個、不在頁首；一句大標＋唯一主鈕「查看冠軍推估與對陣圖」在 390×844 首屏內', !!hero && hero.first && !hero.inHeader && hero.h1.length > 0 && hero.btnCount === 1 && hero.btn.includes('查看冠軍推估與對陣圖') && hero.btnBottom < 844, hero);
+  ok('17.1 首屏主視覺在內容區第一個、不在頁首；一句大標＋唯一主鈕「看賽前推估的冠軍與對陣圖」在 390×844 首屏內', !!hero && hero.first && !hero.inHeader && hero.h1.length > 0 && hero.btnCount === 1 && hero.btn.includes('看賽前推估的冠軍與對陣圖') && hero.btnBottom < 844, hero);
   ok('17.2 誠實紅線「只有「官方賽果」是真實比分，其餘是推估」在主視覺裡直接可見', !!hero && hero.brief.includes('只有「官方賽果」是真實比分') && hero.brief.includes('其餘是推估') && hero.briefVis, hero && hero.brief);
   const font = await c.eval(`(async()=>{await document.fonts.ready;const ok=await document.fonts.load('16px WCRound','冠軍').then(f=>f.length>0);
     return {ok,check:document.fonts.check('16px WCRound','冠軍'),h1:getComputedStyle(document.querySelector('.hero h1')).fontFamily,tab:getComputedStyle(document.querySelector('#tabs button')).fontFamily,
@@ -688,6 +692,61 @@ try {
     const dOk = !!(twFoc && k && n && [k, n].every((v) => v.z === '當地' || v.d === twFoc));
     ok(`18.${x.m}b M${x.m} 日期都標明時區：四強焦點「${x.focDate}」、對陣圖「${k ? k.z + ' ' + k.d : x.kmeta}」、近期賽事「${n ? n.z + ' ' + n.d : x.nd}」`, dOk, x);
   }
+  }
+
+  { // 第 19 節（2026-10-21 回顧版 v4.9.0）：賽事已結束 → 首頁改「賽前推估存檔」，不再假裝賽事進行中；紅線與官方連結要看得到
+  console.log('\n[19 回顧版：已結束、沒有「今天的比賽」、官方賽果連結、紅線可見]');
+  await c.width(390, 844);
+  await c.open(BASE, { clock: '2026-10-21T10:00:00+08:00' });
+  await sleep(600);
+  const r19 = await c.eval(`(()=>{const vis=e=>{if(!e)return false;const r=e.getBoundingClientRect();const cs=getComputedStyle(e);return r.width>0&&r.height>0&&cs.visibility!=='hidden'&&cs.display!=='none';};
+    const main=document.getElementById('main');const hero=main.querySelector('.hero');
+    const kicker=hero&&hero.querySelector('.hero-kicker');const sub=document.querySelector('header .rl-sub');
+    const links=[...main.querySelectorAll('a[href]')].filter(a=>a.href==='${'https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/scores-fixtures'}');
+    const vlinks=links.filter(vis);
+    const findVis=(txt)=>[...main.querySelectorAll('*')].some(e=>vis(e)&&[...e.childNodes].some(n=>n.nodeType===3&&n.textContent.includes(txt))||(vis(e)&&e.children.length===0&&e.textContent.includes(txt)));
+    const near=[...main.querySelectorAll('#sec-near .nr')];
+    return {h1:(hero.querySelector('h1')||{}).textContent,kicker:kicker?kicker.textContent:'',kickerVis:vis(kicker),sub:sub?sub.textContent:'',
+      text:main.textContent,inner:main.innerText,links:links.length,vlinks:vlinks.length,linkTarget:vlinks.map(a=>a.target+'|'+a.rel),
+      nearTitle:(main.querySelector('#sec-near h2')||{}).textContent||'',nearN:near.length,
+      nearRounds:near.map(e=>(e.querySelector('.nt span')||{}).textContent||''),nearToday:main.querySelectorAll('#sec-near .nr.today').length,
+      verdicts:[...main.querySelectorAll('.stverdict')].map(e=>e.textContent),
+      brief:vis(hero.querySelector('.endnote summary'))?hero.querySelector('.endnote summary').textContent:'',
+      bet:findVis('非投注建議'),risk:findVis('博弈有風險'),sw:document.documentElement.scrollWidth,vw:innerWidth}})()`);
+  ok('19.1 首頁主視覺寫「2026 世界盃已結束」且看得到；大標「賽前推估存檔」；頁首副標「賽事已結束 · 賽前推估存檔」',
+    r19.kicker.includes('2026 世界盃已結束') && r19.kickerVis && r19.h1.includes('賽前推估存檔') && r19.sub.includes('賽事已結束') && r19.sub.includes('賽前推估存檔'), { kicker: r19.kicker, h1: r19.h1, sub: r19.sub });
+  const live = ['近期賽事', '今日', '今天', '今日開踢', '賽果記錄進度', '已有實際賽果', '若想押冷門', '賭盤建議'].filter((w) => r19.text.includes(w));
+  ok('19.2 首頁（含收合內文）不再出現假設賽事進行中的字樣：近期賽事／今日／今天／賽果記錄進度／已有實際賽果／賭盤建議／若想押冷門（命中 ' + JSON.stringify(live) + '）', live.length === 0, live);
+  ok('19.3 FIFA 官方賽果連結存在且看得到（共 ' + r19.links + ' 個、可見 ' + r19.vlinks + ' 個），開新分頁 rel=noopener',
+    r19.vlinks >= 1 && r19.linkTarget.length === r19.vlinks && r19.linkTarget.every((x) => x.startsWith('_blank|') && x.includes('noopener')), r19.linkTarget);
+  ok('19.4 紅線可見：主視覺「只有「官方賽果」是真實比分，其餘是推估」、盤口「非投注建議」「博弈有風險」',
+    r19.brief.includes('只有「官方賽果」是真實比分') && r19.brief.includes('其餘是推估') && r19.bet && r19.risk, { brief: r19.brief, bet: r19.bet, risk: r19.risk });
+  ok('19.5 盤口改標「賽前盤口存檔」（' + r19.verdicts.length + ' 張四強卡），存檔說明寫明是賽前推估、不是實際結果',
+    r19.verdicts.length === 2 && r19.verdicts.every((v) => v.includes('賽前盤口存檔')) && r19.text.includes('賽前盤口存檔') && r19.text.includes('賽前推估，不是實際結果'), r19.verdicts);
+  ok('19.6 淘汰賽後段清單：標題寫「賽前推估」、只列 8 強／4 強／決賽（' + r19.nearN + ' 場：' + r19.nearRounds.join('、') + '）、沒有「今日」標記',
+    r19.nearTitle.includes('賽前推估') && r19.nearN === 7 && r19.nearRounds.every((t) => /^(8強|4強|決賽)/.test(t)) && r19.nearToday === 0, r19);
+  ok('19.7 390 首頁不左右滑（scrollWidth ' + r19.sw + '／' + r19.vw + '）', r19.sw <= r19.vw, r19);
+  await tab('sched');
+  const g19 = await c.eval(`[...document.querySelectorAll('#main .gdet .gcnt')].map(e=>e.textContent)`);
+  ok('19.8 歷史分頁 ' + g19.length + ' 個比賽日的摘要不再寫「賽果 0/N」：沒有官方賽果的日子標「賽前推估」（' + g19.filter((x) => x === '賽前推估').length + ' 天）、有的標「官方賽果 N/M」',
+    g19.length === 17 && g19.every((x) => x === '賽前推估' || /^官方賽果 \d+\/\d+$/.test(x)) && g19.some((x) => x.startsWith('官方賽果')), g19);
+  const wx19 = await c.eval(`document.querySelectorAll('#main .match .wx').length`);
+  ok('19.9 賽後歷史分頁不放「查當天天氣／抓出賽名單」（實測 ' + wx19 + ' 顆）', wx19 === 0, wx19);
+  // 賽前（7/1）照舊：近期賽事、賽果記錄進度、賭盤建議都還在（回顧版只在賽事結束後生效）
+  await tab('ko');
+  await c.open(BASE, { clock: '2026-07-01T12:00:00+08:00' });
+  await sleep(600);
+  const pre19 = await c.eval(`document.getElementById('main').textContent`);
+  ok('19.10 賽中（7/1）時鐘下照舊顯示「近期賽事」「賽果記錄進度」「賭盤建議」、沒有「已結束」主視覺',
+    pre19.includes('近期賽事') && pre19.includes('賽果記錄進度') && pre19.includes('賭盤建議') && !pre19.includes('2026 世界盃已結束'), null);
+  for (const w of [360, 1440]) {
+    await c.width(w, w > 600 ? 900 : 800);
+    await c.open(BASE, { clock: '2026-10-21T10:00:00+08:00' });
+    await sleep(500);
+    const s = await c.eval(`({sw:document.documentElement.scrollWidth,vw:document.documentElement.clientWidth})`);
+    ok(`19.11.${w} ${w}px 回顧版首頁不左右滑（scrollWidth ${s.sw}／${s.vw}）`, s.sw <= s.vw + 1, s);
+  }
+  await c.width(390);
   }
 
   console.log('\n[14 沒有錯誤]');
